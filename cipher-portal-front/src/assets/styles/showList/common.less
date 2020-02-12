@@ -1,0 +1,179 @@
+// 基本颜色
+@darkBlue: #7eb5cb;
+@lightBlue: #78c1d6;
+@skyBlue: #81cfe6;
+@yellow: #f5a623;
+@fontBlue: #93c0cd;
+@fontGrey: #9b9b9b;
+@black: #0B133B;
+@fontGrey: #A7A7A7;
+
+// 基本字体
+@fontSize1: 12px;
+@fontSize2: 14px;
+@fontSize3: 16px;
+@fontSize4: 18px;
+@fontSize5: 20px;
+
+// 边框
+@borderRadius8: 8px;
+@leftBorder: 1px solid #d3d3d3;
+@inlineBorderColor: 2px solid #78c1d6;
+@outBorderColor: 3px solid #93c0cd; // 边框
+@leftBoxShadow: -2px 0 20px rgba(0, 0, 0, 0.35);
+
+// 宽度高度
+@contentWidth: 1000px;
+@topHeight: 64px;
+@rightFrameWidth: 330px;
+@rightFrameHeight: 460px;
+@footerHeight: 50px;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  user-select: none;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+ul,
+li {
+  list-style: none;
+}
+
+.clear:after {
+  content: '';
+  display: block;
+  clear: both;
+}
+
+.clear {
+  zoom: 1;
+}
+
+.back_img {
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}
+
+.margin {
+  margin: 0 auto;
+}
+
+.left {
+  float: left;
+}
+
+.right {
+  float: right;
+}
+
+.hide {
+  display: none;
+}
+
+.show {
+  display: block;
+}
+
+.ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.router-link-exact-active {
+  color: @black  !important;
+  background-color: transparent !important;
+}
+
+//定位上下左右居中
+.center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+// margin 左右居中
+.margin-center {
+  margin: 0 auto;
+}
+
+// 内容宽度
+.center-content {
+  width: @contentWidth;
+  margin: 0 auto;
+}
+
+//宽高
+.wh(@width, @height) {
+  width: @width;
+  height: @height;
+}
+
+//字体大小，颜色
+.sc(@size, @color) {
+  font-size: @size;
+  color: @color;
+}
+
+//margin
+.margin(@tb, @lr) {
+  margin: @tb @lr;
+}
+
+//padding
+.padding(@tb, @lr) {
+  padding: @tb @lr;
+}
+
+// 窗体显示
+.formsBody {
+  .wh(@rightFrameWidth, @rightFrameHeight);
+  .padding(51px, 30px);
+  border: @inlineBorderColor;
+  border-radius: @borderRadius8;
+  background-color: #fff;
+
+  .title {
+    font-size: @fontSize4;
+    color: @fontBlue;
+  }
+
+  /deep/ .ivu-form-item {
+    margin-top: 20px;
+  }
+
+  /deep/ .ivu-form-item-error-tip {
+    padding-top: 3px;
+  }
+}
+
+/deep/ input {
+  font-size: @fontSize1;
+  text-align: center;
+  color: @fontGrey;
+  border: 1.5px solid @lightBlue;
+}
+
+// 重置浏览器默认样式
+/deep/ input::-webkit-input-placeholder {
+  color: @fontBlue;
+}
+
+.button {
+  .wh(160px, 40px);
+  background-color: @skyBlue;
+  color: #fff;
+  border-radius: 5px;
+  outline: none;
+  border: none;
+  margin-top: 20px;
+  font-size: @fontSize2;
+}

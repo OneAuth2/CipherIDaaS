@@ -1,0 +1,175 @@
+// 基本颜色
+@colorBase1: #4a90e2;
+@colorBase2: #9b9b9b;
+@colorBase3: #4f6971;
+@colorBase4: #81cfe6;
+@colorBase5: #cbcbcb;
+@colorBase6: #2a6ce2;
+@colorBase7: #4a90e2;
+@colorBase8: #93c0cd;
+@colorBase9: #eaeaea;
+@colorError: #d0021b;
+
+// 基本字体
+@fontSize12: 12px;
+@fontSize14: 14px;
+@fontSize16: 16px;
+@fontSize18: 18px;
+@fontSize20: 20px;
+@fontSize24: 24px;
+
+// 边框
+@borderRadius8: 8px;
+@borderColor: 3px solid #78c1d6; // 边框
+@inputBorder: 2px solid #78c1d6; // input边框
+
+// 用户首页，管理员首页，新用户注册，新用户扫码绑定，老用户扫码登录等窗体外层容器定位
+.authLogicOuther {
+  position: absolute;
+  top: -38px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+}
+
+.titleLevel1 {
+  font-size: 16px;
+  color: @colorBase8;
+  font-weight: 500;
+}
+
+
+.titleLevel2 {
+  font-size: 14px;
+  color: @colorBase8;
+}
+
+.titleLevel3 {
+  font-size: 12px;
+  color: @colorBase1;
+}
+
+/deep/ input {
+  font-size: 14px;
+  height: 44px;
+  text-align: center;
+  color: #c1dae2;
+  border: @inputBorder;
+}
+
+.code /deep/ input {
+  width: 140px;
+  color: @colorBase8;
+  font-size: 14px;
+  border: @inputBorder;
+  height: 44px;
+  top: -3px;
+}
+
+/deep/ button {
+  width: 212px;
+  height: 44px;
+}
+
+.qrCode {
+  font-size: 14px;
+  color: @colorBase2;
+}
+
+.return {
+  font-size: 16px;
+  color: @colorBase8;
+}
+
+.skip {
+  color: @colorBase8;
+  font-size: 16px;
+
+  span {
+    cursor: pointer;
+    padding: 10px;
+  }
+}
+
+// 重置浏览器默认样式
+/deep/ input::-webkit-input-placeholder {
+  color: #c1dae2;
+}
+
+// /deep/ input:-webkit-autofill,
+// /deep/ textarea:-webkit-autofill,
+// /deep/ select:-webkit-autofill {
+//   color: #c1dae2 !important;
+// }
+
+
+// 新用户注册，新用户扫码绑定，老用户扫码登录等窗体
+.formsBody {
+  width: 380px;
+  height: 490px;
+  padding: 0 33px;
+  border: @borderColor;
+  border-radius: @borderRadius8;
+  // /deep/ input {
+  //   font-size: 14px !important;
+  //   height: 44px !important;
+  // }
+}
+
+// 扫码登录
+.scanLogin {
+  margin-bottom: 5px;
+
+  .logo {
+    width: 40px;
+    height: 40px;
+    background-image: url("/assets/img/authLogic/scanLogo.png");
+    background-repeat: no-repeat;
+    display: inline-block;
+    margin: 0 10px;
+    vertical-align: middle;
+  }
+
+  .cipher {
+    background-position: 0px 0px;
+  }
+
+  .dabai {
+    background-position: -58px 0px;
+  }
+
+  .dingding {
+    background-position: -116px 0px;
+  }
+
+  .wx {
+    background-position: -174px 0px;
+  }
+
+  .active {
+    .mouseHover;
+  }
+}
+
+// 活动状态基类
+.activeBase(@opacity: 0.8, @scale: 1.2) {
+  opacity: @opacity;
+  cursor: pointer;
+  transform: scale(@scale);
+  transition: all 0.5s ease-in-out;
+}
+
+// 鼠标悬停
+.mouseHover {
+  .activeBase(0.8, 1.2);
+}
+
+// 鼠标点击
+.selActive {
+  .activeBase(0.5, 1);
+}
+
+.selActiveScale {
+  .activeBase(0.5, 1.2);
+}

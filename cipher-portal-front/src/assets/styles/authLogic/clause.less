@@ -1,0 +1,212 @@
+// 基本颜色
+@darkBlue: #4A90E2;
+@greytBlue: #C1DAE2; // input的placeholder颜色
+@buttonBlue: #81cfe6; // 按钮颜色
+@buttonGrey: #cbcbcb; // 按钮非active状态
+@fontBlue: #93c0cd;
+@fontGrey: #9b9b9b;
+@black: #0B133B;
+@error: #D0021B; // 错误颜色
+
+// 基本字体
+@fontSize1: 12px;
+@fontSize2: 14px;
+@fontSize3: 16px;
+@fontSize4: 18px;
+@fontSize5: 20px;
+
+// 边框
+@borderRadius8: 8px;
+@outBorder: 4px solid #93CCD0; // 外部边框
+@inlineBorder: 2px solid #78c1d6; // 内部input边框
+@leftBoxShadow: -2px 0 20px rgba(0, 0, 0, 0.35);
+
+// 宽度高度
+@contentWidth: 730px;
+@contentHeight: 490px;
+@framWidth: 380px;
+@framHeight: 490px;
+@topHeight: 130px;
+@footerHeight: 96px;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  user-select: none;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+ul,
+li {
+  list-style: none;
+}
+
+.clearfix:after {
+  content: '';
+  display: block;
+  clear: both;
+}
+
+.clearfix {
+  zoom: 1;
+}
+
+.left {
+  float: left;
+}
+
+.right {
+  float: right;
+}
+
+.hide {
+  display: none;
+}
+
+.show {
+  display: block;
+}
+
+.ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+//定位上下左右居中
+.center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+//宽高
+.wh(@width, @height) {
+  width: @width;
+  height: @height;
+}
+
+//字体大小，颜色
+.sc(@size, @color) {
+  font-size: @size;
+  color: @color;
+}
+
+.commonFont {
+  .sc(@fontSize2, @fontBlue);
+}
+
+.commonFontLarge {
+  .sc(@fontSize3, @fontBlue);
+}
+
+// 窗体显示
+.formsBody {
+  .wh(@framWidth, @framHeight);
+  border: @outBorder;
+  border-radius: @borderRadius8;
+  background-color: #fff;
+  position: relative;
+  margin: 0 auto;
+
+  .title {
+    padding: 60px 0 48px 0;
+    font-size: @fontSize3;
+    color: @fontBlue;
+    font-weight: 500;
+  }
+
+  /deep/ .ivu-form-item {
+    width: 313px;
+    margin: 0 auto 26px auto;
+  }
+
+  /deep/ .ivu-form-item-error-tip {
+    padding-top: 3px;
+  }
+}
+
+/deep/ input {
+  font-size: @fontSize2;
+  text-align: center;
+  color: @fontGrey;
+  border: @inlineBorder;
+  height: 44px;
+}
+
+// 隐藏表单验证错误信息
+.hiddenError /deep/ .ivu-form-item-error-tip {
+  display: none;
+}
+
+// 重置浏览器默认样式
+/deep/ input::-webkit-input-placeholder {
+  .sc(@fontSize2, @greytBlue)
+}
+
+// 活动状态基类
+.activeBase(@opacity: 0.8, @scale: 1.2) {
+  opacity: @opacity;
+  cursor: pointer;
+  transform: scale(@scale);
+  transition: all 0.5s ease-in-out;
+}
+
+.selActive {
+  .activeBase(0.5, 1.2);
+}
+
+// 二维码
+.code {
+  margin-top: -1px !important;
+
+  /deep/ .ivu-input-wrapper {
+    width: 50%;
+    display: inline-block;
+  }
+}
+
+// 注册
+.register {
+  position: absolute;
+  bottom: 23px;
+  text-align: center;
+  width: 100%;
+
+  span {
+    .commonFont;
+    cursor: pointer;
+  }
+}
+
+// 返回
+.back {
+  position: absolute;
+  bottom: 63px;
+  text-align: center;
+  width: 100%;
+
+  span {
+    .commonFont;
+    cursor: pointer;
+  }
+}
+
+//  跳过
+.skip {
+  position: absolute;
+  bottom: 29px;
+  text-align: center;
+  width: 100%;
+
+  span {
+    .commonFont;
+    cursor: pointer;
+  }
+}
