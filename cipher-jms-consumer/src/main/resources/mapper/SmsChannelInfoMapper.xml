@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cipher.jms.consumer.mapper.SmsChannelInfoMapper" >
+  <resultMap id="BaseResultMap" type="cipher.jms.consumer.domain.SmsChannelInfo" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="state" property="state" jdbcType="INTEGER" />
+    <result column="company_id" property="companyId" jdbcType="INTEGER" />
+    <result column="type" property="type" jdbcType="INTEGER" />
+    <result column="parameter" property="parameter" jdbcType="VARCHAR" />
+    <result column="limit_time" property="limitTime" jdbcType="INTEGER" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, name, state, company_id, parameter, limit_time, create_time,type, modify_time
+  </sql>
+
+
+  <select id="getSmsChannelInfo" resultMap="BaseResultMap" parameterType="cipher.jms.consumer.domain.SmsChannelInfo" >
+    select
+    <include refid="Base_Column_List" />
+    from cipher_sms_channel_info where state=1 and  company_id=#{companyId}
+  </select>
+
+</mapper>

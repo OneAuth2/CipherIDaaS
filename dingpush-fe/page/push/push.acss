@@ -1,0 +1,59 @@
+.title {
+  text-align: center;
+  margin-top: 50rpx;
+  font-size: 40rpx;
+  color: #8FBECB;
+  font-family: 黑体;
+  margin-bottom: 100rpx;
+}
+
+.content {
+  margin-top: 30rpx;
+  padding-top: 30rpx;
+  width: 100%;
+  text-align: center;
+  height: 150rpx;
+}
+
+.push {
+  width: 80rpx;
+  height: 80rpx;
+}
+
+.bottom {
+  width: 100%;
+  bottom: 40rpx;
+  position: fixed;
+}
+
+.agree {
+  width: 40%;
+  float: left;
+  clear: both;
+  background-color: #8ECEE7;
+  height: 100rpx;
+  margin-left: 10%;
+  margin-right: 10rpx;
+}
+
+.cancel {
+  width: 40%;
+  background-color: #ffffff;
+  height: 100rpx;
+  margin-left: 10rpx;
+}
+
+.agree_text {
+  text-align: center;
+  line-height: 100rpx;
+  font-size: 30rpx;
+  font-family: 黑体;
+}
+
+
+.cancel_text {
+  text-align: center;
+  line-height: 100rpx;
+  font-size: 30rpx;
+  font-family: 黑体;
+}

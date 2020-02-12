@@ -1,0 +1,17 @@
+<!-- <view>
+  <button type="primary">欢迎使用赛赋科技统一身份认证</button>
+     <view class="name">{{userName}}</view>
+      <view>{{userId}}</view>
+     <view class="indexImg">
+       <image class="image" src={{indexImg}}/>
+     </view>
+    <view class="bottom">
+      <form onSubmit="onSubmit" onReset="onReset"  class="bottom">
+      <button form-type="submit" class="agree" disabled={{disabled}}>
+        <view class="agree_text">同意</view>
+      </button>
+    </form>
+    </view>
+</view> -->
+
+<web-view src="http://101.132.145.69:8645/authLogic/login/staff/" />

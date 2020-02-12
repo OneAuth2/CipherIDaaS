@@ -1,0 +1,19 @@
+.row {
+  height: 60rpx;
+  line-height: 60rpx;
+}
+
+.name {
+  text-align: center;
+  padding-top: 50rpx;
+  padding-bottom: 50rpx;
+}
+
+.indexImg {
+  text-align: center;
+}
+
+.image{
+width: 85%;
+height: 600rpx;
+}

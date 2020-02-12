@@ -1,0 +1,23 @@
+{
+  "pages": [
+    "page/index/index",
+    "page/push/push"
+  ],
+  "window": {
+    "enableWK": "YES",
+    "enableDSL": true,
+    "defaultTitle": "赛赋科技身份认证平台",
+    "backgroundColor": "#F5F5F9",
+    "pullRefresh": false,
+    "allowsBounceVertical": true
+  },
+  "tabBar": {
+    "textColor": "#404040",
+    "selectedColor": "#108ee9",
+    "backgroundColor": "#F5F5F9",
+    "items": [
+    
+    ]
+  },
+  "debug": true
+}

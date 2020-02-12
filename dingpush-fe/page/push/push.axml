@@ -1,0 +1,29 @@
+<view>
+     <view class="title">{{title}} </view>
+  
+  <view class="content">
+    <image mode="scaleToFill" src={{push1}} class="push"/>
+    <view>{{deviceName}}</view>
+  </view>
+   <view class="content">
+    <image mode="scaleToFill" src={{push2}} class="push"/>
+    <view>{{ip}}</view>
+     <view>{{address}}</view>
+  </view>
+  <view class="content">
+    <image mode="scaleToFill" src={{push3}} class="push"/>
+    <view>{{loginTime}}</view>
+    <view>{{loginDate}}</view>
+  </view>
+    <view class="bottom">
+      <form onSubmit="onSubmit" onReset="onReset"  class="bottom">
+      <button form-type="submit" class="agree" disabled={{disabled}}>
+        <view class="agree_text">同意</view>
+      </button>
+      <button form-type="reset" class="cancel">
+        <view class="cancel_text">{{cancel}}</view>
+        </button>
+    </form>
+    </view>
+
+</view>
