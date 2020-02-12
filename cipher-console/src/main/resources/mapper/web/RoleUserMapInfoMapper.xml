@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cipher.console.oidc.mapper.RoleUserMapInfoMapper" >
+  <resultMap id="BaseResultMap" type="cipher.console.oidc.domain.web.RoleUserMapInfo" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="role_id" property="roleId" jdbcType="INTEGER" />
+    <result column="user_id" property="userId"  />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, role_id, user_id
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from cipher_role_user_map
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from cipher_role_user_map
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="cipher.console.oidc.domain.web.RoleUserMapInfo" >
+    insert into cipher_role_user_map (id, role_id, user_id
+      )
+    values (#{id,jdbcType=INTEGER}, #{roleId,jdbcType=INTEGER}, #{userId,jdbcType=INTEGER}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="cipher.console.oidc.domain.web.RoleUserMapInfo" >
+    insert into cipher_role_user_map
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="roleId != null" >
+        role_id,
+      </if>
+      <if test="userId != null" >
+        user_id,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id},
+      </if>
+      <if test="roleId != null" >
+        #{roleId},
+      </if>
+      <if test="userId != null" >
+        #{userId},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="cipher.console.oidc.domain.web.RoleUserMapInfo" >
+    update cipher_role_user_map
+    <set >
+      <if test="roleId != null" >
+        role_id = #{roleId,jdbcType=INTEGER},
+      </if>
+      <if test="userId != null" >
+        user_id = #{userId},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cipher.console.oidc.domain.web.RoleUserMapInfo" >
+    update cipher_role_user_map
+    set role_id = #{roleId,jdbcType=INTEGER},
+      user_id = #{userId}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+
+  <select id="selectUserMapList" resultType="cipher.console.oidc.domain.web.RoleUserMapInfo" parameterType="cipher.console.oidc.domain.web.RoleUserMapInfo" >
+    select
+    tt.id as id,
+    mm.account_number as accountNumber,
+    user_name AS userName,
+    role_id as roleId,
+    user_id as accountNumber
+    from cipher_user_info mm
+    LEFT  join cipher_role_user_map tt on mm.account_number=tt.user_id
+    where 1=1 and mm.is_delete=0
+    <if test="roleId != null " >
+     and role_id = #{roleId,jdbcType=INTEGER}
+    </if>
+    <if test="id != null" >
+      and tt.id = #{id,jdbcType=INTEGER}
+    </if>
+  </select>
+
+
+    <select id="selectRoleUserInfo" resultType="cipher.console.oidc.domain.web.RoleUserMapInfo" parameterType="cipher.console.oidc.domain.web.RoleUserMapInfo">
+      select
+      <include refid="Base_Column_List" />
+      from cipher_role_user_map
+      where 1=1
+      <if test="roleId != null " >
+        and role_id = #{roleId,jdbcType=INTEGER}
+      </if>
+      <if test="userId != null" >
+        and user_id = #{userId}
+      </if>
+    </select>
+
+
+  <delete id="deleteRoleUserMap"  parameterType="java.lang.Integer">
+   delete from cipher_role_user_map
+    where role_id = #{RoleId,jdbcType=INTEGER}
+  </delete>
+
+
+
+  <select id="selectHaveRoleList" resultType="cipher.console.oidc.domain.web.RoleInfoDomain">
+    select
+    tt.id as id,
+    mm.account_number as accountNumber,
+    user_name AS userName,
+    role_id as roleId,
+    role_name as roleName,
+    user_id as accountNumber
+    from cipher_user_info mm
+    LEFT  join cipher_role_user_map tt on mm.account_number=tt.user_id
+    left join cipher_role_info ss on tt.role_id=ss.id
+    where 1=1
+    <if test="accountNumber != null and accountNumber!='' " >
+      and tt.user_id = #{accountNumber}
+    </if>
+  </select>
+
+
+  <delete id="deleteRoleUserMapByAccountNumber">
+    delete from cipher_role_user_map
+    where user_id = #{uuid}
+  </delete>
+
+
+    <delete id="deleteRoleUser">
+       delete from cipher_role_user_map
+       where user_id = #{userId} and role_id=#{roleId}
+    </delete>
+</mapper>

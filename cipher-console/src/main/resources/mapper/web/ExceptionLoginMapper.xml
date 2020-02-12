@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="cipher.console.oidc.mapper.ExceptionLoginMapper">
+
+    <resultMap id="exceptionLoginResult" type="cipher.console.oidc.domain.web.ExceptionLoginDomain">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="type" property="type" jdbcType="INTEGER"/>
+        <result column="status" property="status" jdbcType="INTEGER"/>
+
+    </resultMap>
+
+    <select id="queryExceptionLoginObj" resultMap="exceptionLoginResult">
+        SELECT *
+        FROM cipher_portal_login_exception_strategy
+        where company_id=#{companyId}
+        limit 1
+    </select>
+
+    <update id="updateExceptionLogin" parameterType="cipher.console.oidc.domain.web.ExceptionLoginDomain">
+        UPDATE cipher_portal_login_exception_strategy SET modify_time=NOW()
+        <if test="type!=null">
+            ,type=#{type}
+        </if>
+        <if test="status!=null">
+            ,status=#{status}
+        </if>
+    </update>
+
+
+    <insert id="insertExceptionLogin" parameterType="cipher.console.oidc.domain.web.ExceptionLoginDomain">
+      insert into cipher_portal_login_exception_strategy
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+        <if test="type!=null">
+            type,
+        </if>
+        <if test="status!=null">
+            status,
+        </if>
+            <if test="companyId!=null">
+                company_id,
+            </if>
+        create_time,
+        modify_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+        <if test="type!=null">
+            #{type},
+        </if>
+        <if test="status!=null">
+            #{status},
+        </if>
+            <if test="companyId!=null">
+                #{companyId},
+            </if>
+        NOW(),
+        NOW()
+        </trim>
+    </insert>
+
+
+</mapper>

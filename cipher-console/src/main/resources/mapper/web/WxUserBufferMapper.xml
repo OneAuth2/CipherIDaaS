@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="cipher.console.oidc.mapper.WxUserBufferMapper">
+
+    <select id="queryList" resultType="cipher.console.oidc.domain.web.WxUserDomain">
+        select
+        wx.userid,
+        wx.company_id,
+        wx.mobile,
+        wx.name,
+        wx.email,
+        user_info.uuid as status
+        from cipher_wx_user_buffer wx
+        left join cipher_user_info user_info
+        on
+        <if test="matchRule==0">
+            wx.mobile = user_info.phone_number
+        </if>
+        <if test="matchRule==1">
+            wx.email = user_info.mail and user_info.mail!=''
+        </if>
+        <if test="matchRule==2">
+            wx.email = user_info.mail and wx.mobile = user_info.phone_number
+        </if>
+        <if test="matchRule==3">
+            -- (
+            -- wx.email = user_info.mail
+            -- or wx.mobile = user_info.phone_number
+            -- )
+            -- and wx.email != ''
+            wx.mobile = user_info.phone_number
+            or (
+            wx.email = user_info.mail
+            and wx.email!=''
+            )
+
+        </if>
+        where
+
+        wx.company_id = #{companyId}
+
+
+        <if test="queryStr!=null">
+            and wx.name LIKE CONCAT(CONCAT('%',#{queryStr}),'%')
+        </if>
+
+        <if test="status==null or status==0">
+
+        </if>
+
+        <if test="status==1">
+            and user_info.uuid is null
+        </if>
+
+        <if test="status==2">
+            and user_info.uuid is not null
+        </if>
+
+        group by wx.userid
+
+        limit #{dataGridModel.currentRow},#{dataGridModel.rows};
+    </select>
+
+    <select id="queryListCount" resultType="int">
+        select count(userid) from(
+        select
+        wx.userid,
+        wx.company_id,
+        wx.mobile,
+        wx.name,
+        wx.email,
+        user_info.uuid as status
+
+        from cipher_wx_user_buffer wx
+        left join cipher_user_info user_info
+        on
+        <if test="matchRule==0">
+            wx.mobile = user_info.phone_number
+        </if>
+        <if test="matchRule==1">
+            wx.email = user_info.mail and user_info.mail!=''
+        </if>
+        <if test="matchRule==2">
+            wx.email = user_info.mail and wx.mobile = user_info.phone_number
+        </if>
+        <if test="matchRule==3">
+            -- (wx.email = user_info.mail
+            -- or wx.mobile = user_info.phone_number)
+            -- and wx.email != ''
+
+            wx.mobile = user_info.phone_number
+            or (
+            wx.email = user_info.mail
+            and wx.email!=''
+            )
+        </if>
+        where
+
+        wx.company_id = #{companyId}
+
+        <if test="queryStr!=null">
+            and wx.name LIKE CONCAT(CONCAT('%',#{queryStr}),'%')
+        </if>
+
+        <if test="status==null or status==0">
+
+        </if>
+
+        <if test="status==1">
+            and user_info.uuid is null
+        </if>
+
+        <if test="status==2">
+            and user_info.uuid is not null
+        </if>
+
+        group by wx.userid
+        ) tmp
+    </select>
+
+    <select id="queryAlredyInBufferUser" resultType="java.lang.String">
+        <if test="list != null and list.size() != 0">
+            select userid from cipher_wx_user_buffer where userid in
+            <foreach collection="list" open="(" separator="," close=")" item="wxUser">
+                #{wxUser.userid}
+            </foreach>
+            and company_id=#{companyId}
+        </if>
+    </select>
+
+    <insert id="insert">
+        <if test="list != null and list.size() != 0">
+            insert into cipher_wx_user_buffer(
+            userid,
+            company_id,
+            name,
+            department,
+            position,
+            mobile,
+            gender,
+            email,
+            address,
+            create_time,
+            modify_time)
+            values
+            <foreach collection="list" item="wxUser" separator=",">
+                (
+                #{wxUser.userid},
+                #{wxUser.companyId},
+                #{wxUser.name},
+                #{wxUser.department},
+                #{wxUser.position},
+                #{wxUser.mobile},
+                #{wxUser.gender},
+                #{wxUser.email},
+                #{wxUser.address},
+                NOW(),
+                NOW()
+                )
+            </foreach>
+        </if>
+    </insert>
+
+    <delete id="deleteByIdList">
+        <if test="list != null and list.size() != 0">
+            delete from cipher_wx_user_buffer where userid in
+            <foreach collection="list" open="(" separator="," close=")" item="userId">
+                #{userId}
+            </foreach>
+            and company_id=#{companyId}
+        </if>
+    </delete>
+
+    <delete id="deleteByCompanyIdList">
+           delete from cipher_wx_user_buffer where company_id=#{companyId}
+    </delete>
+
+    <select id="queryListToSync" resultType="cipher.console.oidc.domain.web.WxUserDomain">
+        select
+        wx.userid,
+        wx.company_id,
+        wx.mobile,
+        wx.name,
+        wx.email,
+        wx.position,
+        wx.address,
+        wx.gender,
+        wx.department as departmentStr,
+         user_info.uuid as status
+        from cipher_wx_user_buffer wx
+        left join cipher_user_info user_info
+        on
+        <if test="matchRule==0">
+            wx.mobile = user_info.phone_number
+        </if>
+        <if test="matchRule==1">
+            wx.email = user_info.mail and user_info.mail!=''
+        </if>
+        <if test="matchRule==2">
+            wx.email = user_info.mail and wx.mobile = user_info.phone_number
+        </if>
+        <if test="matchRule==3">
+            wx.mobile = user_info.phone_number
+            or (
+            wx.email = user_info.mail
+            and wx.email!=''
+            )
+        </if>
+        where
+
+        wx.company_id = #{companyId}
+
+        <if test="userIdList!=null and userIdList.size() != 0 ">
+            and wx.userid in
+            <foreach collection="userIdList" item="wxUserId" open="(" separator="," close=")">
+                #{wxUserId}
+            </foreach>
+        </if>
+
+        group by wx.userid
+
+    </select>
+</mapper>

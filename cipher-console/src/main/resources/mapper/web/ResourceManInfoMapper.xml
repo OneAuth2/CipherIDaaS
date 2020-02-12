@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cipher.console.oidc.mapper.ResourceManInfoMapper">
+    <select id="queryallinfo"  parameterType="cipher.console.oidc.domain.web.ResourceManInfo" resultType="cipher.console.oidc.domain.web.ResourceManInfo">
+      select * from cipher_resource
+      LIMIT #{pageData.currentRow}, #{pageData.rows}
+    </select>
+     <select id="insertinfo" parameterType="cipher.console.oidc.domain.web.ResourceManInfo" resultType="integer">
+         insert into cipher_resource(resource_id,resource_name,resource_url,parent,display_sort,display_type,description,create_time,modify_time)
+         values (
+                 #{resourceId},
+                 #{resourceName},
+                 #{resourceUrl},
+                 #{parent},
+                 #{displaySort},
+                 #{displayType},
+                 #{description},
+                 #{create_time},
+                 #{modify_time}
+               )
+
+     </select>
+    <update id="updateinfo" parameterType="cipher.console.oidc.domain.web.ResourceManInfo">
+        update cipher_resource
+        <set>
+            <if test="resourceId!=null">
+                resource_id = #{resourceId},
+            </if>
+            <if test="resourceName!=null">
+                resource_name = #{resourceName},
+            </if>
+            <if test="resourceUrl!=null">
+                resource_url = #{resourceUrl},
+            </if>
+            <if test="parent!=null">
+                parent = #{parent},
+            </if>
+        </set>
+    </update>
+</mapper>

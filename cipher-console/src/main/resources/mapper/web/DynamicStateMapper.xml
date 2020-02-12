@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="cipher.console.oidc.mapper.DynamicStateMapper">
+
+    <resultMap id="resultBase" type="cipher.console.oidc.domain.web.DynamicStateDomain"/>
+
+    <select id="selectDynamicStateList" parameterType="cipher.console.oidc.domain.web.DynamicStateInfo" resultMap="resultBase">
+        SELECT dp.userId userId,dp.uuid,dp.account_number,dp.userName,dp.issueStatus,SUBSTRING_INDEX( GROUP_CONCAT(group_id order by group_id desc),',',1) group_id  FROM
+        (SELECT ciph.uuid,ciph.userId,ciph.account_number,ciph.userName,ciph.issueStatus,gro.group_id FROM
+        (SELECT dyna.uuid,info.uuid userId,info.account_number,CONCAT(ifnull(info.user_name,""),"(",ifnull(info.mail,""),")") userName,info.issue_status issueStatus FROM cipher_user_info info
+          LEFT JOIN cipher_dynamic_password dyna
+          ON info.uuid = dyna.user_id
+          WHERE info.company_id=#{companyId}
+          <if test="queryName!=null and queryName!=''">
+                AND (info.user_name LIKE CONCAT(CONCAT('%',#{queryName}),'%')
+                         OR info.mail LIKE CONCAT(CONCAT('%',#{queryName}),'%'))
+          </if>
+        ) ciph
+        LEFT JOIN cipher_group_user_map gro
+        ON ciph.userId=gro.user_id) dp
+        Group by dp.userId
+        LIMIT #{pageModel.currentRow},#{pageModel.rows}
+    </select>
+    <select id="selectDynamicStateListCount" parameterType="cipher.console.oidc.domain.web.DynamicStateInfo" resultType="int">
+        SELECT COUNT(1) FROM cipher_user_info WHERE company_id=#{companyId}
+        <if test="queryName!=null and queryName!=''">
+            AND (user_name LIKE CONCAT(CONCAT('%',#{queryName}),'%')
+            OR mail LIKE CONCAT(CONCAT('%',#{queryName}),'%'))
+        </if>
+    </select>
+
+    <select id="selectDynamicStateFinishList" parameterType="cipher.console.oidc.domain.web.DynamicStateInfo" resultMap="resultBase">
+        SELECT dp.userId userId,dp.uuid,dp.account_number,dp.userName,dp.issueStatus,SUBSTRING_INDEX( GROUP_CONCAT(group_id order by group_id desc),',',1) group_id  FROM
+        (SELECT ciph.uuid,ciph.userId,ciph.account_number,ciph.userName,ciph.issueStatus,gro.group_id FROM
+        (SELECT dyna.uuid,info.uuid userId,info.account_number,CONCAT(ifnull(info.user_name,""),"(",ifnull(info.mail,""),")") userName,info.issue_status issueStatus FROM cipher_user_info info
+        LEFT JOIN cipher_dynamic_password dyna
+        ON info.uuid = dyna.user_id
+        WHERE info.company_id=#{companyId} AND info.issue_status=1
+        <if test="queryName!=null and queryName!=''">
+            AND (info.user_name LIKE CONCAT(CONCAT('%',#{queryName}),'%')
+            OR info.mail LIKE CONCAT(CONCAT('%',#{queryName}),'%'))
+        </if>
+        ) ciph
+        LEFT JOIN cipher_group_user_map gro
+        ON ciph.userId=gro.user_id) dp
+        Group by dp.userId
+        LIMIT #{pageModel.currentRow},#{pageModel.rows}
+    </select>
+
+    <select id="selectDynamicStateFinishListCount" parameterType="cipher.console.oidc.domain.web.DynamicStateInfo" resultType="int">
+        SELECT COUNT(1) FROM cipher_user_info WHERE company_id=#{companyId} AND issue_status=1
+        <if test="queryName!=null and queryName!=''">
+            AND (user_name LIKE CONCAT(CONCAT('%',#{queryName}),'%')
+            OR mail LIKE CONCAT(CONCAT('%',#{queryName}),'%'))
+        </if>
+    </select>
+
+    <select id="selectDynamicStateUndoneList" parameterType="cipher.console.oidc.domain.web.DynamicStateInfo" resultMap="resultBase">
+        SELECT dp.userId userId,dp.uuid,dp.account_number,dp.userName,dp.issueStatus,SUBSTRING_INDEX( GROUP_CONCAT(group_id order by group_id desc),',',1) group_id  FROM
+        (SELECT ciph.uuid,ciph.userId,ciph.account_number,ciph.userName,ciph.issueStatus,gro.group_id FROM
+        (SELECT dyna.uuid,info.uuid userId,info.account_number,CONCAT(ifnull(info.user_name,""),"(",ifnull(info.mail,""),")") userName,info.issue_status issueStatus FROM cipher_user_info info
+        LEFT JOIN cipher_dynamic_password dyna
+        ON info.uuid = dyna.user_id
+        WHERE info.company_id=#{companyId} AND (info.issue_status != 1 OR info.issue_status IS NULL)
+        <if test="queryName!=null and queryName!=''">
+            AND (info.user_name LIKE CONCAT(CONCAT('%',#{queryName}),'%')
+            OR info.mail LIKE CONCAT(CONCAT('%',#{queryName}),'%'))
+        </if>
+        ) ciph
+        LEFT JOIN cipher_group_user_map gro
+        ON ciph.userId=gro.user_id) dp
+        Group by dp.userId
+        LIMIT #{pageModel.currentRow},#{pageModel.rows}
+    </select>
+    <select id="selectDynamicStateUndoneListCount" parameterType="cipher.console.oidc.domain.web.DynamicStateInfo" resultType="int">
+        SELECT COUNT(1) FROM cipher_user_info WHERE company_id=#{companyId} AND (issue_status != 1 OR issue_status IS NULL)
+        <if test="queryName!=null and queryName!=''">
+            AND (user_name LIKE CONCAT(CONCAT('%',#{queryName}),'%')
+            OR mail LIKE CONCAT(CONCAT('%',#{queryName}),'%'))
+        </if>
+    </select>
+
+    <select id="getMailByuserId" parameterType="string" resultType="string">
+        SELECT mail FROM cipher_user_info WHERE uuid=#{userId}
+    </select>
+    <delete id="delDynamicPassword" parameterType="string">
+        DELETE FROM cipher_dynamic_password
+        WHERE user_id=#{userId}
+    </delete>
+    <select id="selectAccountNumByUserId" parameterType="string" resultType="string">
+        SELECT account_number FROM cipher_user_info WHERE uuid = #{userId}
+    </select>
+    <update id="updateIssueStatus" parameterType="string">
+        UPDATE cipher_user_info
+        SET issue_status=1
+        WHERE uuid=#{userId}
+    </update>
+    <insert id="insertDynamicPassword" parameterType="string">
+        INSERT INTO cipher_dynamic_password
+            (uuid,user_id,company_id,dynamic_password,create_time,modify_time)
+        VALUES
+            (#{uuid},#{userId},#{companyId},#{dynamicPassword},NOW(),NOW())
+    </insert>
+
+    <select id="selectedUserId" parameterType="string" resultType="string">
+        SELECT user_id FROM cipher_dynamic_password WHERE company_id=#{companyId}
+    </select>
+
+</mapper>

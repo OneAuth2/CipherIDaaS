@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="cipher.console.oidc.mapper.IconSettingsMapper">
+    <resultMap id="BaseResultMap" type="cipher.console.oidc.domain.web.IconSettingsDomain">
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="company_uuid" property="companyUuid" jdbcType="VARCHAR" />
+        <result column="type" property="type" jdbcType="INTEGER" />
+        <result column="title" property="title" jdbcType="VARCHAR" />
+        <result column="left_title" property="leftTitle" jdbcType="VARCHAR" />
+        <result column="right_title" property="rightTitle" jdbcType="VARCHAR" />
+        <result column="iconfont_img_url" property="iconfont" jdbcType="VARCHAR" />
+        <result column="logo_img_url" property="logo" jdbcType="VARCHAR" />
+    </resultMap>
+    <sql id="FieldColumn">
+        (company_uuid,type,title,left_title,right_title,iconfont_img_url,logo_img_url,create_time,modify_time)
+    </sql>
+    <sql id="FieldColumn1">
+        (company_uuid,type,title,left_title,right_title,iconfont_img_url,create_time,modify_time)
+    </sql>
+    <select id="countByCompanyUuid" resultType="int">
+        SELECT count(id) FROM cipher_interface_config
+        WHERE company_uuid=#{companyUuid} AND type=#{type};
+    </select>
+    <insert id="insertDoorPage" parameterType="cipher.console.oidc.domain.web.IconSettingsDomain">
+        INSERT INTO cipher_interface_config
+        <include refid="FieldColumn"/>
+        VALUES
+        (#{companyUuid},
+        #{type},
+        #{title},
+        #{leftTitle},
+        #{rightTitle},
+        #{iconfont},
+        #{logo},
+        NOW(),
+        NOW())
+    </insert>
+    <update id="updateDoorPage" parameterType="cipher.console.oidc.domain.web.IconSettingsDomain">
+        UPDATE cipher_interface_config
+        <set>
+            title=#{title},
+            left_title=#{leftTitle},
+            right_title=#{rightTitle},
+            <if test="iconfont!=null and iconfont!=''">
+                iconfont_img_url=#{iconfont},
+            </if>
+            <if test="logo!=null and logo!=''">
+                logo_img_url=#{logo},
+            </if>
+            modify_time=NOW()
+        </set>
+        WHERE company_uuid=#{companyUuid} AND type=#{type};
+    </update>
+
+    <select id="selectIconSettingsByCompanyUuid" resultMap="BaseResultMap">
+        SELECT id,company_uuid,type,title,left_title,right_title,iconfont_img_url,logo_img_url
+        FROM cipher_interface_config
+        WHERE company_uuid=#{companyUuid} AND type=#{type};
+    </select>
+
+    <insert id="insertApplicationPage" parameterType="cipher.console.oidc.domain.web.IconSettingsDomain">
+        INSERT INTO cipher_interface_config
+            (company_uuid,type,title,iconfont_img_url,create_time,modify_time)
+        VALUES
+        (#{companyUuid},
+        #{type},
+        #{title},
+        #{iconfont},
+        NOW(),
+        NOW())
+    </insert>
+    <update id="updateApplicationPage" parameterType="cipher.console.oidc.domain.web.IconSettingsDomain">
+        UPDATE cipher_interface_config
+        <set>
+            title=#{title},
+            <if test="iconfont!=null and iconfont!=''">
+                iconfont_img_url=#{iconfont},
+            </if>
+            modify_time=NOW()
+        </set>
+        WHERE company_uuid=#{companyUuid} AND type=#{type};
+    </update>
+
+    <insert id="insertManagePage" parameterType="cipher.console.oidc.domain.web.IconSettingsDomain">
+        INSERT INTO cipher_interface_config
+        <include refid="FieldColumn1"/>
+        VALUES
+        (#{companyUuid},
+         #{type},
+         #{title},
+         #{leftTitle},
+         #{rightTitle},
+         #{iconfont},
+         NOW(),
+         NOW())
+    </insert>
+    <update id="updateManagePage" parameterType="cipher.console.oidc.domain.web.IconSettingsDomain">
+        UPDATE cipher_interface_config
+        <set>
+            title=#{title},
+            left_title=#{leftTitle},
+            right_title=#{rightTitle},
+            <if test="iconfont!=null and iconfont!=''">
+                iconfont_img_url=#{iconfont},
+            </if>
+            modify_time=NOW()
+        </set>
+        WHERE company_uuid=#{companyUuid} AND type=#{type};
+    </update>
+    <insert id="insertTitleTag" parameterType="cipher.console.oidc.domain.web.IconSettingsDomain">
+          INSERT INTO cipher_interface_config
+              (company_uuid,type,title,iconfont_img_url,create_time,modify_time)
+          VALUES
+          (#{companyUuid},
+           #{type},
+           #{title},
+           #{iconfont},
+           NOW(),
+           NOW())
+    </insert>
+    <update id="updateTitleTag" parameterType="cipher.console.oidc.domain.web.IconSettingsDomain">
+            UPDATE cipher_interface_config
+            <set>
+                title=#{title},
+                <if test="iconfont!=null and iconfont!=''">
+                    iconfont_img_url=#{iconfont},
+                </if>
+                modify_time=NOW()
+            </set>
+            WHERE company_uuid=#{companyUuid} AND type=#{type}
+    </update>
+
+    <select id="obtailCopyright" resultType="string">
+            SELECT copyright FROM cipher_company_copyRight where id=1
+    </select>
+
+
+
+</mapper>

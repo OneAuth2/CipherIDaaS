@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cipher.console.oidc.mapper.OnlineVisitorMapper">
+
+    <select id="selectAllOnlineMember" parameterType="cipher.console.oidc.common.DataGridModel" resultType="cipher.console.oidc.domain.web.OnlineVisitor">
+
+        select id,username,type,ip,login_time,crete_time
+        from cipher_online_visitor
+        where ip is not null
+    </select>
+
+    <select id="selectOnlineMemberAccount" resultType="int">
+
+        select count(id) as count
+        from cipher_online_visitor;
+
+    </select>
+
+
+    <select id="selectOffLineVistor" resultType="cipher.console.oidc.domain.web.OnlineVisitor">
+         select tt.id,username,ip, end_time from cipher_online_visitor tt, cipher_user_async mm
+         where  tt.type=0 and tt.username=mm.mobile and end_time &lt;= NOW()
+    </select>
+
+
+    <delete id="deleteVistor" parameterType="cipher.console.oidc.domain.web.OnlineVisitor">
+      delete from cipher_online_visitor where ip=#{ip}
+    </delete>
+
+
+
+    <select id="selectOnlineVistorList" resultType="cipher.console.oidc.domain.web.OnlineVisitor">
+        select vr.id,name,username,type,ip,login_time,crete_time,mac,type_name,cr.description as description,
+        CASE visitor_type
+        WHEN 0 THEN
+        '访客'
+        ELSE
+        '员工'
+        END as visitorType
+        from cipher_online_visitor vr
+        LEFT JOIN cipher_ac_portal_config  cr on vr.portal_id=cr.portal_num
+        where 1=1 and vr.company_id=#{companyId}
+        <if test="name != null and name!=''">
+            and name LIKE CONCAT(CONCAT('%',#{name}),'%')
+        </if>
+        <if test="visitorType != null and visitorType!=''">
+            and  visitor_type = #{visitorType}
+        </if>
+        order by vr.crete_time desc
+        LIMIT #{pageData.currentRow}, #{pageData.rows}
+    </select>
+
+
+    <select id="selectOnlineVistorListCount" resultType="int">
+        select count(1)
+        from cipher_online_visitor vr
+        LEFT JOIN cipher_ac_portal_config  cr on vr.portal_id=cr.portal_num
+        where 1=1 and vr.company_id=#{companyId}
+        <if test="name != null and name!=''">
+            and name LIKE CONCAT(CONCAT('%',#{name}),'%')
+        </if>
+        <if test="visitorType != null and visitorType!=''">
+            and  visitor_type = #{visitorType}
+        </if>
+
+    </select>
+
+
+    <select id="export" resultType="cipher.console.oidc.domain.exceldomain.WifiVistorExcle">
+        select id,name,username,type,ip,login_time,crete_time,mac,type_name,
+        CASE visitor_type
+        WHEN 0 THEN
+        '访客'
+        ELSE
+        '员工'
+        END as visitorType
+        from cipher_online_visitor
+        where 1=1
+        <if test="name != null and name!=''">
+            and name LIKE CONCAT(CONCAT('%',#{name}),'%')
+        </if>
+        <if test="visitorType != null and visitorType!=''">
+            and  visitor_type = #{visitorType}
+        </if>
+        <if test="startTime != null and startTime!=''">
+            and crete_time &gt;= #{startTime}
+        </if>
+        <if test="endTime != null and endTime!=''">
+            and crete_time &lt; #{endTime}
+        </if>
+         order by crete_time desc
+    </select>
+
+
+</mapper>

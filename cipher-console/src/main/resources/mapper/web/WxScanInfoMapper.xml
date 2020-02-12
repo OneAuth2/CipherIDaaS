@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="cipher.console.oidc.mapper.WxScanInfoMapper">
+
+  <insert id="insertList">
+      insert into cipher_wx_scan_app_info(id,company_id, config_id, application_name, application, scan_app_id,
+      scan_app_secret, callback_url,auth_url,create_time, modify_time) values
+      <foreach collection="list" item="scanApp" separator="," >
+          (
+          #{scanApp.id},
+          #{scanApp.companyId} ,
+          #{scanApp.configId} ,
+          #{scanApp.applicationName} ,
+          #{scanApp.application} ,
+          #{scanApp.scanAppId} ,
+          #{scanApp.scanAppSecret} ,
+          #{scanApp.callBackUrl} ,
+          #{scanApp.authUrl},
+          NOW(),
+          NOW()
+          )
+      </foreach>
+  </insert>
+
+    <select id="getScanInfoListByConfigId" resultType="cipher.console.oidc.domain.web.WxScanInfoDomain">
+        select id,company_id, config_id, application_name, application, scan_app_id, scan_app_secret, callback_url, auth_url,create_time, modify_time
+         from cipher_wx_scan_app_info where config_id=#{configId} ;
+    </select>
+
+    <update id="updateScanAppInfo">
+        update cipher_wx_scan_app_info
+        <set>
+            <if test="scanAppId!=null">
+                scan_app_id=#{scanAppId} ,
+            </if>
+            <if test="scanAppSecret!=null">
+                scan_app_secret=#{scanAppSecret} ,
+            </if>
+            <if test="callBackUrl!=null">
+                callback_url=#{callBackUrl} ,
+            </if>
+            <if test="authUrl!=null">
+                auth_url=#{authUrl} ,
+            </if>
+            modify_time=NOW()
+        </set>
+        where id=#{id}
+    </update>
+
+</mapper>

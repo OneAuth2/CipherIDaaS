@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="cipher.console.oidc.mapper.CustomAttributeMapper">
+    <resultMap id="resultMap" type="cipher.console.oidc.domain.web.CustomAttributeInfo">
+        <result column="uuid" property="uuid" jdbcType="VARCHAR"/>
+        <result column="attribute_name" property="attributeName" jdbcType="VARCHAR"/>
+        <result column="attribute_description" property="attributeDescription" jdbcType="VARCHAR"/>
+    </resultMap>
+    <select id="countAttributeByCompanyId" resultType="int">
+        SELECT count(id)
+        FROM cipher_user_attribute
+        WHERE company_id = #{companyId}
+    </select>
+    <select id="countAttributeByName" resultType="int">
+        SELECT count(id)
+        FROM cipher_user_attribute
+        WHERE company_id = #{companyId}
+          AND attribute_value = #{attributeValue}
+    </select>
+    <insert id="insertUserAttribute" parameterType="cipher.console.oidc.domain.web.UserAttributeDomain">
+        INSERT INTO cipher_user_attribute
+              (uuid, company_id, attribute_name, attribute_value, attribute_description)
+        VALUES
+              (#{uuid},#{companyId},#{attributeName},#{attributeValue},#{attributeDescription})
+    </insert>
+    <update id="updateUserAttribute" parameterType="cipher.console.oidc.domain.web.UserAttributeDomain">
+        UPDATE cipher_user_attribute
+        SET
+        attribute_name=#{attributeName},attribute_description=#{attributeDescription}
+        WHERE uuid=#{uuid} AND company_id=#{companyId}
+    </update>
+    <select id="selectUserAttribute" resultType="string">
+        SELECT attribute_value FROM cipher_user_attribute WHERE uuid=#{uuid} AND company_id=#{companyId}
+    </select>
+    <update id="delUserAttribute">
+        UPDATE cipher_user_attribute_map
+        SET
+        ${attribute}=""
+        WHERE company_id=#{companyId}
+    </update>
+    <delete id="delUserAttributeMap">
+        DELETE FROM cipher_user_attribute WHERE uuid=#{uuid} AND company_id=#{companyId}
+    </delete>
+    <select id="selectAttributeList" parameterType="string" resultMap="resultMap">
+        SELECT uuid,attribute_name,attribute_description FROM cipher_user_attribute WHERE company_id=#{companyId}
+    </select>
+
+</mapper>

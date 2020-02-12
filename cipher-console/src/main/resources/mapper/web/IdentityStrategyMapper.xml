@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="cipher.console.oidc.mapper.IdentityStrategyMapper">
+
+    <resultMap id="identityStrategyResult" type="cipher.console.oidc.domain.web.IdentityStrategyDomain">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="strategy_name" property="strategyName" jdbcType="VARCHAR"/>
+        <result column="priority" property="priority" jdbcType="INTEGER"/>
+        <result column="second_auth" property="secondAuth" jdbcType="INTEGER"/>
+        <result column="second_auth_type" property="secondAuthType" jdbcType="VARCHAR"/>
+        <result column="auth_type" property="authType" jdbcType="VARCHAR"/>
+        <result column="scave_auth_state" property="scaveAuthState" jdbcType="INTEGER"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+
+    <insert id="saveIdentityStrategy" parameterType="cipher.console.oidc.domain.web.IdentityStrategyDomain" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO cipher_identity_auth_strategy
+            (company_uuid,
+             priority,
+             strategy_name,
+             second_auth,
+             switches,
+             second_auth_type,
+             auth_type,
+             scave_auth_state,
+             create_time,
+             modify_time)
+        VALUES (
+            #{companyUuid},
+            #{priority},
+            #{strategyName},
+            #{secondAuth},
+            #{switches},
+            #{secondAuthType},
+            #{authType},
+            #{scaveAuthState},
+            NOW(),
+            NOW()
+        )
+    </insert>
+
+    <select id="queryIdentityStrategyPageList" resultMap="identityStrategyResult">
+        SELECT *
+        FROM cipher_identity_auth_strategy
+        WHERE company_uuid = #{companyUuid}
+        <if test="sidx!=null and sidx=='priority'.toString()">
+            order by priority ${sord}
+        </if>
+        <if test="sidx!=null and sidx=='strategyName'.toString()">
+            order by strategy_name ${sord}
+        </if>
+        limit #{pageData.currentRow},#{pageData.rows}
+    </select>
+
+    <select id="queryIdentityStrategyById" parameterType="cipher.console.oidc.domain.web.IdentityStrategyDomain" resultMap="identityStrategyResult">
+        SELECT *
+        FROM cipher_identity_auth_strategy
+        where 1=1 and company_uuid=#{companyUuid}
+        <if test="id!=null">
+            and id = #{id}
+        </if>
+        <if test="strategyName!=null">
+            and strategy_name=#{strategyName}
+        </if>
+        <if test="priority!=null">
+            or priority=#{priority}
+        </if>
+    </select>
+
+    <update id="modifyIdentityStrategy" parameterType="cipher.console.oidc.domain.web.IdentityStrategyDomain">
+        UPDATE cipher_identity_auth_strategy SET modify_time=NOW()
+        <if test="priority!=null">
+            ,priority=#{priority}
+        </if>
+        <if test="strategyName!=null">
+            ,strategy_name=#{strategyName}
+        </if>
+        <if test="authType!=null">
+            ,auth_type=#{authType}
+        </if>
+        <if test="secondAuth!=null">
+            ,second_auth=#{secondAuth}
+        </if>
+        <if test="switches!=null">
+            ,switches=#{switches}
+        </if>
+        <if test="secondAuthType!=null">
+            ,second_auth_type=#{secondAuthType}
+        </if>
+        <if test="scaveAuthState!=null">
+            ,scave_auth_state=#{scaveAuthState}
+        </if>
+      WHERE id=#{id}
+    </update>
+
+    <delete id="deleteIdentityStrategy" parameterType="cipher.console.oidc.domain.web.IdentityStrategyDomain">
+      delete  from cipher_identity_auth_strategy  WHERE id=#{id}
+    </delete>
+    <select id="queryIdentityStrategyCount" resultType="int">
+        select count(1)
+        from   cipher_identity_auth_strategy
+        where company_uuid = #{companyUuid}
+    </select>
+
+
+    <select id="getIdentityStrategyInfo" resultMap="identityStrategyResult">
+        SELECT *
+        FROM cipher_identity_auth_strategy  sr
+        LEFT JOIN cipher_identity_group_mapping map on sr.id=map.identity_id
+        where map.group_id=#{groupId} order by sr.priority desc limit 1
+    </select>
+    <select id="queryDefaultAuthType" resultMap="identityStrategyResult">
+      SELECT
+            id,
+            priority,
+            strategy_name,
+            auth_type,
+            scave_auth_state,
+            create_time,
+            modify_time
+        FROM
+        cipher_identity_auth_strategy
+        where company_uuid=#{companyId}
+        ORDER BY priority ASC LIMIT 1;
+    </select>
+
+
+    <select id="queryAuthTypeByGroupIdList" resultMap="identityStrategyResult">
+        SELECT
+        id,
+        priority,
+        strategy_name,
+        auth_type,
+        scave_auth_state,
+        create_time,
+        modify_time
+        FROM cipher_identity_auth_strategy
+        WHERE id IN (SELECT DISTINCT identity_id
+        FROM cipher_identity_group_mapping
+        WHERE group_id IN
+        <foreach collection="groupIdList" open="(" separator="," close=")" index="groupId" item="groupId">
+            #{groupId}
+        </foreach>
+        )
+        ORDER BY
+        priority DESC LIMIT 1;
+    </select>
+    <select id="queryCountByStrategyName" resultType="int">
+        SELECT COUNT(1) FROM cipher_identity_auth_strategy
+        WHERE id!=#{id} AND strategy_name=#{strategyName}
+    </select>
+    <select id="queryCountByPriority" resultType="int">
+        SELECT COUNT(1) FROM cipher_identity_auth_strategy
+        WHERE id!=#{id} AND priority=#{priority}
+    </select>
+
+
+</mapper>

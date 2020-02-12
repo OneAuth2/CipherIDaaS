@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="cipher.console.oidc.mapper.ApplicationUserAuthMapper">
+
+    <select id="deleteUserAuth">
+                   delete from cipher_user_application_map
+                    where application_id = #{applicationId}
+                    and user_id=#{uuid}
+    </select>
+    <select id="getDepatment" resultType="cipher.console.oidc.domain.web.GroupInfoDomain">
+    SELECT group_id,group_name
+    from (
+
+    select group1.group_id,group1.group_name
+     FROM cipher_application_info app_info
+    LEFT JOIN cipher_group_authorization_map app on app_info.id=app.application_id
+    LEFT JOIN cipher_group_info  group1 ON app.group_id=group1.group_id
+    LEFT JOIN cipher_group_user_map usermap ON group1.group_id = usermap.group_id
+    LEFT JOIN cipher_user_info info ON usermap.user_id = info.uuid
+    WHERE
+    app_info.id =#{applicationId}
+    AND info.uuid = #{uuid}
+    ) demo
+    WHERE
+    1 = 1
+
+</select>
+    <select id="getTeam" resultType="cipher.console.oidc.domain.web.TeamInfo">
+      SELECT id,team_name
+    from (
+    SELECT
+    teamInfo.id ,teamInfo.team_name
+    FROM
+    cipher_application_info app_info
+    LEFT JOIN cipher_team_application_map team ON app_info.id = team.application_id
+LEFT JOIN cipher_team_info teamInfo ON team.team_id=teamInfo.id
+    LEFT JOIN cipher_team_user_map teamuser ON teamInfo.id= teamuser.team_id
+    LEFT JOIN cipher_user_info info ON teamuser.user_id = info.uuid
+    WHERE
+    app_info.id = #{applicationId}
+   AND info.uuid=#{uuid}
+    ) demo
+    WHERE
+    1 = 1
+</select>
+</mapper>

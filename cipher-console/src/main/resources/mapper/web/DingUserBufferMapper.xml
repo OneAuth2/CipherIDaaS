@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="cipher.console.oidc.mapper.DingUserBufferMapper">
+
+
+    <select id="queryAlredyInBufferUser" resultType="java.lang.String">
+        <if test="list != null and list.size() != 0">
+            select userid from cipher_ding_user_buffer where userid in
+            <foreach collection="list" open="(" separator="," close=")" item="dingUser">
+                #{dingUser.userid}
+            </foreach>
+            and company_id=#{companyId}
+        </if>
+
+    </select>
+
+    <insert id="insert">
+        <if test="list != null and list.size() != 0">
+            insert into cipher_ding_user_buffer(
+            userid,
+            company_id,
+            mobile,
+            name,
+            email,
+            unionid,
+            position,
+            isBoss,
+            stateCode,
+            isLeader,
+            avatar,
+            active,
+            isAdmin,
+            openId,
+            isHide,
+            department,
+            create_time,
+            modify_time)
+            values
+            <foreach collection="list" item="dingUser" separator=",">
+                (
+                #{dingUser.userid},
+                #{dingUser.companyId},
+                #{dingUser.mobile},
+                #{dingUser.name},
+                #{dingUser.email},
+                #{dingUser.unionid},
+                #{dingUser.position},
+                #{dingUser.isBoss},
+                #{dingUser.stateCode},
+                #{dingUser.isLeader},
+                #{dingUser.avatar},
+                #{dingUser.active},
+                #{dingUser.isAdmin},
+                #{dingUser.openId},
+                #{dingUser.isHide},
+                #{dingUser.department},
+                NOW(),
+                NOW()
+                )
+            </foreach>
+        </if>
+
+    </insert>
+
+
+    <select id="queryList" resultType="cipher.console.oidc.domain.web.DingUserDomain">
+        select
+        ding.userid,
+        ding.company_id,
+        ding.mobile,
+        ding.name,
+        ding.unionid,
+        ding.email,
+        user_info.uuid as status
+
+        from cipher_ding_user_buffer ding
+        left join cipher_user_info user_info
+        on
+        <if test="matchRule==0">
+            ding.mobile = user_info.phone_number
+        </if>
+        <if test="matchRule==1">
+            ding.email = user_info.mail and user_info.mail!=''
+        </if>
+        <if test="matchRule==2">
+            ding.email = user_info.mail and ding.mobile = user_info.phone_number
+        </if>
+        <if test="matchRule==3">
+            -- (
+            -- ding.email = user_info.mail
+            -- or ding.mobile = user_info.phone_number
+            -- )
+            -- and ding.email != ''
+            ding.mobile = user_info.phone_number
+            or (
+            ding.email = user_info.mail
+            and ding.email!=''
+            )
+
+        </if>
+        where
+
+        ding.company_id = #{companyId}
+
+
+        <if test="queryStr!=null">
+            and ding.name LIKE CONCAT(CONCAT('%',#{queryStr}),'%')
+        </if>
+
+        <if test="status==null or status==0">
+
+        </if>
+
+        <if test="status==1">
+            and user_info.uuid is null
+        </if>
+
+        <if test="status==2">
+            and user_info.uuid is not null
+        </if>
+
+        group by ding.userid
+
+        limit #{dataGridModel.currentRow},#{dataGridModel.rows};
+
+    </select>
+
+
+    <select id="queryListCount" resultType="int">
+        select count(userid) from(
+        select
+        ding.userid,
+        ding.company_id,
+        ding.unionid,
+        ding.mobile,
+        ding.name,
+        ding.email,
+        user_info.uuid as status
+
+        from cipher_ding_user_buffer ding
+        left join cipher_user_info user_info
+        on
+        <if test="matchRule==0">
+            ding.mobile = user_info.phone_number
+        </if>
+        <if test="matchRule==1">
+            ding.email = user_info.mail and user_info.mail!=''
+        </if>
+        <if test="matchRule==2">
+            ding.email = user_info.mail and ding.mobile = user_info.phone_number
+        </if>
+        <if test="matchRule==3">
+            -- (ding.email = user_info.mail
+            -- or ding.mobile = user_info.phone_number)
+            -- and ding.email != ''
+
+            ding.mobile = user_info.phone_number
+            or (
+            ding.email = user_info.mail
+            and ding.email!=''
+            )
+        </if>
+        where
+
+        ding.company_id = #{companyId}
+
+        <if test="queryStr!=null">
+            and ding.name LIKE CONCAT(CONCAT('%',#{queryStr}),'%')
+        </if>
+
+        <if test="status==null or status==0">
+
+        </if>
+
+        <if test="status==1">
+            and user_info.uuid is null
+        </if>
+
+        <if test="status==2">
+            and user_info.uuid is not null
+        </if>
+
+        group by ding.userid
+        ) tmp
+    </select>
+
+
+    <select id="queryListToSync" resultType="cipher.console.oidc.domain.web.DingUserDomain">
+        select
+        ding.userid,
+        ding.company_id,
+        ding.mobile,
+        ding.name,
+        ding.email,
+        ding.unionid,
+        ding.position,
+        ding.department as departmentStr,
+        user_info.uuid as status
+
+        from cipher_ding_user_buffer ding
+        left join cipher_user_info user_info
+        on
+        <if test="matchRule==0">
+            ding.mobile = user_info.phone_number
+        </if>
+        <if test="matchRule==1">
+            ding.email = user_info.mail and user_info.mail!=''
+        </if>
+        <if test="matchRule==2">
+            ding.email = user_info.mail and ding.mobile = user_info.phone_number
+        </if>
+        <if test="matchRule==3">
+            ding.mobile = user_info.phone_number
+            or (
+            ding.email = user_info.mail
+            and ding.email!=''
+            )
+        </if>
+        where
+
+        ding.company_id = #{companyId}
+
+        <if test="userIdList!=null and userIdList.size() != 0 ">
+            and ding.userid in
+            <foreach collection="userIdList" item="dingUserId" open="(" separator="," close=")">
+                #{dingUserId}
+            </foreach>
+        </if>
+
+        group by ding.userid
+
+    </select>
+
+
+    <delete id="deleteByIdList">
+        <if test="list != null and list.size() != 0">
+            delete from cipher_ding_user_buffer where userid in
+            <foreach collection="list" open="(" separator="," close=")" item="userId">
+                #{userId}
+            </foreach>
+            and company_id=#{companyId}
+        </if>
+    </delete>
+
+
+    <delete id="deleteByCompanyIdList">
+        delete from cipher_ding_user_buffer where  company_id=#{companyId}
+    </delete>
+
+
+</mapper>

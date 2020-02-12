@@ -1,0 +1,645 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="cipher.console.oidc.mapper.NewUserMapper">
+    <resultMap id="baseResultMap" type="cipher.console.oidc.domain.web.NewUserInfo">
+        <result column="account_number" property="accountNumber"/>
+        <result column="account_status" property="status"/>
+        <collection property="roleList" column="account_number"
+                    select="cipher.console.oidc.mapper.RoleInfoDomainMapper.selectRoleNameList">
+        </collection>
+        <collection property="groupList" column="account_number"
+                    select="cipher.console.oidc.mapper.GroupMapper.selectGroupNameList">
+        </collection>
+    </resultMap>
+
+    <select id="selectNewUserInfo" resultMap="baseResultMap"
+            parameterType="cipher.console.oidc.domain.web.NewUserInfo">
+        select mm.*,
+        mm.uuid as uuid,
+        user_name AS userName
+        from cipher_user_info mm
+        where 1=1 and mm.is_delete=0 and mm.account_authorized_date is null and mm.account_authorized_valid_date is null
+        <if test="queryName!=null and queryName!=''">
+            and (user_name LIKE CONCAT(CONCAT('%',#{queryName}),'%') OR
+            account_number LIKE CONCAT(CONCAT('%',#{queryName}),'%'))
+        </if>
+        <if test="accountNumber!=null and accountNumber!=''">
+            and mm.account_number=#{accountNumber}
+        </if>
+        <if test="status!=null and status!=''and status!='全部'">
+            and account_status=#{status}
+        </if>
+        <if test="sidx!=null and sidx=='accountNumber'.toString()">
+            order by account_number ${sord}
+        </if>
+        <if test="sidx!=null and sidx=='userName'.toString()">
+            order by user_name ${sord}
+        </if>
+
+        LIMIT #{pageData.currentRow}, #{pageData.rows}
+    </select>
+
+
+    <select id="selectNewUserCount" resultType="int">
+        select count(1)
+        from cipher_user_info mm
+        where 1=1 and mm.is_delete=0 and mm.account_authorized_date is null and mm.account_authorized_valid_date is null
+        and mm.company_id=#{companyId}
+        <if test="queryName!=null and queryName!=''">
+            and (user_name LIKE CONCAT(CONCAT('%',#{queryName}),'%') OR
+            account_number LIKE CONCAT(CONCAT('%',#{queryName}),'%'))
+        </if>
+        <if test="accountNumber!=null and accountNumber!=''">
+            and mm.account_number=#{accountNumber}
+        </if>
+        <if test="status!=null and status!=''and status!='全部'">
+            and account_status=#{status}
+        </if>
+    </select>
+
+
+    <update id="updateByIsdelete" parameterType="cipher.console.oidc.domain.web.NewUserInfo">
+      update cipher_user_info set is_delete=#{isdelete} where uuid=#{uuid}
+    </update>
+
+    <select id="selectDeleteUserInfo" resultType="cipher.console.oidc.domain.web.NewUserInfo">
+        select
+        account_number as accountNumber,
+        user_name AS userName,
+        role_name as roleName,
+        account_status as status
+        from cipher_user_info mm
+        LEFT join cipher_role_user_map tt on mm.account_number=tt.user_id
+        LEFT JOIN cipher_role_info nn on nn.id=tt.role_id
+        where 1=1 and mm.is_delete=1 and mm.account_authorized_date is null and mm.account_authorized_valid_date is null
+        <if test="queryName!=null and queryName!=''">
+            and user_name LIKE CONCAT(CONCAT('%',#{queryName}),'%') OR
+            account_number LIKE CONCAT(CONCAT('%',#{queryName}),'%')
+        </if>
+        <if test="sidx!=null and sidx=='accountNumber'.toString()">
+            order by account_number ${sord}
+        </if>
+        <if test="sidx!=null and sidx=='userName'.toString()">
+            order by user_name ${sord}
+        </if>
+        <if test="sidx!=null and sidx=='roleName'.toString()">
+            order by role_name ${sord}
+        </if>
+        LIMIT #{pageData.currentRow}, #{pageData.rows}
+    </select>
+
+
+    <select id="selectDeleteUserCount" resultType="int">
+        select count(1)
+        from cipher_user_info mm
+        LEFT join cipher_role_user_map tt on mm.account_number=tt.user_id
+        LEFT JOIN cipher_role_info nn on nn.id=tt.role_id
+        where 1=1 and mm.is_delete=1 and mm.account_authorized_date is null and mm.account_authorized_valid_date is null
+        <if test="queryName!=null and queryName!=''">
+            and user_name LIKE CONCAT(CONCAT('%',#{queryName}),'%') OR
+            account_number LIKE CONCAT(CONCAT('%',#{queryName}),'%')
+        </if>
+    </select>
+
+
+    <select id="getUserListByGroupId" resultType="cipher.console.oidc.domain.web.NewUserInfo"
+            parameterType="cipher.console.oidc.domain.web.NewUserInfo">
+        select
+        mm.uuid as uuid,
+        mm.account_number as accountNumber,
+        user_name AS userName,
+        source,
+        ff.group_id as groupId,
+        account_status as status
+        from cipher_user_info mm
+        Left JOIN cipher_group_user_map ff on ff.user_id=mm.uuid
+        Left join cipher_group_info rr on rr.group_id=ff.group_id
+        where 1=1 and mm.is_delete=0 and mm.account_authorized_date is null and mm.account_authorized_valid_date is null
+        and rr.group_id=#{groupId}
+        <if test="queryName!=null and queryName!=''">
+            and (user_name LIKE CONCAT(CONCAT('%',#{queryName}),'%') OR
+            mm.account_number LIKE CONCAT(CONCAT('%',#{queryName}),'%'))
+        </if>
+        <if test="status!=null and status!='' and status!='全部'">
+            and account_status=#{status}
+        </if>
+        <if test="sidx!=null and sidx=='accountNumber'.toString()">
+            order by account_number ${sord}
+        </if>
+        <if test="sidx!=null and sidx=='userName'.toString()">
+            order by user_name ${sord}
+        </if>
+    </select>
+
+
+    <select id="getAllUserList" resultType="cipher.console.oidc.domain.web.TreeNodesDomain">
+     select
+     tt.uuid as uuid,
+     tt.account_number as accountNumber,
+     user_name as userName,
+     nn.group_name as groupName,
+     mm.group_id as groupId
+     from cipher_user_info tt
+     right join cipher_group_user_map mm on tt.uuid=mm.user_id
+     LEFT JOIN cipher_group_info nn on mm.group_id=nn.group_id
+     where 1=1 and tt.is_delete=0
+     and tt.account_authorized_valid_date is null and tt.account_authorized_date is null
+     and tt.company_id=#{companyId}
+    </select>
+
+
+    <select id="geUserList" resultType="cipher.console.oidc.domain.web.NewUserInfo"
+            parameterType="cipher.console.oidc.domain.web.NewUserInfo">
+        select mm.*
+        from cipher_user_info mm where is_delete=0  and mm.account_authorized_date is null and mm.account_authorized_valid_date is null
+    </select>
+
+
+    <select id="queryUserList" resultType="cipher.console.oidc.domain.web.NewUserInfo"
+            parameterType="cipher.console.oidc.domain.web.NewUserInfo">
+        select
+        tt.uuid as uuid,
+        tt.account_number as accountNumber,
+        tt.mail as mail,
+        tt.job as job,
+        tt.phone_number as phoneNumber,
+        tt.gender as gender,
+        user_name as userName,
+        nn.group_name as groupName,
+        mm.group_id as groupId
+        from cipher_user_info tt
+        right join cipher_group_user_map mm on tt.uuid=mm.user_id
+        LEFT JOIN cipher_group_info nn on mm.group_id=nn.group_id
+        where 1=1 and tt.is_delete=0 and tt.account_authorized_date is null and tt.account_authorized_valid_date is null
+        <if test="type==1">
+            <if test="queryType==1">
+                <choose>
+                    <when test="queryName !=null and queryName != ''">
+                        and group_name =#{queryName}
+                    </when>
+                    <otherwise>
+                        and group_name is null
+                    </otherwise>
+                </choose>
+            </if>
+            <if test="queryType==2">
+                <choose>
+                    <when test="queryName !=null and queryName != ''">
+                        and tt.account_number = #{queryName}
+                    </when>
+                    <otherwise>
+                        and tt.account_number is null
+                    </otherwise>
+                </choose>
+            </if>
+            <if test="queryType==3">
+                <choose>
+                    <when test="queryName !=null and queryName != ''">
+                        and  phone_number = #{queryName}
+                    </when>
+                    <otherwise>
+                        and phone_number is null
+                    </otherwise>
+                </choose>
+
+            </if>
+            <if test="queryType==4">
+                <choose>
+                    <when test="queryName !=null and queryName != ''">
+                        and   mail=#{queryName}
+                    </when>
+                    <otherwise>
+                        and mail is null
+                    </otherwise>
+                </choose>
+
+            </if>
+            <if test="queryType==5">
+                <choose>
+                    <when test="queryName !=null and queryName != ''">
+                        and   job=#{queryName}
+                    </when>
+                    <otherwise>
+                        and job is null
+                    </otherwise>
+                </choose>
+
+            </if>
+            <if test="queryType==6">
+                <choose>
+                    <when test="queryName !=null and queryName != ''">
+                        and gender=#{queryName}
+                    </when>
+                    <otherwise>
+                        and gender is null
+                    </otherwise>
+                </choose>
+
+            </if>
+        </if>
+        <if test="type==2">
+            <if test="queryType==1">
+                <choose>
+                    <when test="queryName !=null and queryName != ''">
+                        and group_name !=#{queryName}
+                    </when>
+                    <otherwise>
+                        and group_name is not null
+                    </otherwise>
+                </choose>
+
+            </if>
+            <if test="queryType==2">
+                <choose>
+                    <when test="queryName !=null and queryName != ''">
+                        and tt.account_number != #{queryName}
+                    </when>
+                    <otherwise>
+                        and tt.account_number is not null
+                    </otherwise>
+                </choose>
+
+            </if>
+            <if test="queryType==3">
+                <choose>
+                    <when test="queryName !=null and queryName != ''">
+                        and phone_number != #{queryName}
+                    </when>
+                    <otherwise>
+                        and phone_number is not null
+                    </otherwise>
+                </choose>
+
+
+            </if>
+            <if test="queryType==4">
+                <choose>
+                    <when test="queryName !=null and queryName != ''">
+                        and mail !=#{queryName}
+                    </when>
+                    <otherwise>
+                        and mail is not null
+                    </otherwise>
+                </choose>
+
+
+            </if>
+            <if test="queryType==5">
+                <choose>
+                    <when test="queryName !=null and queryName != ''">
+                        and job !=#{queryName}
+                    </when>
+                    <otherwise>
+                        and job is not null
+                    </otherwise>
+                </choose>
+
+
+            </if>
+            <if test="queryType==6">
+                <choose>
+                    <when test="queryName !=null and queryName != ''">
+                        and gender != #{queryName}
+                    </when>
+                    <otherwise>
+                        and gender is not null
+                    </otherwise>
+                </choose>
+
+
+            </if>
+        </if>
+        <if test="type==3">
+            <if test="queryType==1">
+                <choose>
+                    <when test="queryName !=null and queryName != ''">
+                        and group_name LIKE CONCAT(CONCAT('%',#{queryName}),'%')
+                    </when>
+                    <otherwise>
+                        and group_name is null
+                    </otherwise>
+                </choose>
+            </if>
+            <if test="queryType==2">
+                <choose>
+                    <when test="queryName !=null and queryName != ''">
+                        and tt.account_number LIKE CONCAT(CONCAT('%',#{queryName}),'%')
+                    </when>
+                    <otherwise>
+                        and tt.account_number is null
+                    </otherwise>
+                </choose>
+
+            </if>
+            <if test="queryType==3">
+                <choose>
+                    <when test="queryName !=null and queryName != ''">
+                        and phone_number LIKE CONCAT(CONCAT('%',#{queryName}),'%')
+                    </when>
+                    <otherwise>
+                        and phone_number is null
+                    </otherwise>
+                </choose>
+
+            </if>
+            <if test="queryType==4">
+                <choose>
+                    <when test="queryName !=null and queryName != ''">
+                        and mail LIKE CONCAT(CONCAT('%',#{queryName}),'%')
+                    </when>
+                    <otherwise>
+                        and mail is null
+                    </otherwise>
+                </choose>
+
+            </if>
+            <if test="queryType==5">
+                <choose>
+                    <when test="queryName !=null and queryName != ''">
+                        and job LIKE CONCAT(CONCAT('%',#{queryName}),'%')
+                    </when>
+                    <otherwise>
+                        and job is null
+                    </otherwise>
+                </choose>
+
+            </if>
+            <if test="queryType==6">
+                <choose>
+                    <when test="queryName !=null and queryName != ''">
+                        and gender LIKE CONCAT(CONCAT('%',#{queryName}),'%')
+                    </when>
+                    <otherwise>
+                        and gender is null
+                    </otherwise>
+                </choose>
+
+            </if>
+        </if>
+        <if test="type==4">
+            <if test="queryType==1">
+                <choose>
+                    <when test="queryName !=null and queryName != ''">
+                        and group_name not LIKE CONCAT(CONCAT('%',#{queryName}),'%')
+                    </when>
+                    <otherwise>
+                        and group_name is not null
+                    </otherwise>
+                </choose>
+
+            </if>
+            <if test="queryType==2">
+                <choose>
+                    <when test="queryName !=null and queryName != ''">
+                        and tt.account_number not LIKE CONCAT(CONCAT('%',#{queryName}),'%')
+                    </when>
+                    <otherwise>
+                        and tt.account_number is not null
+                    </otherwise>
+                </choose>
+
+            </if>
+            <if test="queryType==3">
+                <choose>
+                    <when test="queryName !=null and queryName != ''">
+                        and phone_number not LIKE CONCAT(CONCAT('%',#{queryName}),'%')
+                    </when>
+                    <otherwise>
+                        and phone_number is not null
+                    </otherwise>
+                </choose>
+
+            </if>
+            <if test="queryType==4">
+                <choose>
+                    <when test="queryName !=null and queryName != ''">
+                        and mail not LIKE CONCAT(CONCAT('%',#{queryName}),'%')
+                    </when>
+                    <otherwise>
+                        and mail is not null
+                    </otherwise>
+                </choose>
+
+            </if>
+            <if test="queryType==5">
+                <choose>
+                    <when test="queryName !=null and queryName != ''">
+                        and job not LIKE CONCAT(CONCAT('%',#{queryName}),'%')
+                    </when>
+                    <otherwise>
+                        and job is not null
+                    </otherwise>
+                </choose>
+
+            </if>
+            <if test="queryType==6">
+                <choose>
+                    <when test="queryName !=null and queryName != ''">
+                        and gender not LIKE CONCAT(CONCAT('%',#{queryName}),'%')
+                    </when>
+                    <otherwise>
+                        and gender is not null
+                    </otherwise>
+                </choose>
+
+            </if>
+        </if>
+        group by tt.uuid
+    </select>
+
+    <select id="getNoGroupUserList" resultMap="baseResultMap"
+            parameterType="cipher.console.oidc.domain.web.NewUserInfo">
+        select mm.*,
+        mm.uuid as uuid,
+        user_name AS userName
+        from cipher_user_info mm
+        Left JOIN cipher_group_user_map ff on ff.user_id=mm.uuid
+        WHERE ff.group_id=0 and mm.is_delete=0 and mm.company_id=#{companyId}
+        <if test="queryName!=null and queryName!=''">
+            and (user_name LIKE CONCAT(CONCAT('%',#{queryName}),'%') OR
+            mm.account_number LIKE CONCAT(CONCAT('%',#{queryName}),'%'))
+        </if>
+        <if test="status!=null and status != '0'.toString()">
+            and account_status=#{status}
+        </if>
+        LIMIT #{pageData.currentRow}, #{pageData.rows}
+    </select>
+
+
+    <select id="getNoGroupUserCount" resultType="int" parameterType="cipher.console.oidc.domain.web.NewUserInfo">
+        select count(1)
+        from cipher_user_info mm
+        Left JOIN cipher_group_user_map ff on ff.user_id=mm.uuid
+        WHERE ff.group_id=0 and mm.is_delete=0 and mm.company_id=#{companyId}
+        <if test="queryName!=null and queryName!=''">
+            and (user_name LIKE CONCAT(CONCAT('%',#{queryName}),'%') OR
+            mm.account_number LIKE CONCAT(CONCAT('%',#{queryName}),'%'))
+        </if>
+        <if test="status!=null and status != '0'.toString()">
+            and account_status=#{status}
+        </if>
+    </select>
+
+
+    <select id="getAllList" resultMap="baseResultMap" parameterType="cipher.console.oidc.domain.web.NewUserInfo">
+        select mm.*,
+        mm.uuid AS uuid,
+        mm.user_name AS userName,
+        ff.group_id as groupId
+        from cipher_user_info mm
+        Left JOIN cipher_group_user_map ff on ff.user_id=mm.uuid
+        WHERE  mm.is_delete=0 and mm.account_authorized_date is null and mm.account_authorized_valid_date is null
+        and mm.company_id=#{companyId}
+        <if test="queryName!=null and queryName!=''">
+            and (user_name LIKE CONCAT(CONCAT('%',#{queryName}),'%') OR
+            mm.account_number LIKE CONCAT(CONCAT('%',#{queryName}),'%'))
+        </if>
+        <if test="accountNumber!=null and accountNumber!=''">
+            and  mm.account_number=#{accountNumber}
+        </if>
+        <if test="status!=null and status != '0'.toString() and status != '全部'">
+            and account_status=#{status}
+        </if>
+        group by mm.uuid
+    </select>
+
+
+    <select id="getUserListByCondition" resultMap="baseResultMap"
+            parameterType="cipher.console.oidc.domain.web.NewUserInfo">
+        select mm.*,
+        mm.uuid as uuid,
+        user_name AS userName
+        from cipher_user_info mm
+        WHERE mm.is_delete=0 and company_id=#{userInfo.companyId} and DATE(create_time) &lt;= DATE(DATE_SUB(NOW(),INTERVAL 30 day))
+        <if test="userInfo.getQueryName!=null and userInfo.getQueryName!=''">
+            and (user_name LIKE CONCAT(CONCAT('%',#{queryName}),'%') OR
+            mm.account_number LIKE CONCAT(CONCAT('%',#{queryName}),'%'))
+        </if>
+        <if test="userInfo.getStatus!=null and userInfo.getStatus!= '0'.toString()">
+            and account_status=#{status}
+        </if>
+        <if test="list !=null and list.size >0" >
+        and mm.account_number not in
+        <foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        </if>
+        LIMIT #{userInfo.pageData.currentRow}, #{userInfo.pageData.rows}
+    </select>
+
+
+    <select id="getNoLoginUser" resultMap="baseResultMap">
+        select  user_id as accountNumber
+        from cipher_user_behavior_log where company_id=#{companyId}
+        and  type=1 and  DATE(create_time)  &gt;= DATE(DATE_SUB(NOW(),INTERVAL 30 day))
+    </select>
+
+
+    <select id="getUserListByConditionCount" resultType="int"
+            parameterType="cipher.console.oidc.domain.web.NewUserInfo">
+        select count(1)
+        from cipher_user_info mm
+        WHERE mm.is_delete=0 and company_id=#{userInfo.companyId} and DATE(create_time) &lt;= DATE(DATE_SUB(NOW(),INTERVAL 30 day))
+        <if test="userInfo.getQueryName!=null and userInfo.getQueryName!=''">
+            and (user_name LIKE CONCAT(CONCAT('%',#{queryName}),'%') OR
+            mm.account_number LIKE CONCAT(CONCAT('%',#{queryName}),'%'))
+        </if>
+        <if test="userInfo.getStatus!=null and userInfo.getStatus!= '0'.toString()">
+            and account_status=#{status}
+        </if>
+        <if test="list!=null and list.size>0">
+        and mm.account_number not in
+        <foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        </if>
+    </select>
+    <select id="getAccountNumber" resultType="java.lang.String">
+            SELECT account_number
+            from cipher_password_authorization_mag
+            WHERE  account_number=#{accountNumber}
+    </select>
+    <delete id="deletePassword">
+          delete from
+          cipher_password_authorization_mag
+          WHERE  account_number=#{accountNumber}
+    </delete>
+
+    <select id="getNewUserInfo" resultMap="baseResultMap">
+        select *
+        from cipher_user_info  where uuid=#{uuid}
+    </select>
+
+
+
+
+    <select id="getNewAllList" resultMap="baseResultMap" parameterType="cipher.console.oidc.domain.web.NewUserInfo">
+        select
+        mm.account_number AS accountNumber,
+        mm.account_status AS status,
+        mm.uuid AS uuid,
+        mm.user_name AS userName
+        from cipher_user_info mm
+        WHERE  mm.is_delete=0 and mm.account_authorized_date is null and mm.account_authorized_valid_date is null
+        and mm.company_id=#{companyId}
+        <if test="queryName!=null and queryName!=''">
+            and (user_name LIKE CONCAT(CONCAT('%',#{queryName}),'%') OR
+            mm.account_number LIKE CONCAT(CONCAT('%',#{queryName}),'%'))
+        </if>
+        <if test="accountNumber!=null and accountNumber!=''">
+            and  mm.account_number=#{accountNumber}
+        </if>
+        <if test="status!=null and status != '0'.toString() and status != '全部'">
+            and account_status=#{status}
+        </if>
+    </select>
+
+
+    <select id="reallyDelete">
+          delete from
+          cipher_user_info
+          WHERE  uuid=#{uuid}
+    </select>
+
+    <select id="getNewUserByGroupId" resultType="cipher.console.oidc.domain.web.NewUserInfo"
+            parameterType="cipher.console.oidc.domain.web.NewUserInfo">
+        select
+        mm.uuid as uuid,
+        mm.account_number as accountNumber,
+        user_name AS userName,
+        source,
+        ff.group_id as groupId,
+        account_status as status
+        from cipher_user_info mm
+        Left JOIN cipher_group_user_map ff on ff.user_id=mm.uuid
+        where 1=1 and mm.is_delete=0 and mm.account_authorized_date is null and mm.account_authorized_valid_date is null
+        and ff.group_id=0
+        <if test="queryName!=null and queryName!=''">
+            and (user_name LIKE CONCAT(CONCAT('%',#{queryName}),'%') OR
+            mm.account_number LIKE CONCAT(CONCAT('%',#{queryName}),'%'))
+        </if>
+        <if test="status!=null and status!='' and status!='全部'">
+            and account_status=#{status}
+        </if>
+        <if test="sidx!=null and sidx=='accountNumber'.toString()">
+            order by account_number ${sord}
+        </if>
+        <if test="sidx!=null and sidx=='userName'.toString()">
+            order by user_name ${sord}
+        </if>
+    </select>
+
+
+
+    <select id="getNewUserListByGroupId" resultType="cipher.console.oidc.domain.web.TreeNodesDomain">
+        select mm.*,
+        mm.uuid AS uuid,
+        mm.user_name AS userName,
+        ff.group_id as groupId
+        from cipher_user_info mm
+        Left JOIN cipher_group_user_map ff on ff.user_id=mm.uuid
+        WHERE  mm.is_delete=0 and mm.account_authorized_date is null and mm.account_authorized_valid_date is null
+        and mm.company_id=#{companyId} and ff.group_id=#{groupId}
+    </select>
+</mapper>

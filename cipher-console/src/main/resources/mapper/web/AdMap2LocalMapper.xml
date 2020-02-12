@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cipher.console.oidc.mapper.AdMap2LocalMapper">
+
+
+    <select id="queryAdMapLocalConfig" resultType="cipher.console.oidc.domain.web.AdMap2LocalDomain">
+        SELECT
+            id,
+            ad_key,
+            local_val,
+            create_time,
+            modify_time
+        FROM cipher_ad_local_map;
+    </select>
+
+
+    <insert id="insertAdMap2LocalConfig">
+        INSERT INTO cipher_ad_local_map(ad_key, local_val, create_time, modify_time) VALUES
+        <foreach collection="adMap2LocalDomainList" item="adMap2LocalDomain" index="adMap2LocalDomain"
+                 separator=",">
+            (
+            #{adMap2LocalDomain.adKey},
+            #{adMap2LocalDomain.localVal},
+            NOW(),
+            NOW()
+            )
+        </foreach>
+
+    </insert>
+
+    <update id="updateAdMapConfig" parameterType="cipher.console.oidc.domain.web.AdMap2LocalDomain">
+        UPDATE cipher_ad_local_map
+        SET ad_key = #{adKey}
+        WHERE local_val = #{localVal};
+    </update>
+
+
+</mapper>

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cipher.console.oidc.mapper.ApplicationSysInfoMapper" >
+  <resultMap id="BaseResultMap" type="cipher.console.oidc.domain.web.ApplicationSysInfo" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="application_name" property="applicationName" jdbcType="VARCHAR" />
+    <result column="application_url" property="applicationUrl" jdbcType="VARCHAR" />
+    <result column="application_type" property="applicationType" jdbcType="INTEGER" />
+    <result column="mark" property="mark" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, application_name, application_url, application_type, mark
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from cipher_application_system_info
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from cipher_application_system_info
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="cipher.console.oidc.domain.web.ApplicationSysInfo" >
+    insert into cipher_application_system_info (id, application_name, application_url, 
+      application_type, mark)
+    values (#{id,jdbcType=INTEGER}, #{applicationName,jdbcType=VARCHAR}, #{applicationUrl,jdbcType=VARCHAR}, 
+      #{applicationType,jdbcType=INTEGER}, #{mark,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="cipher.console.oidc.domain.web.ApplicationSysInfo" >
+    insert into cipher_application_system_info
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="applicationName != null" >
+        application_name,
+      </if>
+      <if test="applicationUrl != null" >
+        application_url,
+      </if>
+      <if test="applicationType != null" >
+        application_type,
+      </if>
+      <if test="mark != null" >
+        mark,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="applicationName != null" >
+        #{applicationName,jdbcType=VARCHAR},
+      </if>
+      <if test="applicationUrl != null" >
+        #{applicationUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="applicationType != null" >
+        #{applicationType,jdbcType=INTEGER},
+      </if>
+      <if test="mark != null" >
+        #{mark,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="cipher.console.oidc.domain.web.ApplicationSysInfo" >
+    update cipher_application_system_info
+    <set >
+      <if test="applicationName != null" >
+        application_name = #{applicationName,jdbcType=VARCHAR},
+      </if>
+      <if test="applicationUrl != null" >
+        application_url = #{applicationUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="applicationType != null" >
+        application_type = #{applicationType,jdbcType=INTEGER},
+      </if>
+      <if test="mark != null" >
+        mark = #{mark,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cipher.console.oidc.domain.web.ApplicationSysInfo" >
+    update cipher_application_system_info
+    set application_name = #{applicationName,jdbcType=VARCHAR},
+      application_url = #{applicationUrl,jdbcType=VARCHAR},
+      application_type = #{applicationType,jdbcType=INTEGER},
+      mark = #{mark,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

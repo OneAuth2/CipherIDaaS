@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cipher.console.oidc.mapper.WifiStrategyInfoMapper" >
+  <resultMap id="BaseResultMap" type="cipher.console.oidc.domain.web.WifiStrategyInfo" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="code" property="code" jdbcType="VARCHAR" />
+    <result column="value" property="value" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, name, code, value, create_time, modify_time
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from cipher_wifi_strategy
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from cipher_wifi_strategy
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="cipher.console.oidc.domain.web.WifiStrategyInfo" >
+    insert into cipher_wifi_strategy (id, name, code, 
+      value, create_time, modify_time
+      )
+    values (#{id,jdbcType=INTEGER}, #{name,jdbcType=VARCHAR}, #{code,jdbcType=VARCHAR}, 
+      #{value,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{modifyTime,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="cipher.console.oidc.domain.web.WifiStrategyInfo" useGeneratedKeys="true" keyProperty="id">
+    insert into cipher_wifi_strategy
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="name != null" >
+        name,
+      </if>
+      <if test="code != null" >
+        code,
+      </if>
+      <if test="value != null" >
+        value,
+      </if>
+        create_time,
+        modify_time,
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="code != null" >
+        #{code,jdbcType=VARCHAR},
+      </if>
+      <if test="value != null" >
+        #{value,jdbcType=VARCHAR},
+      </if>
+      NOW(),
+      NOW()
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="cipher.console.oidc.domain.web.WifiStrategyInfo" >
+    update cipher_wifi_strategy
+    <set >
+      <if test="name != null" >
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="code != null" >
+        code = #{code,jdbcType=VARCHAR},
+      </if>
+      <if test="value != null" >
+        value = #{value,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+        modify_time = NOW(),
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cipher.console.oidc.domain.web.WifiStrategyInfo" >
+    update cipher_wifi_strategy
+    set name = #{name,jdbcType=VARCHAR},
+      code = #{code,jdbcType=VARCHAR},
+      value = #{value,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      modify_time = #{modifyTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+
+
+
+  <select id="getWifiStategyInfo" resultMap="BaseResultMap" resultType="cipher.console.oidc.domain.web.WifiStrategyInfo">
+     select
+    <include refid="Base_Column_List" />
+     from cipher_wifi_strategy
+  </select>
+
+  <select id="getStategyId" resultType="int">
+       select id from cipher_wifi_strategy where company_uuid = #{companyUuid} and code = #{type}
+  </select>
+
+  <select id="getStaffWifiStrategyInfo" parameterType="string" resultMap="BaseResultMap" resultType="cipher.console.oidc.domain.web.WifiStrategyInfo">
+    select
+    <include refid="Base_Column_List" />
+    from cipher_wifi_strategy
+    where code ='staff' and company_uuid=#{companyUuid}
+  </select>
+
+  <select id="getVisitorWifiStrategyInfo" resultMap="BaseResultMap" resultType="cipher.console.oidc.domain.web.WifiStrategyInfo">
+    select
+    <include refid="Base_Column_List" />
+    from cipher_wifi_strategy
+    where code ='visitor' and company_uuid = #{companyUuid}
+  </select>
+
+  <insert id="insertIntoWifiStrategy" parameterType="cipher.console.oidc.domain.web.WifiStrategyInfo">
+    replace into cipher_wifi_strategy
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="companyUuid != null">
+        company_uuid,
+      </if>
+      <if test="name != null" >
+        name,
+      </if>
+      <if test="code != null" >
+        code,
+      </if>
+      <if test="value != null">
+        value,
+      </if>
+      modify_time
+    </trim>
+    <trim prefix="values(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id},
+      </if>
+      <if test="companyUuid != null">
+        #{companyUuid,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="code != null">
+         #{code,jdbcType=VARCHAR},
+      </if>
+      <if test="value != null">
+        #{value,jdbcType=VARCHAR},
+      </if>
+      NOW()
+    </trim>
+  </insert>
+
+
+  <select id="getMacDeviceBinding" resultMap="BaseResultMap" resultType="cipher.console.oidc.domain.web.WifiStrategyInfo">
+    SELECT
+      <include refid="Base_Column_List" />
+    from cipher_wifi_strategy
+    WHERE code='mac' and company_uuid=#{companyId}
+  </select>
+
+
+</mapper>

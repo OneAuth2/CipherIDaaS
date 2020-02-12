@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cipher.console.oidc.mapper.TeamInfoMapper" >
+  <resultMap id="BaseResultMap" type="cipher.console.oidc.domain.web.TeamInfo" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="team_name" property="teamName" jdbcType="VARCHAR" />
+    <result column="rule_value" property="ruleValue" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP" />
+    <result column="dsg_team_id" property="dsgTeamId" jdbcType="VARCHAR" />
+    <result column="company_id" property="companyId" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, team_name, create_time, modify_time,rule_value,dsg_team_id
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select
+    <include refid="Base_Column_List" />
+    from cipher_team_info
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from cipher_team_info
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="cipher.console.oidc.domain.web.TeamInfo" >
+    insert into cipher_team_info (id, team_name, create_time,
+      modify_time)
+    values (#{id,jdbcType=INTEGER}, #{teamName,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP},
+      #{modifyTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="cipher.console.oidc.domain.web.TeamInfo" >
+    insert into cipher_team_info
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="teamName != null" >
+        team_name,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+        <if test="dsgTeamId != null" >
+            dsg_team_id,
+        </if>
+       <if test="modifyTime != null" >
+        modify_time,
+       </if>
+      <if test="companyId != null" >
+        company_id,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="teamName != null" >
+        #{teamName,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+        <if test="dsgTeamId != null" >
+           #{dsgTeamId},
+        </if>
+      <if test="modifyTime != null" >
+        #{modifyTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="companyId != null" >
+        #{companyId},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="cipher.console.oidc.domain.web.TeamInfo" >
+    update cipher_team_info
+    <set >
+      <if test="teamName != null" >
+      team_name = #{teamName,jdbcType=VARCHAR},
+    </if>
+      <if test="ruleValue != null" >
+        rule_value = #{ruleValue,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modifyTime != null" >
+      modify_time = #{modifyTime,jdbcType=TIMESTAMP},
+    </if>
+      <if test="companyId != null" >
+        company_id = #{companyId},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cipher.console.oidc.domain.web.TeamInfo" >
+    update cipher_team_info
+    set team_name = #{teamName,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      modify_time = #{modifyTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+
+
+
+  <select id="selectTeamInfoList" resultMap="BaseResultMap" parameterType="cipher.console.oidc.domain.web.TeamInfo">
+     select
+    <include refid="Base_Column_List" />
+     from cipher_team_info where 1=1 and company_id=#{companyId}
+    <if test="teamName!= null and teamName != ''">
+      and team_name LIKE CONCAT(CONCAT('%', #{teamName}), '%')
+    </if>
+
+     LIMIT #{pageData.currentRow}, #{pageData.rows}
+  </select>
+
+
+
+  <select id="selectCount" resultType="int">
+    select count(1)
+    from cipher_team_info where 1=1 and company_id=#{companyId}
+    <if test="teamName!= null and teamName != ''">
+      and team_name LIKE CONCAT(CONCAT('%', #{teamName}), '%')
+    </if>
+  </select>
+
+
+  <select id="selectTeamInfo" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+     from cipher_team_info where 1=1
+    <if test="teamName!= null and teamName != ''">
+      and team_name=#{teamName}
+    </if>
+    <if test="companyId!= null and companyId != ''">
+      and company_id=#{companyId}
+    </if>
+
+  </select>
+
+
+    <select id="getTeamList" resultMap="BaseResultMap">
+      select
+      <include refid="Base_Column_List" />
+      from cipher_team_info where company_id=#{companyId}
+    </select>
+
+
+  <select id="selectTeamPageList" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from cipher_team_info where 1=1
+    <if test="list!=null and list.size!=0">
+     and id not in
+    <foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+      #{item}
+    </foreach>
+    </if>
+    <if test="teamInfo.teamName!= null and teamInfo.teamName != ''">
+      and team_name LIKE CONCAT(CONCAT('%', #{teamInfo.teamName}), '%')
+    </if>
+     limit #{startPageNum},#{pageSize}
+  </select>
+
+  <select id="selectPageCount" resultType="int">
+    select
+    count(1)
+    from cipher_team_info where 1=1
+    <if test="list!=null and list.size!=0">
+      and id not in
+      <foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+        #{item}
+      </foreach>
+    </if>
+    <if test="teamInfo.teamName!= null and teamInfo.teamName != ''">
+      and team_name LIKE CONCAT(CONCAT('%', #{teamInfo.teamName}), '%')
+    </if>
+
+  </select>
+
+
+  <select id="selectApplicationTeamPage" resultType="cipher.console.oidc.domain.web.TeamInfo" parameterType="cipher.console.oidc.domain.web.QueryInfoDomain">
+    select
+    info.id as id,
+    info.team_name as teamName
+    from cipher_team_info info
+    LEFT JOIN cipher_team_application_map map on info.id=map.team_id
+    where 1=1
+    <if test="applicationId!= null and applicationId != ''">
+      and map.application_id=#{applicationId}
+    </if>
+    <if test="queryName!= null and queryName != ''">
+      and team_name LIKE CONCAT(CONCAT('%', #{queryName}), '%')
+    </if>
+    LIMIT #{pageData.currentRow}, #{pageData.rows}
+  </select>
+
+  <select id="selectApplicationTeamCount" resultType="int" parameterType="cipher.console.oidc.domain.web.QueryInfoDomain">
+    select
+    count(1)
+    from cipher_team_info info
+    LEFT JOIN cipher_team_application_map map on info.id=map.team_id
+    where 1=1
+    <if test="applicationId!= null and applicationId != ''">
+      and map.application_id=#{applicationId}
+    </if>
+    <if test="queryName!= null and queryName != ''">
+      and team_name LIKE CONCAT(CONCAT('%', #{queryName}), '%')
+    </if>
+  </select>
+    <select id="getTeamApplicationList" resultType="cipher.console.oidc.domain.web.ApplicationInfoDomain"  parameterType="cipher.console.oidc.domain.web.TeamInfo">
+           SELECT application.id,application.application_name  from cipher_team_application_map info
+            LEFT JOIN  cipher_application_info application
+            on  info.application_id=application.id
+            where  1=1
+            AND info.team_id=#{id}
+            <if test="queryName!= null and queryName != ''">
+                  and  application.application_name LIKE CONCAT(CONCAT('%', #{queryName}), '%')
+          </if>
+          LIMIT #{pageData.currentRow}, #{pageData.rows}
+       </select>
+  <select id="getTeamApplicationListCount" resultType="java.lang.Integer"  parameterType="cipher.console.oidc.domain.web.TeamInfo">
+    SELECT count(*)  from cipher_team_application_map info
+    LEFT JOIN  cipher_application_info application
+    on  info.application_id=application.id
+    where  1=1
+    AND info.team_id=#{id}
+    <if test="queryName!= null and queryName != ''">
+      and  application.application_name LIKE CONCAT(CONCAT('%', #{queryName}), '%')
+    </if>
+
+  </select>
+  <select id="getAllTeamApplicationList" resultType="cipher.console.oidc.domain.web.ApplicationInfoDomain" parameterType="cipher.console.oidc.domain.web.TeamInfo">
+           SELECT application.id,application.application_name  from cipher_team_application_map info
+            LEFT JOIN  cipher_application_info application
+            on  info.application_id=application.id
+            where  1=1
+            AND info.team_id=#{id}
+  </select>
+  <select id="getAllApplication" resultType="cipher.console.oidc.domain.web.ApplicationInfoDomain">
+      select  * from cipher_application_info
+      where  company_id=#{companyId}
+  </select>
+
+  <select id="getAppTeamInfo" resultType="cipher.console.oidc.domain.web.TeamInfo">
+    select cipher_team_info.id,cipher_team_info.dsg_team_id,cipher_team_info.team_name  from cipher_team_info
+    left join cipher_team_user_map on cipher_team_user_map.team_id = cipher_team_info.id
+    left join cipher_team_application_map on cipher_team_application_map.team_id = cipher_team_info.id
+    where cipher_team_user_map.user_id = #{userId}
+
+    and cipher_team_application_map.application_id = #{appId}
+    limit 1
+  </select>
+
+
+</mapper>

@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="cipher.console.oidc.mapper.LdapUserMapper">
+
+    <insert id="insertLdapUserList">
+        INSERT INTO cipher_ad_user_info (dn, cn, sn, givenName, distinguishedName, instanceType, whenCreated,
+        whenChanged, displayName, sAMAccountName, userPrincipalName, objectCategory, mail, userAccountControl, manager,
+        mobile, objectGUID, objectSid, title,company_id, create_time, modify_time,source)
+        VALUES
+        <foreach collection="ldapUserList" separator="," index="ldapUser" item="ldapUser">
+            <if test="ldapUser.userPrincipalName != null">
+                (
+                #{ldapUser.dn},
+                #{ldapUser.cn},
+                #{ldapUser.sn},
+                #{ldapUser.name},
+                #{ldapUser.distinguishedName},
+                #{ldapUser.instanceType},
+                #{ldapUser.whenCreated},
+                #{ldapUser.whenChanged},
+                #{ldapUser.displayName},
+                #{ldapUser.sAMAccountName},
+                #{ldapUser.userPrincipalName},
+                #{ldapUser.objectCategory},
+                #{ldapUser.mail},
+                #{ldapUser.userAccountControl},
+                #{ldapUser.manager},
+                #{ldapUser.mobile},
+                #{ldapUser.objectGUID},
+                #{ldapUser.objectSid},
+                #{ldapUser.title},
+                #{ldapUser.companyId},
+                NOW(),
+                NOW(),
+                #{ldapUser.source}
+                )
+            </if>
+        </foreach>
+    </insert>
+
+    <insert id="insertLdapUserGuidList">
+        INSERT INTO cipher_ad_user_info_temp (dn, cn, sn, givenName, distinguishedName, instanceType, whenCreated,
+        whenChanged, displayName, sAMAccountName, userPrincipalName, objectCategory, mail, userAccountControl, manager,
+        mobile, objectGUID, objectSid, title, create_time, modify_time)
+        VALUES
+        <foreach collection="ldapUserList" separator="," index="ldapUser" item="ldapUser">
+            <if test="ldapUser.userPrincipalName != null">
+                (
+                #{ldapUser.dn},
+                #{ldapUser.cn},
+                #{ldapUser.sn},
+                #{ldapUser.name},
+                #{ldapUser.distinguishedName},
+                #{ldapUser.instanceType},
+                #{ldapUser.whenCreated},
+                #{ldapUser.whenChanged},
+                #{ldapUser.displayName},
+                #{ldapUser.sAMAccountName},
+                #{ldapUser.userPrincipalName},
+                #{ldapUser.objectCategory},
+                #{ldapUser.mail},
+                #{ldapUser.userAccountControl},
+                #{ldapUser.manager},
+                #{ldapUser.mobile},
+                #{ldapUser.objectGUID},
+                #{ldapUser.objectSid},
+                #{ldapUser.title},
+                NOW(),
+                NOW()
+                )
+            </if>
+        </foreach>
+    </insert>
+
+    <delete id="truncateLdapUserGuidList">
+        delete from  cipher_ad_user_info_temp where  company_id=#{companyId}
+       /* TRUNCATE table cipher_ad_user_info_temp where company_id=#{companyId}*/
+    </delete>
+
+
+    <update id="updateList">
+
+        UPDATE cipher_ad_user_info
+
+        <trim prefix="set" suffixOverrides=",">
+
+            <trim prefix="dn=case" suffix="end,">
+                <foreach collection="ldapUserList" item="ldapUser" index="index">
+                    <if test="ldapUser.dn!=null">
+                        when objectGUID=#{ldapUser.objectGUID} then #{ldapUser.dn}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="cn=case" suffix="end,">
+                <foreach collection="ldapUserList" item="ldapUser" index="index">
+                    <if test="ldapUser.cn!=null">
+                        when objectGUID=#{ldapUser.objectGUID} then #{ldapUser.cn}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="sn=case" suffix="end,">
+                <foreach collection="ldapUserList" item="ldapUser" index="index">
+                    <if test="ldapUser.sn!=null">
+                        when objectGUID=#{ldapUser.objectGUID} then #{ldapUser.sn}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="cn=case" suffix="end,">
+                <foreach collection="ldapUserList" item="ldapUser" index="index">
+                    <if test="ldapUser.name!=null">
+                        when objectGUID=#{ldapUser.objectGUID} then #{ldapUser.name}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="distinguishedName=case" suffix="end,">
+                <foreach collection="ldapUserList" item="ldapUser" index="index">
+                    <if test="ldapUser.distinguishedName!=null">
+                        when objectGUID=#{ldapUser.objectGUID} then #{ldapUser.distinguishedName}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="instanceType=case" suffix="end,">
+                <foreach collection="ldapUserList" item="ldapUser" index="index">
+                    <if test="ldapUser.instanceType!=null">
+                        when objectGUID=#{ldapUser.objectGUID} then #{ldapUser.instanceType}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="whenCreated=case" suffix="end,">
+                <foreach collection="ldapUserList" item="ldapUser" index="index">
+                    <if test="ldapUser.whenCreated!=null">
+                        when objectGUID=#{ldapUser.objectGUID} then #{ldapUser.whenCreated}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="whenChanged=case" suffix="end,">
+                <foreach collection="ldapUserList" item="ldapUser" index="index">
+                    <if test="ldapUser.whenChanged!=null">
+                        when objectGUID=#{ldapUser.objectGUID} then #{ldapUser.whenChanged}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="displayName=case" suffix="end,">
+                <foreach collection="ldapUserList" item="ldapUser" index="index">
+                    <if test="ldapUser.displayName!=null">
+                        when objectGUID=#{ldapUser.objectGUID} then #{ldapUser.displayName}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="sAMAccountName=case" suffix="end,">
+                <foreach collection="ldapUserList" item="ldapUser" index="index">
+                    <if test="ldapUser.sAMAccountName!=null">
+                        when objectGUID=#{ldapUser.objectGUID} then #{ldapUser.sAMAccountName}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="userPrincipalName=case" suffix="end,">
+                <foreach collection="ldapUserList" item="ldapUser" index="index">
+                    <if test="ldapUser.userPrincipalName!=null">
+                        when objectGUID=#{ldapUser.objectGUID} then #{ldapUser.userPrincipalName}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="objectCategory=case" suffix="end,">
+                <foreach collection="ldapUserList" item="ldapUser" index="index">
+                    <if test="ldapUser.objectCategory!=null">
+                        when objectGUID=#{ldapUser.objectGUID} then #{ldapUser.objectCategory}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="mail=case" suffix="end,">
+                <foreach collection="ldapUserList" item="ldapUser" index="index">
+                    <if test="ldapUser.mail!=null">
+                        when objectGUID=#{ldapUser.objectGUID} then #{ldapUser.mail}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="userAccountControl=case" suffix="end,">
+                <foreach collection="ldapUserList" item="ldapUser" index="index">
+                    <if test="ldapUser.userAccountControl!=null">
+                        when objectGUID=#{ldapUser.objectGUID} then #{ldapUser.userAccountControl}
+                    </if>
+                </foreach>
+            </trim>
+
+            <trim prefix="manager=case" suffix="end,">
+                <foreach collection="ldapUserList" item="ldapUser" index="index">
+                    <if test="ldapUser.manager!=null">
+                        when objectGUID=#{ldapUser.objectGUID} then #{ldapUser.manager}
+                    </if>
+                </foreach>
+            </trim>
+
+            <trim prefix="mobile=case" suffix="end,">
+                <foreach collection="ldapUserList" item="ldapUser" index="index">
+                    <if test="ldapUser.mobile!=null">
+                        when objectGUID=#{ldapUser.objectGUID} then #{ldapUser.mobile}
+                    </if>
+                </foreach>
+            </trim>
+
+            <trim prefix="objectSid=case" suffix="end,">
+                <foreach collection="ldapUserList" item="ldapUser" index="index">
+                    <if test="ldapUser.objectSid!=null">
+                        when objectGUID=#{ldapUser.objectGUID} then #{ldapUser.objectSid}
+                    </if>
+                </foreach>
+            </trim>
+
+            <trim prefix="title=case" suffix="end,">
+                <foreach collection="ldapUserList" item="ldapUser" index="index">
+                    <if test="ldapUser.title!=null">
+                        when objectGUID=#{ldapUser.objectGUID} then #{ldapUser.title}
+                    </if>
+                </foreach>
+            </trim>
+
+            <trim prefix="modify_time=case" suffix="end,">
+                <foreach collection="ldapUserList" item="ldapUser" index="index">
+
+                    when objectGUID=#{ldapUser.objectGUID} then NOW()
+
+                </foreach>
+            </trim>
+
+            <trim prefix="userAccountControl=case" suffix="end,">
+                <foreach collection="ldapUserList" item="ldapUser" index="index">
+                    <if test="ldapUser.userAccountControl!=null">
+                        when objectGUID=#{ldapUser.objectGUID} then #{ldapUser.userAccountControl}
+                    </if>
+                </foreach>
+            </trim>
+
+        </trim>
+        where
+        <foreach collection="ldapUserList" separator="or" item="ldapUser" index="index">
+            objectGUID=#{ldapUser.objectGUID}
+        </foreach>
+
+    </update>
+
+    <select id="queryLatestChangeTime" resultType="java.lang.String">
+        SELECT whenChanged
+        FROM cipher_ad_user_info
+        where source=#{source}
+
+        ORDER BY whenChanged DESC
+        LIMIT 1;
+    </select>
+
+    <select id="queryLatestCreatedTime" resultType="java.lang.String">
+        SELECT whenCreated
+        FROM cipher_ad_user_info
+        ORDER BY whenCreated DESC
+        LIMIT 1;
+    </select>
+
+    <select id="queryAlredyExistsUser" resultType="cipher.console.oidc.entity.LdapUser">
+        SELECT DISTINCT  objectGUID  from cipher_ad_user_info WHERE company_id=#{companyId} and objectGUID IN
+        <foreach collection="ldapUserList" open="(" separator="," close=")" index="index" item="ldapUser">
+            #{ldapUser.objectGUID}
+        </foreach>
+    </select>
+
+    <select id="queryAlredyExistsUserExtend" resultType="cipher.console.oidc.entity.LdapUser">
+        SELECT DISTINCT a.objectGUID from cipher_ad_user_info a JOIN cipher_ad_user_info_temp b ON a.objectGUID = b.objectGUID
+    </select>
+
+
+</mapper>

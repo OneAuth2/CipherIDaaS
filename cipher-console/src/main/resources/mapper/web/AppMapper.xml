@@ -1,0 +1,1391 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="cipher.console.oidc.mapper.AppMapper">
+
+    <resultMap id="appMap" type="cipher.console.oidc.domain.web.ApplicationInfoDomain" autoMapping="true"/>
+
+    <resultMap id="appUserCountMap" type="cipher.console.oidc.model.ApplicationUserCountModel"/>
+
+    <resultMap id="accountDetail" type="cipher.console.oidc.model.ApplicationSubAccountModel"/>
+
+    <resultMap id="subResultMap" type="cipher.console.oidc.domain.web.NewAppSonAccountDomain"/>
+
+
+    <!-- <select id="queryPageList" resultMap="appMap" parameterType="cipher.console.oidc.domain.web.ApplicationInfoDomain">
+         SELECT
+         tmp_app_group.id,
+         tmp_app_group.application_id,
+         tmp_app_group.application_name,
+         tmp_app_group.application_description,
+         tmp_app_group.application_icon_url,
+         tmp_app_group.application_port_id,
+         tmp_app_group.application_url,
+         tmp_app_group.application_status,
+         group_concat(group_info.group_name) as concatName
+         FROM (
+         SELECT
+         app.*,
+         appG.group_id
+         FROM cipher_application_info app LEFT JOIN cipher_group_authorization_map appG
+         ON app.id = appG.application_id
+         ) tmp_app_group LEFT JOIN cipher_group_info group_info
+         ON tmp_app_group.group_id = group_info.group_id
+         WHERE 1=1
+         <if test="applicationName!=null">
+           and   tmp_app_group.application_name LIKE CONCAT(CONCAT('%',#{applicationName}),'%')
+         </if>
+         GROUP BY tmp_app_group.application_name
+         <if test="sidx!=null and sidx=='applicationName'.toString()">
+             order by tmp_app_group.application_name ${sord}
+         </if>
+         <if test="sidx!=null and sidx=='applicationUrl'.toString()">
+             order by tmp_app_group.application_url ${sord}
+         </if>
+         LIMIT #{pageData.currentRow}, #{pageData.rows}
+     </select>-->
+
+    <select id="queryPageList" resultMap="appMap" parameterType="cipher.console.oidc.domain.web.ApplicationInfoDomain">
+        SELECT * FROM cipher_application_info
+        WHERE 1=1 and company_id=#{companyId}
+        <if test="applicationName!=null">
+            and application_name LIKE CONCAT(CONCAT('%',#{applicationName}),'%')
+        </if>
+        <if test="sidx!=null and sidx=='applicationName'.toString()">
+            order by application_name ${sord}
+        </if>
+        <if test="sidx!=null and sidx=='applicationUrl'.toString()">
+            order by application_url ${sord}
+        </if>
+        order by application_index ASC,create_time DESC
+        LIMIT #{pageData.currentRow}, #{pageData.rows}
+    </select>
+
+    <select id="queryPageCount" parameterType="cipher.console.oidc.domain.web.ApplicationInfoDomain" resultType="int">
+        SELECT count(id) FROM cipher_application_info WHERE 1=1 and company_id=#{companyId}
+        <if test="applicationName!=null">
+            and application_name LIKE CONCAT(CONCAT('%',#{applicationName}),'%')
+        </if>
+    </select>
+
+
+    <select id="selectAppUserCount" resultType="cipher.console.oidc.model.ApplicationUserCountModel">
+        SELECT app_group_con.application_name,
+               count(*) AS count
+        FROM (
+                 SELECT app.application_name,
+                        app_group.group_id
+                 FROM cipher_application_info app
+                          LEFT JOIN cipher_group_authorization_map app_group
+                                    ON app.id = app_group.application_id
+             ) app_group_con
+                 LEFT JOIN cipher_group_user_map group_user ON app_group_con.group_id = group_user.group_id
+        GROUP BY application_name;
+    </select>
+
+
+    <select id="selectAccountDetail" resultMap="accountDetail"
+            parameterType="cipher.console.oidc.model.ApplicationSubAccountModel">
+        SELECT
+        group_info.group_name,
+        user_info.*,
+        group_info.group_description
+        FROM cipher_group_info group_info RIGHT JOIN (
+        SELECT
+        sub_account.sub_account,
+        sub_account.app_client_id,
+        main_sub_map_info.*
+        FROM cipher_sub_account sub_account RIGHT JOIN (
+        SELECT
+        main_sub_map.id,
+        main_sub_map.sub_id,
+        comple_user.*
+        FROM
+        cipher_sub_account_map main_sub_map RIGHT JOIN
+        (
+
+        SELECT
+        all_user.account_number,
+        all_user.user_name,
+        all_user.mail,
+        all_user.account_status,
+        target_main_account.group_id,
+        target_main_account.application_id
+        FROM
+        cipher_user_info all_user
+        RIGHT JOIN
+        (
+        SELECT
+        group_user.*,
+        app_group.application_id
+        FROM
+        cipher_group_user_map group_user RIGHT JOIN
+        (
+        SELECT
+        *
+        FROM
+        cipher_group_authorization_map
+        WHERE
+        application_id
+        =
+        #{applicationId}
+        ) app_group
+        ON
+        app_group.group_id
+        =
+        group_user.group_id) target_main_account
+        ON
+        target_main_account.account_number
+        =
+        all_user.account_number) comple_user
+        ON
+        comple_user.account_number
+        =
+        main_sub_map.account_number) main_sub_map_info
+        ON main_sub_map_info.sub_id = sub_account.id) user_info
+        ON user_info.group_id = group_info.group_id
+        <if test="queryName!=null">
+            WHERE user_info.sub_account LIKE CONCAT(CONCAT('%',#{queryName}),'%') OR
+            user_info.user_name LIKE CONCAT(CONCAT('%',#{queryName}),'%') OR
+            user_info.account_number LIKE CONCAT(CONCAT('%',#{queryName}),'%')
+        </if>
+        <if test="sidx!=null and sidx=='accountNumber'.toString()">
+            order by user_info.account_number ${sord}
+        </if>
+        <if test="sidx!=null and sidx=='subAccount'.toString()">
+            order by user_info.sub_account ${sord}
+        </if>
+        <if test="sidx!=null and sidx=='nickName'.toString()">
+            order by user_info.nickname ${sord}
+        </if>
+        <if test="sidx!=null and sidx=='userName'.toString()">
+            order by user_info.user_name ${sord}
+        </if>
+        <if test="sidx!=null and sidx=='groupName'.toString()">
+            order by group_info.group_name ${sord}
+        </if>
+        <if test="sidx==null">
+            ORDER BY sub_account, account_status ASC
+        </if>
+        LIMIT #{pageData.currentRow}, #{pageData.rows};
+    </select>
+
+    <select id="selectAccountDetailTotal" resultType="java.lang.Integer"
+            parameterType="cipher.console.oidc.model.ApplicationSubAccountModel">
+        SELECT count(*)
+        FROM cipher_group_info group_info RIGHT JOIN (
+        SELECT
+        sub_account.sub_account,
+        sub_account.app_client_id,
+        main_sub_map_info.*
+        FROM cipher_sub_account sub_account RIGHT JOIN (
+        SELECT
+        main_sub_map.id,
+        main_sub_map.sub_id,
+        comple_user.*
+        FROM
+        cipher_sub_account_map main_sub_map RIGHT JOIN
+        (
+
+        SELECT
+        all_user.account_number,
+        all_user.user_name,
+        all_user.nickname,
+        all_user.mail,
+        all_user.account_status,
+        target_main_account.group_id,
+        target_main_account.application_id
+        FROM
+        cipher_user_info all_user
+        RIGHT JOIN
+        (
+        SELECT
+        group_user.*,
+        app_group.application_id
+        FROM
+        cipher_group_user_map group_user RIGHT JOIN
+        (
+        SELECT
+        *
+        FROM
+        cipher_group_authorization_map
+        WHERE
+        application_id
+        =
+        #{applicationId}
+        ) app_group
+        ON
+        app_group.group_id
+        =
+        group_user.group_id) target_main_account
+        ON
+        target_main_account.account_number
+        =
+        all_user.account_number) comple_user
+        ON
+        comple_user.account_number
+        =
+        main_sub_map.account_number) main_sub_map_info
+        ON main_sub_map_info.sub_id = sub_account.id) user_info
+        ON user_info.group_id = group_info.group_id
+        <if test="queryName!=null">
+            WHERE user_info.sub_account LIKE CONCAT(CONCAT('%',#{queryName}),'%') OR
+            user_info.user_name LIKE CONCAT(CONCAT('%',#{queryName}),'%') OR
+            user_info.account_number LIKE CONCAT(CONCAT('%',#{queryName}),'%')
+        </if>;
+    </select>
+
+    <select id="selectUserAppConcat" resultType="cipher.console.oidc.model.UserApplicationConcatModel">
+        SELECT user_info.account_number,
+               group_concat(app.application_name) AS appNameConcat
+        FROM cipher_application_info app
+                 RIGHT JOIN (
+            SELECT group_user.id,
+                   group_user.account_number,
+                   grou_app.application_id
+            FROM cipher_group_user_map group_user
+                     LEFT JOIN
+                 cipher_group_authorization_map grou_app
+                 ON group_user.group_id = grou_app.group_id) user_info
+                            ON user_info.application_id = app.id
+        GROUP BY user_info.account_number
+
+    </select>
+
+    <insert id="insertApplication" parameterType="cipher.console.oidc.domain.web.ApplicationInfoDomain">
+        INSERT INTO cipher_application_info (application_name, application_id, application_description, application_url,
+                                             application_port_id, application_icon_url, application_secrect,
+                                             application_type, app_sys_id, x_dsg_url,
+                                             company_id, associated_account, cas_server_url, cas_logout_url,
+                                             relay_state,
+                                             assertion_consumer_service_url,
+                                             exit_time,
+                                             entity_id,
+                                             public_key,
+                                             private_key,
+                                             create_time, modify_time)
+        VALUES (#{applicationName},
+                #{applicationId},
+                #{applicationDescription},
+                #{applicationUrl},
+                #{applicationPortId},
+                #{applicationIconUrl},
+                #{applicationSecrect},
+                #{applicationType},
+                #{appSysId},
+                #{xdsgUrl},
+                #{companyId},
+                #{associatedAccount},
+                #{casServerUrl},
+                #{casLogoutUrl},
+                #{relayState},
+                #{assertionConsumerServiceUrl},
+                #{exitTime},
+                #{entityId},
+                #{publicKey},
+                #{privateKey},
+                NOW(), NOW())
+    </insert>
+
+    <select id="queryApplicationById" resultType="cipher.console.oidc.domain.web.ApplicationInfoDomain"
+            parameterType="cipher.console.oidc.domain.web.ApplicationInfoDomain">
+        SELECT *
+        FROM cipher_application_info
+        WHERE id = #{id};
+    </select>
+
+    <select id="associatedAccountById" parameterType="integer" resultType="string">
+        SELECT associated_account
+        FROM cipher_application_info
+        WHERE id = #{id}
+    </select>
+    <select id="autoSyncById" parameterType="integer" resultType="string">
+        SELECT sync_config
+        FROM cipher_application_info
+        WHERE id = #{id}
+    </select>
+    <select id="selectCountByAppidx" resultType="int">
+        select count(1)
+        from cipher_application_info
+        where application_index = #{appIndex}
+          and company_id = #{companyId}
+          and id != #{id}
+    </select>
+
+    <select id="selectAutoSyncById" parameterType="integer"
+            resultType="cipher.console.oidc.domain.web.AutoSyncAppDomain">
+        SELECT id,application_id,sync_config
+        FROM cipher_application_info
+        WHERE id = #{id}
+    </select>
+
+    <update id="updateApplication" parameterType="cipher.console.oidc.domain.web.ApplicationInfoDomain">
+
+        UPDATE cipher_application_info SET modify_time=NOW()
+
+        <if test="applicationName!=null">
+            , application_name =#{applicationName}
+        </if>
+
+        <if test="applicationId!=null">
+            , application_id =#{applicationId}
+        </if>
+
+        <if test="applicationDescription!=null">
+            , application_description=#{applicationDescription}
+        </if>
+        <if test="applicationUrl!=null">
+            , application_url=#{applicationUrl}
+        </if>
+        <if test="applicationPortId!=null">
+            , application_port_id=#{applicationPortId}
+        </if>
+        <if test="applicationIconUrl!=null and applicationIconUrl!=''">
+            , application_icon_url=#{applicationIconUrl}
+        </if>
+        <if test="applicationStatus!=null">
+            ,application_status =#{applicationStatus}
+        </if>
+        <if test="configInfo!=null">
+            ,config_info= #{configInfo}
+        </if>
+        <if test="accountType!=null">
+            ,account_type=#{accountType}
+        </if>
+        <if test="isSameAccount!=null">
+            ,is_same_account=#{isSameAccount}
+        </if>
+
+        <if test="dsgApiUrl!=null and dsgApiUrl!=''">
+            ,dsg_api_url=#{dsgApiUrl}
+        </if>
+        ,x_dsg_url=#{xdsgUrl}
+        <if test="associatedAccount!=null and associatedAccount!=''">
+            ,associated_account=#{associatedAccount}
+        </if>
+        <if test="autoSync!=null and autoSync!=''">
+            ,sync_config=#{autoSync}
+        </if>
+        <if test="applicationIndex!=null and applicationIndex!=''">
+            ,application_index=#{applicationIndex}
+        </if>
+
+        <if test="server!=null and server!=''">
+            ,server=#{server}
+        </if>
+
+        <if test="pos!=null and pos!=''">
+            ,pos=#{pos}
+        </if>
+
+        <if test="data!=null and data!=''">
+            ,data=#{data}
+        </if>
+
+        <if test="loginType!=null and loginType!=''">
+            ,login_type=#{loginType}
+        </if>
+
+        <if test="relayState!=null and relayState!=''">
+            ,relay_state=#{relayState}
+        </if>
+
+        <if test="assertionConsumerServiceUrl!=null and assertionConsumerServiceUrl!=''">
+            ,assertion_consumer_service_url=#{assertionConsumerServiceUrl}
+        </if>
+
+        <if test="exitTime!=null and exitTime!=''">
+            ,exit_time=#{exitTime}
+        </if>
+        <if test="entityId!=null and entityId!=''">
+            ,entity_id=#{entityId}
+        </if>
+
+        WHERE id=#{id}
+
+    </update>
+
+
+    <select id="countApplication" parameterType="cipher.console.oidc.domain.web.ApplicationInfoDomain" resultType="int">
+
+        SELECT count(id) FROM cipher_application_info where 1=1
+        <if test="id!=null and id!=''">
+            and id not in(#{id})
+        </if>
+        <if test="applicationName!=null">
+            and application_name=#{applicationName}
+        </if>
+
+    </select>
+
+    <select id="appSelect" resultType="cipher.console.oidc.model.ApplicationSelectModel">
+        SELECT id,
+               application_name,
+               application_id AS appClientId
+        FROM cipher_application_info;
+    </select>
+
+    <select id="queryAllApplicationNameAndId" resultType="cipher.console.oidc.domain.web.ApplicationInfoDomain">
+        SELECT id,
+               application_name,
+               cipher_application_info.application_id,
+               application_secrect
+        FROM cipher_application_info;
+    </select>
+
+    <select id="queryIdByName" resultType="java.lang.Integer"
+            parameterType="cipher.console.oidc.domain.web.ApplicationInfo">
+
+        SELECT id
+        FROM cipher_application_info
+        WHERE application_name = #{applicationName}
+
+    </select>
+
+
+    <select id="queryAppNotSelect" resultType="cipher.console.oidc.model.ApplicationSelectModel">
+        SELECT
+        id,
+        application_name,
+        application_id AS appClientId
+        FROM cipher_application_info
+        where id not in
+        <foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+
+    <select id="queryAllApplication" resultType="cipher.console.oidc.model.GroupApplicationModel">
+        SELECT id,
+               application_name,
+               application_id AS applicationId
+        FROM cipher_application_info
+        where application_status = 1
+    </select>
+    <select id="getAccountNumber" resultType="cipher.console.oidc.domain.web.AppSonAccountDomain"
+            parameterType="cipher.console.oidc.domain.web.AppSonAccountDomain">
+        SELECT
+        id,
+        uuid,
+        applicationId,
+        account_number,
+        gender,
+        mail,
+        job,
+        nickname,
+        phoneNumber,
+        jobNo,
+        userName
+        FROM
+        (
+        SELECT
+        app_info.id,
+        app_info.application_id AS applicationId,
+        info.uuid as uuid,
+        info.account_number AS account_number,
+        info.gender as gender,
+        info.mail as mail,
+        info.job as job,
+        info.nickname as nickname,
+        info.phone_number as phoneNumber,
+        info.job_no as jobNo,
+        info.user_name as userName
+        FROM cipher_application_info app_info
+        LEFT JOIN cipher_role_application_map app on app_info.id=app.id
+        LEFT JOIN cipher_role_group_map role ON app.role_id = role.role_id
+        LEFT JOIN cipher_group_user_map usermap ON role.group_id = usermap.group_id
+        LEFT JOIN cipher_user_info info ON usermap.user_id = info.uuid
+        WHERE
+        app_info.id =#{applicationId}
+        AND info.uuid IS NOT NULL
+        AND info.is_delete = "0"
+        UNION
+        SELECT
+        app_info.id,
+        app_info.application_id AS applicationId,
+        info.uuid as uuid,
+        info.account_number AS account_number,
+        info.gender as gender,
+        info.mail as mail,
+        info.job as job,
+        info.nickname as nickname,
+        info.phone_number as phoneNumber,
+        info.job_no as jobNo,
+        info.user_name AS userName
+        FROM cipher_application_info app_info
+        LEFT JOIN cipher_role_application_map app ON app_info.id=app.application_id
+        LEFT JOIN cipher_role_user_map roleuser ON app.role_id = roleuser.role_id
+        LEFT JOIN cipher_user_info info ON roleuser.user_id = info.uuid
+        WHERE
+        app_info.id = #{applicationId}
+        AND info.uuid IS NOT NULL
+        AND info.is_delete = "0"
+        UNION
+        SELECT
+        app_info.id,
+        app_info.application_id AS applicationId,
+        info.uuid as uuid,
+        info.account_number AS account_number,
+        info.gender as gender,
+        info.mail as mail,
+        info.job as job,
+        info.nickname as nickname,
+        info.phone_number as phoneNumber,
+        info.job_no as jobNo,
+        info.user_name as userName
+        FROM
+        cipher_application_info app_info
+        LEFT JOIN cipher_team_application_map team ON app_info.id = team.application_id
+        LEFT JOIN cipher_team_user_map teamuser ON team.team_id = teamuser.team_id
+        LEFT JOIN cipher_user_info info ON teamuser.user_id = info.uuid
+        WHERE
+        app_info.id = #{applicationId}
+        AND info.uuid IS NOT NULL
+        AND info.is_delete = "0"
+        UNION
+        SELECT
+        app_info.id,
+        app_info.application_id AS applicationId,
+        info.uuid as uuid,
+        info.account_number AS account_number,
+        info.gender as gender,
+        info.mail as mail,
+        info.job as job,
+        info.nickname as nickname,
+        info.phone_number as phoneNumber,
+        info.job_no as jobNo,
+        info.user_name as userName
+        FROM
+        cipher_application_info app_info
+        LEFT JOIN cipher_group_authorization_map tt on tt.application_id=app_info.id
+        LEFT JOIN cipher_group_user_map usermap ON tt.group_id = usermap.group_id
+        LEFT JOIN cipher_user_info info ON usermap.user_id = info.uuid
+        WHERE
+        app_info.id = #{applicationId}
+        AND info.uuid IS NOT NULL
+        AND info.is_delete = "0"
+        UNION
+        SELECT
+        app_info.id,
+        app_info.application_id AS applicationId,
+        info.uuid as uuid,
+        info.account_number AS account_number,
+        info.gender as gender,
+        info.mail as mail,
+        info.job as job,
+        info.nickname as nickname,
+        info.phone_number as phoneNumber,
+        info.job_no as jobNo,
+        info.user_name as userName
+        FROM
+        cipher_application_info app_info
+        LEFT JOIN cipher_user_application_map tt on tt.application_id=app_info.id
+        LEFT JOIN cipher_user_info info ON tt.user_id = info.uuid
+        WHERE
+        app_info.id = #{applicationId}
+        AND info.uuid IS NOT NULL
+        AND info.is_delete = "0"
+
+        ) demo
+        WHERE
+        1 = 1
+        <if test="accountNumber!=null">
+            and (account_number LIKE CONCAT(CONCAT('%',#{accountNumber}),'%') OR userName LIKE
+            CONCAT(CONCAT('%',#{accountNumber}),'%'))
+        </if>
+        <if test="sidx!=null and sidx=='accountNumber'.toString()">
+            order by account_number ${sord}
+        </if>
+        LIMIT #{pageData.currentRow}, #{pageData.rows}
+
+    </select>
+    <select id="getAccountNumberCount" resultType="cipher.console.oidc.domain.web.AppSonAccountDomain"
+            parameterType="cipher.console.oidc.domain.web.AppSonAccountDomain">
+        SELECT
+        uuid,
+        applicationId,
+        account_number,
+        gender,
+        mail,
+        job,
+        nickname,
+        phoneNumber,
+        jobNo,
+        userName
+        FROM
+        (
+        SELECT
+        app_info.application_id AS applicationId,
+        info.uuid as uuid,
+        info.account_number AS account_number,
+        info.gender as gender,
+        info.mail as mail,
+        info.job as job,
+        info.nickname as nickname,
+        info.phone_number as phoneNumber,
+        info.job_no as jobNo,
+        info.user_name as userName
+        FROM cipher_application_info app_info
+        LEFT JOIN cipher_role_application_map app on app_info.id=app.id
+        LEFT JOIN cipher_role_group_map role ON app.role_id = role.role_id
+        LEFT JOIN cipher_group_user_map usermap ON role.group_id = usermap.group_id
+        LEFT JOIN cipher_user_info info ON usermap.user_id = info.uuid
+        WHERE
+        app_info.id =#{applicationId}
+        AND info.uuid IS NOT NULL
+        AND info.is_delete = "0"
+        UNION
+        SELECT
+        app_info.application_id AS applicationId,
+        info.uuid as uuid,
+        info.account_number AS account_number,
+        info.gender as gender,
+        info.mail as mail,
+        info.job as job,
+        info.nickname as nickname,
+        info.phone_number as phoneNumber,
+        info.job_no as jobNo,
+        info.user_name AS userName
+        FROM cipher_application_info app_info
+        LEFT JOIN cipher_role_application_map app ON app_info.id=app.application_id
+        LEFT JOIN cipher_role_user_map roleuser ON app.role_id = roleuser.role_id
+        LEFT JOIN cipher_user_info info ON roleuser.user_id = info.uuid
+        WHERE
+        app_info.id = #{applicationId}
+        AND info.uuid IS NOT NULL
+        AND info.is_delete = "0"
+        UNION
+        SELECT
+        app_info.application_id AS applicationId,
+        info.uuid as uuid,
+        info.account_number AS account_number,
+        info.gender as gender,
+        info.mail as mail,
+        info.job as job,
+        info.nickname as nickname,
+        info.phone_number as phoneNumber,
+        info.job_no as jobNo,
+        info.user_name as userName
+        FROM
+        cipher_application_info app_info
+        LEFT JOIN cipher_team_application_map team ON app_info.id = team.application_id
+        LEFT JOIN cipher_team_user_map teamuser ON team.team_id = teamuser.team_id
+        LEFT JOIN cipher_user_info info ON teamuser.user_id = info.uuid
+        WHERE
+        app_info.id = #{applicationId}
+        AND info.uuid IS NOT NULL
+        AND info.is_delete = "0"
+        UNION
+        SELECT
+        app_info.application_id AS applicationId,
+        info.uuid as uuid,
+        info.account_number AS account_number,
+        info.gender as gender,
+        info.mail as mail,
+        info.job as job,
+        info.nickname as nickname,
+        info.phone_number as phoneNumber,
+        info.job_no as jobNo,
+        info.user_name as userName
+        FROM
+        cipher_application_info app_info
+        LEFT JOIN cipher_group_authorization_map tt on tt.application_id=app_info.id
+        LEFT JOIN cipher_group_user_map usermap ON tt.group_id = usermap.group_id
+        LEFT JOIN cipher_user_info info ON usermap.user_id = info.uuid
+        WHERE
+        app_info.id = #{applicationId}
+        AND info.uuid IS NOT NULL
+        AND info.is_delete = "0"
+        UNION
+        SELECT
+        app_info.application_id AS applicationId,
+        info.uuid as uuid,
+        info.account_number AS account_number,
+        info.gender as gender,
+        info.mail as mail,
+        info.job as job,
+        info.nickname as nickname,
+        info.phone_number as phoneNumber,
+        info.job_no as jobNo,
+        info.user_name as userName
+        FROM
+        cipher_application_info app_info
+        LEFT JOIN cipher_user_application_map tt on tt.application_id=app_info.id
+        LEFT JOIN cipher_user_info info ON tt.user_id = info.uuid
+        WHERE
+        app_info.id = #{applicationId}
+        AND info.uuid IS NOT NULL
+        AND info.is_delete = "0"
+
+        ) demo
+        WHERE
+        1 = 1
+        <if test="accountNumber!=null">
+            and account_number LIKE CONCAT(CONCAT('%',#{accountNumber}),'%')
+        </if>
+    </select>
+    <insert id="insertSonRule" parameterType="cipher.console.oidc.domain.web.AllRuleInfoDomain">
+        INSERT INTO cipher_subaccount_down_rule_info(application_id, account_type, rule_value, create_time, modify_time,
+                                                     init_pwd)
+        VALUES (#{applicationId},
+                #{accountType},
+                #{ruleValue},
+                NOW(), NOW(),
+                #{initPwd})
+    </insert>
+    <select id="getRuleInfo" resultType="cipher.console.oidc.domain.web.AllRuleInfoDomain">
+        select rule_value   as ruleValue,
+               account_type as accountType,
+               init_pwd     as initPwd
+        from cipher_subaccount_down_rule_info
+        where application_id = #{applicationId}
+    </select>
+    <select id="getaccountSonRule" resultType="int">
+        select COUNT(*)
+        from cipher_subaccount_down_rule_info
+        where application_id = #{applicationId}
+    </select>
+
+
+    <select id="queryApplication" resultMap="appMap">
+        select *
+        from cipher_application_info
+        where application_id = #{applicationId}
+    </select>
+    <select id="getApplication" resultType="cipher.console.oidc.domain.web.ApplicationInfoDomain"
+            parameterType="cipher.console.oidc.domain.web.ApplicationInfoDomain">
+        SELECT * FROM cipher_application_info
+        <where>
+            <if test="applicationName!=null">
+                application_name=#{applicationName}
+            </if>
+            <if test="id!=null">
+                id=#{id}
+            </if>
+
+        </where>
+    </select>
+    <select id="getAllApplications" resultType="cipher.console.oidc.domain.web.ApplicationSysInfo">
+        SELECT * from cipher_application_system_info
+        where 1=1
+        <if test="queryName!=null">
+            and application_name LIKE CONCAT(CONCAT('%',#{queryName}),'%')
+        </if>
+        limit #{startPageNum},#{pageSize}
+    </select>
+    <select id="getAllApplicationsNumber" resultType="int">
+        select count(*)
+        from cipher_application_system_info
+        where 1=1
+        <if test="queryName!=null">
+            and application_name LIKE CONCAT(CONCAT('%',#{queryName}),'%')
+        </if>
+    </select>
+
+    <select id="getAllListAccountNumber" resultType="java.lang.String">
+
+        SELECT info.account_number AS account_number,
+               info.user_name      as userName
+        FROM cipher_application_info app_info
+                 LEFT JOIN cipher_role_application_map app on app_info.id = app.id
+
+                 LEFT JOIN cipher_role_group_map role ON app.role_id = role.role_id
+                 LEFT JOIN cipher_group_user_map usermap ON role.group_id = usermap.group_id
+                 LEFT JOIN cipher_user_info info ON usermap.account_number = info.account_number
+        WHERE app_info.id = #{id}
+          AND info.account_number IS NOT NULL
+          AND info.is_delete = "0"
+        UNION
+        SELECT info.account_number AS account_number,
+               info.user_name      as userName
+        FROM cipher_application_info app_info
+                 LEFT JOIN cipher_role_application_map app ON app_info.id = app.application_id
+                 LEFT JOIN cipher_role_user_map roleuser ON app.role_id = roleuser.role_id
+                 LEFT JOIN cipher_user_info info ON roleuser.user_id = info.account_number
+        WHERE app_info.id = #{id}
+          AND info.account_number IS NOT NULL
+          AND info.is_delete = "0"
+        UNION
+        SELECT info.account_number AS account_number,
+               info.user_name      as userName
+        FROM cipher_application_info app_info
+                 LEFT JOIN cipher_team_application_map team ON app_info.id = team.application_id
+                 LEFT JOIN cipher_team_user_map teamuser ON team.team_id = teamuser.team_id
+                 LEFT JOIN cipher_user_info info ON teamuser.user_id = info.account_number
+        WHERE app_info.id = #{id}
+          AND info.account_number IS NOT NULL
+          AND info.is_delete = "0"
+        UNION
+        SELECT info.account_number AS account_number,
+               info.user_name      as userName
+        FROM cipher_application_info app_info
+                 LEFT JOIN cipher_group_authorization_map tt on tt.application_id = app_info.id
+                 LEFT JOIN cipher_group_user_map usermap ON tt.group_id = usermap.group_id
+                 LEFT JOIN cipher_user_info info ON usermap.account_number = info.account_number
+        WHERE app_info.id = #{id}
+          AND info.account_number IS NOT NULL
+          AND info.is_delete = "0"
+        UNION
+        select info.account_number AS account_number,
+               info.user_name      as userName
+        from cipher_application_info app_info
+                 LEFT join cipher_user_application_map map
+                           on app_info.id = map.application_id
+                 LEFT join cipher_user_info info
+                           on map.account_number = info.account_number
+        WHERE app_info.id = #{id}
+          AND info.account_number IS NOT NULL
+          AND info.is_delete = "0"
+    </select>
+    <select id="getAllNoAuthzationCount" resultType="int">
+        SELECT
+        count(*)
+        FROM cipher_user_info
+        where account_number is not null and is_delete="0"
+        <if test="queryName!=null">
+            and (user_name LIKE CONCAT(CONCAT('%',#{queryName}),'%') OR
+            account_number LIKE CONCAT(CONCAT('%',#{queryName}),'%'))
+        </if>
+        <if test="accountNumbers.size() > 0">
+            and account_number not in
+            <foreach collection="accountNumbers" item="item" index="index" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+
+
+    </select>
+    <select id="getAllAuthzationUser" resultType="cipher.console.oidc.domain.web.UserInfoDomain">
+        select *
+        FROM cipher_user_info
+        where account_number is not null and is_delete="0"
+        <if test="queryName!=null">
+            and (user_name LIKE CONCAT(CONCAT('%',#{queryName}),'%') OR
+            account_number LIKE CONCAT(CONCAT('%',#{queryName}),'%'))
+        </if>
+        <if test="accountNumbers.size() > 0">
+            and account_number not in
+            <foreach collection="accountNumbers" item="item" index="index" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        limit #{startPageNum},#{pageSize}
+
+    </select>
+    <select id="updaSonRule" parameterType="cipher.console.oidc.domain.web.AllRuleInfoDomain">
+        UPDATE cipher_subaccount_down_rule_info SET modify_time=NOW()
+
+        <if test="accountType!=null">
+            , account_type =#{accountType}
+        </if>
+
+        <if test="ruleValue!=null">
+            , rule_value =#{ruleValue}
+        </if>
+
+        <if test="initPwd!=null">
+            , init_pwd=#{initPwd}
+        </if>
+
+        WHERE application_id=#{applicationId}
+
+    </select>
+
+    <select id="getSubAccountList" resultType="cipher.console.oidc.domain.web.AppSonAccountDomain"
+            parameterType="cipher.console.oidc.domain.web.AppSonAccountDomain">
+        SELECT
+        uuid,
+        applicationId,
+        account_number,
+        gender,
+        mail,
+        job,
+        nickname,
+        phoneNumber,
+        jobNo,
+        userName
+        FROM
+        (
+        SELECT
+        info.uuid,
+        app_info.application_id AS applicationId,
+        info.account_number AS account_number,
+        info.gender as gender,
+        info.mail as mail,
+        info.job as job,
+        info.nickname as nickname,
+        info.phone_number as phoneNumber,
+        info.job_no as jobNo,
+        info.user_name as userName
+        FROM cipher_application_info app_info
+        LEFT JOIN cipher_role_application_map app on app_info.id=app.id
+        LEFT JOIN cipher_role_group_map role ON app.role_id = role.role_id
+        LEFT JOIN cipher_group_user_map usermap ON role.group_id = usermap.group_id
+        LEFT JOIN cipher_user_info info ON usermap.user_id = info.uuid
+        WHERE
+        app_info.id =#{applicationId}
+        AND info.account_number IS NOT NULL
+        AND info.is_delete = "0"
+        UNION
+        SELECT
+        info.uuid,
+        app_info.application_id AS applicationId,
+        info.account_number AS account_number,
+        info.gender as gender,
+        info.mail as mail,
+        info.job as job,
+        info.nickname as nickname,
+        info.phone_number as phoneNumber,
+        info.job_no as jobNo,
+        info.user_name as userName
+        FROM cipher_application_info app_info
+        LEFT JOIN cipher_role_application_map app ON app_info.id=app.application_id
+        LEFT JOIN cipher_role_user_map roleuser ON app.role_id = roleuser.role_id
+        LEFT JOIN cipher_user_info info ON roleuser.user_id = info.uuid
+        WHERE
+        app_info.id = #{applicationId}
+        AND info.account_number IS NOT NULL
+        AND info.is_delete = "0"
+        UNION
+        SELECT
+        info.uuid,
+        app_info.application_id AS applicationId,
+        info.account_number AS account_number,
+        info.gender as gender,
+        info.mail as mail,
+        info.job as job,
+        info.nickname as nickname,
+        info.phone_number as phoneNumber,
+        info.job_no as jobNo,
+        info.user_name as userName
+        FROM
+        cipher_application_info app_info
+        LEFT JOIN cipher_team_application_map team ON app_info.id = team.application_id
+        LEFT JOIN cipher_team_user_map teamuser ON team.team_id = teamuser.team_id
+        LEFT JOIN cipher_user_info info ON teamuser.user_id = info.uuid
+        WHERE
+        app_info.id = #{applicationId}
+        AND info.account_number IS NOT NULL
+        AND info.is_delete = "0"
+        UNION
+        SELECT
+        info.uuid,
+        app_info.application_id AS applicationId,
+        info.account_number AS account_number,
+        info.gender as gender,
+        info.mail as mail,
+        info.job as job,
+        info.nickname as nickname,
+        info.phone_number as phoneNumber,
+        info.job_no as jobNo,
+        info.user_name as userName
+        FROM
+        cipher_application_info app_info
+        LEFT JOIN cipher_group_authorization_map tt on tt.application_id=app_info.id
+        LEFT JOIN cipher_group_user_map usermap ON tt.group_id = usermap.group_id
+        LEFT JOIN cipher_user_info info ON usermap.user_id = info.uuid
+        WHERE
+        app_info.id = #{applicationId}
+        AND info.account_number IS NOT NULL
+        AND info.is_delete = "0"
+        UNION
+        SELECT
+        info.uuid,
+        app_info.application_id AS applicationId,
+        info.account_number AS account_number,
+        info.gender as gender,
+        info.mail as mail,
+        info.job as job,
+        info.nickname as nickname,
+        info.phone_number as phoneNumber,
+        info.job_no as jobNo,
+        info.user_name as userName
+        FROM
+        cipher_application_info app_info
+        LEFT JOIN cipher_user_application_map tt on tt.application_id=app_info.id
+        LEFT JOIN cipher_user_info info ON tt.user_id = info.uuid
+        WHERE
+        app_info.id = #{applicationId}
+        AND info.account_number IS NOT NULL
+        AND info.is_delete = "0"
+
+        ) demo
+        WHERE
+        1 = 1
+
+        <if test="accountNumber!=null">
+            and account_number LIKE CONCAT(CONCAT('%',#{accountNumber}),'%')
+        </if>
+        <if test="sidx!=null and sidx=='accountNumber'.toString()">
+            order by account_number ${sord}
+        </if>
+
+
+    </select>
+
+    <select id="queryCheckNumber" resultType="java.lang.String">
+        select account_number AS check_number
+        from cipher_user_application_map
+        where account_number = #{accountNumber}
+          and application_id = #{applicationId}
+    </select>
+
+    <select id="queryAppClientIdByAppSysId" resultType="java.lang.String">
+        select application_id
+        from cipher_application_info
+        where app_sys_id = #{appSysId};
+    </select>
+    <select id="getAppAuthzationUser" resultType="java.lang.String">
+        select info.uuid           as uuid,
+               info.account_number AS account_number,
+               info.user_name      as userName
+        from cipher_application_info app_info
+                 LEFT join cipher_user_application_map map
+                           on app_info.id = map.application_id
+                 LEFT join cipher_user_info info
+                           on map.user_id = info.uuid
+        WHERE app_info.id = #{id}
+          AND info.uuid IS NOT NULL
+          AND info.is_delete = "0"
+    </select>
+
+
+    <select id="getAppList" resultType="cipher.console.oidc.domain.web.AppSonAccountDomain">
+        select map.user_id         as uuid,
+               sub.sub_account     as sonAccountNumber,
+               ss.application_id   AS applicationId,
+               info.account_number AS account_number,
+               info.gender         as gender,
+               info.mail           as mail,
+               info.job            as job,
+               info.nickname       as nickname,
+               info.phone_number   as phoneNumber,
+               info.job_no         as jobNo,
+               info.user_name      as userName
+        from cipher_sub_account sub
+                 LEFT JOIN cipher_sub_account_map map on sub.id = map.sub_id
+                 LEFT JOIN cipher_application_info ss on sub.app_client_id = ss.application_id
+                 LEFT JOIN cipher_user_info info on info.uuid = map.user_id
+        WHERE ss.id = #{applicationId}
+          and ss.company_id = #{companyId}
+        LIMIT #{pageData.currentRow}, #{pageData.rows}
+    </select>
+    <select id="getAppCount" resultType="int">
+        select count(1)
+        from cipher_sub_account sub
+                 LEFT JOIN cipher_sub_account_map map on sub.id = map.sub_id
+                 LEFT JOIN cipher_application_info ss on sub.app_client_id = ss.application_id
+                 LEFT JOIN cipher_user_info info on info.uuid = map.user_id
+        WHERE ss.id = #{applicationId}
+          and ss.company_id = #{companyId}
+    </select>
+    <select id="getSonAppAccount" resultType="cipher.console.oidc.domain.web.SubAccountDomain">
+        select sub.sub_account as subAccount,
+               sub.id          as id
+        from cipher_sub_account sub
+                 LEFT JOIN cipher_sub_account_map map on sub.id = map.sub_id
+                 LEFT JOIN cipher_application_info ss on sub.app_client_id = ss.application_id
+        WHERE ss.id = #{applicationId}
+          and ss.company_id = #{companyId}
+    </select>
+    <delete id="delApplication">
+        DELETE
+        FROM cipher_user_application_map
+        WHERE application_id = #{id};
+
+        DELETE
+        FROM cipher_team_application_map
+        WHERE application_id = #{id};
+
+        DELETE
+        FROM cipher_group_authorization_map
+        WHERE application_id = #{id};
+
+        DELETE
+        FROM cipher_application_info
+        WHERE id = #{id}
+          and company_id = #{companyId};
+    </delete>
+
+    <select id="selectAssAccountByAppId" parameterType="integer" resultMap="subResultMap">
+        SELECT uuid,
+               applicationId,
+               account_number,
+               gender,
+               mail,
+               substring_index(mail, '@', 1) mail_prefix,
+               job,
+               nickname,
+               phoneNumber,
+               jobNo,
+               userName
+        FROM (SELECT app_info.application_id AS applicationId,
+                     info.uuid               as uuid,
+                     info.account_number     AS account_number,
+                     info.gender             as gender,
+                     info.mail               as mail,
+                     info.job                as job,
+                     info.nickname           as nickname,
+                     info.phone_number       as phoneNumber,
+                     info.job_no             as jobNo,
+                     info.user_name          as userName
+              FROM cipher_application_info app_info
+                       LEFT JOIN cipher_role_application_map app on app_info.id = app.id
+                       LEFT JOIN cipher_role_group_map role ON app.role_id = role.role_id
+                       LEFT JOIN cipher_group_user_map usermap ON role.group_id = usermap.group_id
+                       LEFT JOIN cipher_user_info info ON usermap.user_id = info.uuid
+              WHERE app_info.id = #{id}
+                AND info.uuid IS NOT NULL
+                AND info.is_delete = "0"
+              UNION
+              SELECT app_info.application_id AS applicationId,
+                     info.uuid               as uuid,
+                     info.account_number     AS account_number,
+                     info.gender             as gender,
+                     info.mail               as mail,
+                     info.job                as job,
+                     info.nickname           as nickname,
+                     info.phone_number       as phoneNumber,
+                     info.job_no             as jobNo,
+                     info.user_name          AS userName
+              FROM cipher_application_info app_info
+                       LEFT JOIN cipher_role_application_map app ON app_info.id = app.application_id
+                       LEFT JOIN cipher_role_user_map roleuser ON app.role_id = roleuser.role_id
+                       LEFT JOIN cipher_user_info info ON roleuser.user_id = info.uuid
+              WHERE app_info.id = #{id}
+                AND info.uuid IS NOT NULL
+                AND info.is_delete = "0"
+              UNION
+              SELECT app_info.application_id AS applicationId,
+                     info.uuid               as uuid,
+                     info.account_number     AS account_number,
+                     info.gender             as gender,
+                     info.mail               as mail,
+                     info.job                as job,
+                     info.nickname           as nickname,
+                     info.phone_number       as phoneNumber,
+                     info.job_no             as jobNo,
+                     info.user_name          as userName
+              FROM cipher_application_info app_info
+                       LEFT JOIN cipher_team_application_map team ON app_info.id = team.application_id
+                       LEFT JOIN cipher_team_user_map teamuser ON team.team_id = teamuser.team_id
+                       LEFT JOIN cipher_user_info info ON teamuser.user_id = info.uuid
+              WHERE app_info.id = #{id}
+                AND info.uuid IS NOT NULL
+                AND info.is_delete = "0"
+              UNION
+              SELECT app_info.application_id AS applicationId,
+                     info.uuid               as uuid,
+                     info.account_number     AS account_number,
+                     info.gender             as gender,
+                     info.mail               as mail,
+                     info.job                as job,
+                     info.nickname           as nickname,
+                     info.phone_number       as phoneNumber,
+                     info.job_no             as jobNo,
+                     info.user_name          as userName
+              FROM cipher_application_info app_info
+                       LEFT JOIN cipher_group_authorization_map tt on tt.application_id = app_info.id
+                       LEFT JOIN cipher_group_user_map usermap ON tt.group_id = usermap.group_id
+                       LEFT JOIN cipher_user_info info ON usermap.user_id = info.uuid
+              WHERE app_info.id = #{id}
+                AND info.uuid IS NOT NULL
+                AND info.is_delete = "0"
+              UNION
+              SELECT app_info.application_id AS applicationId,
+                     info.uuid               as uuid,
+                     info.account_number     AS account_number,
+                     info.gender             as gender,
+                     info.mail               as mail,
+                     info.job                as job,
+                     info.nickname           as nickname,
+                     info.phone_number       as phoneNumber,
+                     info.job_no             as jobNo,
+                     info.user_name          as userName
+              FROM cipher_application_info app_info
+                       LEFT JOIN cipher_user_application_map tt on tt.application_id = app_info.id
+                       LEFT JOIN cipher_user_info info ON tt.user_id = info.uuid
+              WHERE app_info.id = #{id}
+                AND info.uuid IS NOT NULL
+                AND info.is_delete = "0"
+             ) a
+    </select>
+    <select id="selectApplicatinId" parameterType="integer" resultType="string">
+        SELECT application_id
+        FROM cipher_application_info
+        WHERE id = #{id}
+    </select>
+    <select id="selectAssAccountIdByUserid" resultType="integer">
+        SELECT a.sub_id
+        FROM cipher_sub_account_map a,
+             cipher_sub_account b
+        WHERE a.sub_id = b.id
+          and a.user_id = #{userId}
+          and b.app_client_id = #{applicationId}
+    </select>
+    <update id="updateAssAccount">
+        update cipher_sub_account
+        set sub_account=#{param}
+        where id = #{id}
+    </update>
+    <select id="selectMainAccountPwd" parameterType="string" resultType="string">
+        SELECT password
+        FROM cipher_password_authorization_mag
+        WHERE user_id = #{userId}
+    </select>
+    <update id="updateAssAccountPwd">
+        update cipher_sub_account
+        set sub_pwd=#{password}
+        where id = #{id}
+    </update>
+    <update id="updateDownRule">
+        UPDATE cipher_application_info
+        SET account_type=#{accountType}
+        WHERE id = #{applicationId}
+    </update>
+
+
+    <select id="getAccountNumberAll" resultType="cipher.console.oidc.domain.web.AppSonAccountDomain"
+            parameterType="cipher.console.oidc.domain.web.AppSonAccountDomain">
+        SELECT
+        id,
+        uuid,
+        applicationId,
+        account_number,
+        gender,
+        mail,
+        job,
+        nickname,
+        phoneNumber,
+        jobNo,
+        userName
+        FROM
+        (
+        SELECT
+        app_info.id,
+        app_info.application_id AS applicationId,
+        info.uuid as uuid,
+        info.account_number AS account_number,
+        info.gender as gender,
+        info.mail as mail,
+        info.job as job,
+        info.nickname as nickname,
+        info.phone_number as phoneNumber,
+        info.job_no as jobNo,
+        info.user_name as userName
+        FROM cipher_application_info app_info
+        LEFT JOIN cipher_role_application_map app on app_info.id=app.id
+        LEFT JOIN cipher_role_group_map role ON app.role_id = role.role_id
+        LEFT JOIN cipher_group_user_map usermap ON role.group_id = usermap.group_id
+        LEFT JOIN cipher_user_info info ON usermap.user_id = info.uuid
+        WHERE
+        app_info.id =#{applicationId}
+        AND info.uuid IS NOT NULL
+        AND info.is_delete = "0"
+        UNION
+        SELECT
+        app_info.id,
+        app_info.application_id AS applicationId,
+        info.uuid as uuid,
+        info.account_number AS account_number,
+        info.gender as gender,
+        info.mail as mail,
+        info.job as job,
+        info.nickname as nickname,
+        info.phone_number as phoneNumber,
+        info.job_no as jobNo,
+        info.user_name AS userName
+        FROM cipher_application_info app_info
+        LEFT JOIN cipher_role_application_map app ON app_info.id=app.application_id
+        LEFT JOIN cipher_role_user_map roleuser ON app.role_id = roleuser.role_id
+        LEFT JOIN cipher_user_info info ON roleuser.user_id = info.uuid
+        WHERE
+        app_info.id = #{applicationId}
+        AND info.uuid IS NOT NULL
+        AND info.is_delete = "0"
+        UNION
+        SELECT
+        app_info.id,
+        app_info.application_id AS applicationId,
+        info.uuid as uuid,
+        info.account_number AS account_number,
+        info.gender as gender,
+        info.mail as mail,
+        info.job as job,
+        info.nickname as nickname,
+        info.phone_number as phoneNumber,
+        info.job_no as jobNo,
+        info.user_name as userName
+        FROM
+        cipher_application_info app_info
+        LEFT JOIN cipher_team_application_map team ON app_info.id = team.application_id
+        LEFT JOIN cipher_team_user_map teamuser ON team.team_id = teamuser.team_id
+        LEFT JOIN cipher_user_info info ON teamuser.user_id = info.uuid
+        WHERE
+        app_info.id = #{applicationId}
+        AND info.uuid IS NOT NULL
+        AND info.is_delete = "0"
+        UNION
+        SELECT
+        app_info.id,
+        app_info.application_id AS applicationId,
+        info.uuid as uuid,
+        info.account_number AS account_number,
+        info.gender as gender,
+        info.mail as mail,
+        info.job as job,
+        info.nickname as nickname,
+        info.phone_number as phoneNumber,
+        info.job_no as jobNo,
+        info.user_name as userName
+        FROM
+        cipher_application_info app_info
+        LEFT JOIN cipher_group_authorization_map tt on tt.application_id=app_info.id
+        LEFT JOIN cipher_group_user_map usermap ON tt.group_id = usermap.group_id
+        LEFT JOIN cipher_user_info info ON usermap.user_id = info.uuid
+        WHERE
+        app_info.id = #{applicationId}
+        AND info.uuid IS NOT NULL
+        AND info.is_delete = "0"
+        UNION
+        SELECT
+        app_info.id,
+        app_info.application_id AS applicationId,
+        info.uuid as uuid,
+        info.account_number AS account_number,
+        info.gender as gender,
+        info.mail as mail,
+        info.job as job,
+        info.nickname as nickname,
+        info.phone_number as phoneNumber,
+        info.job_no as jobNo,
+        info.user_name as userName
+        FROM
+        cipher_application_info app_info
+        LEFT JOIN cipher_user_application_map tt on tt.application_id=app_info.id
+        LEFT JOIN cipher_user_info info ON tt.user_id = info.uuid
+        WHERE
+        app_info.id = #{applicationId}
+        AND info.uuid IS NOT NULL
+        AND info.is_delete = "0"
+        ) demo
+        WHERE
+        1 = 1
+        <if test="accountNumber!=null">
+            and account_number LIKE CONCAT(CONCAT('%',#{accountNumber}),'%')
+        </if>
+    </select>
+
+    <select id="getAppSysIdById" resultType="java.lang.Integer">
+        SELECT app_sys_id
+        FROM cipher_application_info
+        WHERE id = #{id}
+    </select>
+    <select id="queryAllApplicationNumber" parameterType="string" resultType="int">
+        select count(1)
+        from cipher_application_info
+        where company_id = #{companyId}
+    </select>
+
+</mapper>

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="cipher.console.oidc.mapper.WxConfigMapper">
+
+    <select id="queryConfigByCompanyUUid" resultType="cipher.console.oidc.domain.web.WxConfigDomain">
+           select
+           id,
+           companyUUid,
+           corp_id,
+           agent_id,
+           corp_secret,
+           match_rule,
+           attr_map,
+           callback_url,
+           create_time,
+           modify_time
+           from
+           cipher_wx_config_info
+           where
+           companyUUid=#{companyUUid};
+    </select>
+
+    <insert id="insertBaseConfig" parameterType="cipher.console.oidc.domain.web.WxConfigDomain">
+  insert into cipher_wx_config_info
+        (id,
+        companyUUid,
+        corp_id,
+        agent_id,
+        corp_secret,
+        attr_map,
+        match_rule,
+        callback_url,
+        create_time,
+        modify_time)
+         VALUE (
+                #{id},
+                #{companyUUid},
+                #{corpId} ,
+                #{agentId},
+                #{corpSecret} ,
+                #{attrMap} ,
+                #{matchRule} ,
+                #{callbackUrl},
+                NOW(),
+                NOW()
+         )
+       </insert>
+
+    <update id="updateBaseConfig" parameterType="cipher.console.oidc.domain.web.WxConfigDomain">
+        update cipher_wx_config_info
+        <set>
+            <if test="corpId != null">
+                corp_id=#{corpId} ,
+            </if>
+            <if test="agentId != null">
+                agent_id=#{agentId} ,
+            </if>
+            <if test="corpSecret != null">
+                corp_secret=#{corpSecret} ,
+            </if>
+            <if test="attrMap != null">
+                attr_map=#{attrMap} ,
+            </if>
+            <if test="matchRule != null">
+                match_rule=#{matchRule} ,
+            </if>
+            <if test="callbackUrl != null">
+                callback_url=#{callbackUrl} ,
+            </if>
+            modify_time=NOW()
+        </set>
+        where companyUUid =#{companyUUid}
+    </update>
+
+
+    <select id="queryAutoByCompanyUUid" parameterType="string" resultType="string">
+        select sync_config from cipher_wx_config_info
+        where companyUUid=#{companyUUid}
+    </select>
+
+    <select id="selectAutoSyncWx" parameterType="string" resultType="cipher.console.oidc.domain.web.AutoSyncWxDomain">
+        SELECT id,companyUUid,sync_config FROM cipher_wx_config_info WHERE companyUUid=#{companyUUid}
+    </select>
+
+
+    <update id="updateAutoSync" parameterType="string">
+        UPDATE cipher_wx_config_info
+        SET sync_config=#{autoSyncInfo}
+        WHERE companyUUid=#{companyUUid}
+    </update>
+</mapper>

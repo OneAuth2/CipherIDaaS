@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="cipher.console.oidc.mapper.UserAuthorizationMapper">
+
+    <select id="getAllUserAuthorizationMethods" resultType="cipher.console.oidc.domain.web.UserAuthorizationMapDomain">
+        SELECT *
+        FROM cipher_user_authorization_map;
+    </select>
+
+
+    <select id="getUserAuthorizationMethods" parameterType="String"
+            resultType="cipher.console.oidc.domain.web.UserAuthorizationMapDomain">
+        SELECT *
+        FROM cipher_user_authorization_map
+        WHERE account_number = #{account_number}#;
+    </select>
+    <select id="qeryUserAuthType" resultType="cipher.console.oidc.domain.web.UserAuthorizationMapDomain">
+        SELECT
+            user_auth.*,
+            group_concat(account_authorized_method) AS authTypeCon
+        FROM
+            cipher_user_authorization_map user_auth
+        GROUP BY account_number;
+    </select>
+
+    <delete id="deleteByAccountNumber" parameterType="String">
+        delete from cipher_user_authorization_map where account_number = #{accountNumber};
+    </delete>
+
+    <insert id="insertInto" parameterType="cipher.console.oidc.domain.web.UserAuthorizationMapDomain">
+       INSERT INTO cipher_user_authorization_map(account_number, account_authorized_method)
+       VALUES (#{accountNumber},#{accountAuthorizedMethod});
+    </insert>
+
+
+</mapper>

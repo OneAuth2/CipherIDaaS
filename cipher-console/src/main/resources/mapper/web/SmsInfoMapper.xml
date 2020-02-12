@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cipher.console.oidc.mapper.SmsInfoMapper">
+
+    <select id="getSmsInfo" resultType="cipher.console.oidc.domain.web.SmsInfoDomain" parameterType="cipher.console.oidc.domain.web.SmsInfoDomain">
+        select * from cipher_sms_config
+    </select>
+
+    <update id="updateSmsInfo" parameterType="cipher.console.oidc.domain.web.SmsInfoDomain">
+        update cipher_sms_config
+        <set>
+            <if test="name != null">
+                name = #{name},
+            </if>
+            <if test="address != null">
+                address = #{address},
+            </if>
+            <if test="requestParams != null">
+                request_params = #{requestParams},
+            </if>
+            <if test="responseParams != null">
+                response_params = #{responseParams},
+            </if>
+            <if test="oneTimeValid != null">
+                one_time_valid=#{oneTimeValid},
+            </if>
+            <if test="sendTimeout != null">
+                send_timeout = #{sendTimeout},
+            </if>
+            <if test="describes != null">
+                describes = #{describes},
+            </if>
+            <if test="sendTime != null">
+                send_time = #{sendTime},
+            </if>
+            <if test="effectiveTime != null">
+                effective_time=#{effectiveTime},
+            </if>
+            <if test="intervalTime != null">
+                interval_time=#{intervalTime},
+            </if>
+            <if test="extendTime != null">
+                extend_time=#{extendTime},
+            </if>
+            modify_time=NOW()
+        </set>
+        where id = #{id}
+    </update>
+
+
+    <insert id="insertSmsInfo" parameterType="cipher.console.oidc.domain.web.SmsInfoDomain">
+        insert into cipher_sms_config
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null">
+                name,
+            </if>
+            <if test="address != null">
+                address,
+            </if>
+            <if test="requestParams != null">
+                request_params,
+            </if>
+            <if test="responseParams != null">
+                response_params,
+            </if>
+            <if test="oneTimeValid != null">
+                one_time_valid,
+            </if>
+            <if test="sendTimeout != null">
+                send_timeout,
+            </if>
+            <if test="describes != null">
+                describes,
+            </if>
+            <if test="sendTime != null">
+                send_time,
+            </if>
+            <if test="effectiveTime != null">
+                effective_time,
+            </if>
+            <if test="intervalTime != null">
+                interval_time,
+            </if>
+            <if test="extendTime != null">
+                extend_time,
+            </if>
+            create_time,
+            modify_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="name != null">
+                 #{name},
+            </if>
+            <if test="address != null">
+                #{address},
+            </if>
+            <if test="requestParams != null">
+                 #{requestParams},
+            </if>
+            <if test="responseParams != null">
+                #{responseParams},
+            </if>
+            <if test="oneTimeValid != null">
+                #{oneTimeValid},
+            </if>
+            <if test="sendTimeout != null">
+                 #{sendTimeout},
+            </if>
+            <if test="describes != null">
+                 #{describes},
+            </if>
+            <if test="sendTime != null">
+                 #{sendTime},
+            </if>
+            <if test="effectiveTime != null">
+                #{effectiveTime},
+            </if>
+            <if test="intervalTime != null">
+                #{intervalTime},
+            </if>
+            <if test="extendTime != null">
+                #{extendTime},
+            </if>
+            NOW(),
+            NOW()
+        </trim>
+
+    </insert>
+
+
+
+
+
+
+</mapper>

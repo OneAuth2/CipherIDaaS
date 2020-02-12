@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cipher.console.oidc.mapper.ModifyAccountNumberMapper">
+
+
+    <update id="updateCipherGroupUserMapAccountNumber">
+
+        UPDATE cipher_group_user_map
+        <trim prefix="set" suffixOverrides=",">
+            <trim prefix="account_number=case" suffix="end,">
+                <foreach collection="modelList" item="model" index="index">
+                    <if test="model.newAccountNumber!=null">
+                        when account_number=#{model.oldAccountNumber} then #{model.newAccountNumber}
+                    </if>
+                </foreach>
+            </trim>
+        </trim>
+        where
+        <foreach collection="modelList" separator="or" item="model" index="index">
+            account_number=#{model.oldAccountNumber}
+        </foreach>
+
+    </update>
+
+    <update id="updateCipherRoleUserMapAccountNumber">
+
+        UPDATE cipher_role_user_map
+
+        <trim prefix="set" suffixOverrides=",">
+            <trim prefix="user_id=case" suffix="end,">
+                <foreach collection="modelList" item="model" index="index">
+                    <if test="model.newAccountNumber!=null">
+                        when user_id=#{model.oldAccountNumber} then #{model.newAccountNumber}
+                    </if>
+                </foreach>
+            </trim>
+        </trim>
+        where
+        <foreach collection="modelList" separator="or" item="model" index="index">
+            user_id=#{model.oldAccountNumber}
+        </foreach>
+
+    </update>
+
+    <update id="updateCipherUserAuthorizationMapAccountNumber">
+        UPDATE cipher_user_authorization_map
+        <trim prefix="set" suffixOverrides=",">
+            <trim prefix="account_number=case" suffix="end,">
+                <foreach collection="modelList" item="model" index="index">
+                    <if test="model.newAccountNumber!=null">
+                        when account_number=#{model.oldAccountNumber} then #{model.newAccountNumber}
+                    </if>
+                </foreach>
+            </trim>
+        </trim>
+        where
+        <foreach collection="modelList" separator="or" item="model" index="index">
+            account_number=#{model.oldAccountNumber}
+        </foreach>
+    </update>
+
+</mapper>

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="cipher.console.oidc.mapper.UserGroupMapper">
+
+    <select id="userAuthCount" resultType="java.lang.Integer">
+        SELECT count(account_number)
+        FROM cipher_group_user_map
+    </select>
+
+    <insert id="insertUserGroupMap" parameterType="cipher.console.oidc.domain.web.GroupUserMapDomain">
+        INSERT INTO cipher_group_user_map (user_id,group_id)
+        VALUES (#{userId},
+                #{groupId})
+
+    </insert>
+
+
+    <select id="selectHaveGroupList" resultType="cipher.console.oidc.domain.web.GroupInfoDomain">
+        SELECT *
+        FROM cipher_group_user_map
+        WHERE account_number = #{accountNumber}
+    </select>
+
+
+    <delete id="deleteUserGroupMap">
+        DELETE FROM cipher_group_user_map
+        WHERE user_id = #{uuid}
+    </delete>
+
+    <insert id="insertList">
+        INSERT INTO cipher_group_user_map (group_id,account_number,user_id) VALUES
+        <foreach collection="groupUserMapList" separator="," item="groupUserMap" index="index">
+            (
+            #{groupUserMap.groupId},
+            #{groupUserMap.accountNumber},
+            #{groupUserMap.userId}
+            )
+        </foreach>
+    </insert>
+
+
+    <select id="selectUserGroupList" resultType="cipher.console.oidc.domain.web.GroupInfoDomain"
+            parameterType="cipher.console.oidc.domain.web.GroupUserMapDomain">
+        select * from cipher_group_info info
+        LEFT JOIN cipher_group_user_map map on info.group_id=map.group_id
+        LEFT JOIN cipher_user_info tt on tt.account_number=map.account_number
+        where 1=1 and tt.is_delete=0
+        <if test="accountNumber != null and accountNumber!='' ">
+            and map.account_number=#{accountNumber}
+        </if>
+        <if test="groupId != null and groupId!='' ">
+            and map.group_id=#{groupId}
+        </if>
+    </select>
+
+
+    <select id="queryGroupByAccount" resultType="java.lang.Integer">
+        SELECT group_id from cipher_group_user_map where user_id=#{uuid}
+        <if test="groupId != null and groupId!='' ">
+            and group_id=#{groupId}
+        </if>
+
+    </select>
+    <select id="selectUuidByaccountNumber" parameterType="string" resultType="string">
+        SELECT uuid
+        from cipher_user_info
+        WHERE account_number = #{accountNumber}
+    </select>
+
+    <select id="selectUserGroup" resultType="cipher.console.oidc.domain.web.GroupUserMapDomain">
+        select * from cipher_group_user_map where 1=1
+        <if test="userId!= null and userId!='' ">
+            and user_id=#{userId}
+        </if>
+        <if test="groupId != null and groupId!='' ">
+            and group_id=#{groupId}
+        </if>
+    </select>
+
+
+    <insert id="insertListWithUUid">
+
+        <if test="groupUserMapList != null and groupUserMapList.size() != 0">
+            INSERT INTO cipher_group_user_map (group_id, user_id) VALUES
+            <foreach collection="groupUserMapList" separator="," item="groupUserMap" index="index">
+                (
+                #{groupUserMap.groupId},
+                #{groupUserMap.userId}
+                )
+            </foreach>
+        </if>
+
+    </insert>
+
+</mapper>

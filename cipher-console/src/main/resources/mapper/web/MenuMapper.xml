@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="cipher.console.oidc.mapper.MenuMapper">
+
+<!--
+	< alias="MenuForm" type="com.cipher.download.cmp.form.MenuForm" />
+-->
+
+	<resultMap id="abatorgenerated_MenuResult" type="cipher.console.oidc.domain.web.MenuForm" >
+	    <result column="resource_id" property="resourceId" />
+	    <result column="resource_name" property="resourceName" />
+	    <result column="permission" property="permission" />
+	    <result column="resource_url" property="resourceUrl" />
+	    <result column="parent" property="parent" />
+	    <result column="display_sort" property="displaySort" />
+	    <result column="display_type" property="displayType" />
+	    <result column="description" property="description" />
+	</resultMap>
+	<resultMap id="select_tree_MenuResult" type="cipher.console.oidc.domain.web.MenuForm" >
+	    <result column="resource_id" property="resourceId" />
+	    <result column="resource_name" property="resourceName" />
+	    <result column="permission" property="permission" />
+	    <result column="resource_url" property="resourceUrl" />
+	    <result column="parent" property="parent" />
+	    <result column="parent_id" property="state" />
+	    <result column="display_sort" property="displaySort" />
+	    <result column="display_type" property="displayType" />
+	    <result column="description" property="description" />
+	</resultMap>
+	
+	<sql id="all" >
+
+		<if test="resourceName!=null and resourceName!=''">
+			and resource_name LIKE concat(concat('%',#{resourceName}),'%')
+		</if>
+		<if test="descriptionpermission!=null and permission!=''">
+			and permission LIKE concat(concat('%',#{permission}),'%')
+		</if>
+		<if test="permission!=null and permission!=''">
+			and description LIKE concat(concat('%',#{description}),'%')
+		</if>
+
+	</sql>
+
+<!--	<select id="query_cipher_count" resultType="java.lang.Integer"	="cipher.console.oidc.domain.web.MenuForm">
+		SELECT COUNT(1) FROM cipher_resource
+		WHERE 1 = 1
+		<include refid="all"/>
+	</select>
+	<select id="FIND_CHILD_STATE" resultType="java.lang.String" ="java.lang.Integer">
+		SELECT COUNT(1) FROM cipher_resource
+		WHERE parent = #parent_id#
+	</select>-->
+	<select id="selectMenuTreeList" resultMap="select_tree_MenuResult" parameterType="cipher.console.oidc.domain.web.MenuForm">
+		SELECT resource_id,resource_id as parent_id ,resource_name, permission,resource_url,parent,display_sort, display_type,description
+		FROM cipher_resource
+		WHERE parent = #parent#
+		<include refid="all"/>
+	</select>
+	
+<!--	<select id="select_children_by_parent_id" resultMap="abatorgenerated_MenuResult" parameterType="cipher.console.oidc.domain.web.MenuForm">
+		<dynamic>
+			<isNotEmpty property="value">
+				SELECT resource_id, resource_name, permission,resource_url,parent,display_sort, display_type,description
+				FROM cipher_resource
+				WHERE parent = #parent#
+			</isNotEmpty>
+		</dynamic>
+	</select>-->
+	
+	
+	<select id="selectMenuForms" resultMap="abatorgenerated_MenuResult" parameterType="cipher.console.oidc.domain.web.MenuForm">
+				SELECT resource_id, resource_name, permission,resource_url,parent,display_sort, display_type,description
+				FROM cipher_resource
+				WHERE 1= 1
+				<include refid="all"/>
+	</select>
+	
+	<select id="queryMenuForm" resultMap="abatorgenerated_MenuResult" parameterType="cipher.console.oidc.domain.web.MenuForm">
+		SELECT resource_id, resource_name, permission,resource_url,parent, display_sort, display_type, description
+		FROM cipher_resource
+		WHERE 1 = 1
+		<include refid="all"/>
+		<if test="resourceId!=null and resourceId!=''">
+			and resource_id LIKE concat(concat('%',#{resourceId}),'%')
+		</if>
+	</select>
+<!--	<select id="select_cipher_model_by_name" resultMap="abatorgenerated_MenuResult" parameterType="cipher.console.oidc.domain.web.MenuForm">
+		SELECT resource_id, resource_name, permission,resource_url,parent,  display_sort, display_type, description
+		FROM cipher_resource
+		WHERE 1 = 1
+		<include refid="all"/>
+	&lt;!&ndash;	<dynamic>
+			<isNotNull prepend="and" property="resourceName">
+				resource_name = #resourceName#
+			</isNotNull>
+		</dynamic>&ndash;&gt;
+	</select>-->
+	
+	<insert id="insertMenuForm" parameterType="cipher.console.oidc.domain.web.MenuForm" >
+	  INSERT INTO cipher_resource ( resource_name, permission,resource_url,parent,display_sort, display_type, description, create_time, modify_time)
+	  VALUES (#resourceName#, #permission#, #resourceUrl#,#parent#,#displaySort#,#displayType#,#description#, NOW(), NOW())
+	  <selectKey resultType="java.lang.Integer" keyProperty="resourceId" >
+	    SELECT LAST_INSERT_ID()
+	  </selectKey>
+	</insert>
+	
+	<update id="updateMenuForm" parameterType="cipher.console.oidc.domain.web.MenuForm" >
+	  UPDATE cipher_resource SET modify_time = NOW()
+
+		<if test="resourceName!=null">
+			resource_name = ${resourceName},
+		</if>
+		<if test="permission!=null">
+			permission = ${permission},
+		</if>
+		<if test="description!=null">
+			description = ${description},
+		</if>
+		<if test="resourceUrldisplaySort!=null">
+			resource_url = ${resourceUrl},
+		</if>
+		<if test="displaySort!=null">
+			display_sort = ${displaySort},
+		</if>
+
+	  WHERE resource_id = #resourceId#
+	</update>
+	
+	<delete id="deleteMenuById" parameterType="cipher.console.oidc.domain.web.MenuForm">
+		delete from cipher_resource where resource_id = #resourceId#
+	</delete>
+
+</mapper>

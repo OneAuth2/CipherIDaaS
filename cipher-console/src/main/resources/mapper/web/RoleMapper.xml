@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cipher.console.oidc.mapper.RoleInfoMapper">
+
+	<!--<typeAlias alias="Role" type="cipher.console.oidc.domain.web.Role" />
+	<typeAlias alias="UserRole" type="cipher.console.oidc.domain.web.UserRole" />
+	<typeAlias alias="RoleForm" type="cipher.console.oidc.domain.web.RoleForm" />
+	<typeAlias alias="RoleMenu" type="cipher.console.oidc.domain.web.RoleMenu" />-->
+	
+	<resultMap id="Role_Map" type="cipher.console.oidc.domain.web.Role" >
+	    <result column="role_id" property="roleId" />
+	    <result column="role_name" property="roleName" />
+	    <result column="roles" property="roles" />
+	    <result column="description" property="description" />
+	    <result column="create_time" property="createTime" />
+	    <result column="modify_time" property="modifyTime" />
+	</resultMap>
+	
+	<select id="getRoleMenusByRoleId" resultType="cipher.console.oidc.domain.web.RoleMenu" parameterType="java.lang.Integer">
+	select m.resource_id as resourceId,m.role_id AS roleId from cipher_role r,cipher_role_resource m where r.role_id = m.role_id and r.role_id = #value#
+	</select>
+	<select id="ResSelect" resultType="cipher.console.oidc.model.ResSelectModel">
+		SELECT
+			   resource_id,
+	           resource_name,
+			   resource_id AS authId
+		FROM cipher_resource;
+	</select>
+	
+	<sql id="all" >
+		<if test="roleName!=null and roleName!=''">
+			and role_name LIKE concat(concat('%',#{roleName}),'%')
+		</if>
+		<if test="roles!=null and roles!=''">
+			and roles LIKE concat(concat('%',#{roles}),'%')
+		</if>
+		<if test="description!=null and description!=''">
+			and description LIKE concat(concat('%',#{description}),'%')
+		</if>
+	</sql>
+
+	<select id="queryCipherCount" resultType="java.lang.Integer"	parameterType="cipher.console.oidc.domain.web.Role">
+		SELECT COUNT(1) FROM cipher_role
+		WHERE 1 = 1
+		<include refid="all"/>
+	</select>
+<!--	<select id="selectUserPageList" resultMap="abatorgenerated_RoleResult" parameterType="cipher.console.oidc.domain.web.Role">
+		SELECT role_id, role_name, roles, description, create_time, modify_time
+		FROM cipher_role
+		WHERE 1 = 1
+		&lt;!&ndash;<if test="roleName!=null and roleName!=''">
+			and role_name LIKE concat(concat('%',#{roleName}),'%')
+		</if>&ndash;&gt;
+		ORDER BY modify_time DESC
+        LIMIT #{pageData.currentRow}, #{pageData.rows}
+	</select>-->
+
+    <select id="queryAllrole" resultMap="Role_Map" parameterType="cipher.console.oidc.domain.web.Role">
+		SELECT * FROM cipher_role
+        LIMIT #{pageData.currentRow}, #{pageData.rows}
+    </select>
+	<select id="queryRoleList" resultType="cipher.console.oidc.domain.web.Role"  parameterType="cipher.console.oidc.domain.web.Role">
+		SELECT role_id, role_name, roles, description, create_time, modify_time
+		FROM cipher_role
+		WHERE 1 = 1
+		<!--<if test="roleName!=null and roleName!=''">
+	        and role_name LIKE concat(concat('%',#{roleName}),'%')
+		</if>-->
+		ORDER BY modify_time DESC
+	</select>
+
+	<insert id="insertSelective" parameterType="cipher.console.oidc.domain.web.RoleMenu" >
+		insert into cipher_role_resource
+		<trim prefix="(" suffix=")" suffixOverrides="," >
+			<if test="roleId != null" >
+				role_id,
+			</if>
+			<if test="resourceId != null" >
+				resource_id,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test="roleId != null" >
+				#{roleId},
+			</if>
+			<if test="resourceId != null" >
+				#{resourceId},
+			</if>
+		</trim>
+	</insert>
+	<select id="selectAuthList"  resultType="cipher.console.oidc.domain.web.MenuForm">
+		select tt.resource_id as id ,resource_name as resourceName from cipher_resource tt
+		LEFT JOIN cipher_role_resource map on tt.id=map.resource_id
+		where 1=1
+		<if test="roleId != null and roleId!=''">
+			and map.role_id=#{roleId}
+		</if>
+		<if test="resourceId != null and resourceId !=''">
+			and  map.resource_id=  #{resourceId}
+		</if>
+	</select>
+	<select id="queryRoleById" resultType="cipher.console.oidc.domain.web.Role">
+		SELECT * FROM cipher_role
+		WHERE role_id = #{roleId}
+	</select>
+	<select id="queryUserRoles" resultType="cipher.console.oidc.domain.web.UserRole" parameterType="cipher.console.oidc.domain.web.UserRole">
+		SELECT role_id AS roleId
+		FROM cipher_user_role
+		WHERE 1 = 1
+		<if test="roleId!=null and roleId!=''">
+			and role_id LIKE concat(concat('%',#{roleId}),'%')
+		</if>
+	</select>
+	
+	<select id="queryRole" resultType="cipher.console.oidc.domain.web.Role" parameterType="cipher.console.oidc.domain.web.Role">
+		SELECT role_id, role_name, roles, description, create_time, modify_time
+		FROM cipher_role
+		WHERE 1 = 1
+		<include refid="all"/>
+		<if test="roleId!=null and roleId!=''">
+			and role_id LIKE concat(concat('%',#{roleId}),'%')
+		</if>
+	</select>
+<!--	<select id="select_cipher_model_by_name" resultMap="abatorgenerated_RoleResult" parameterType="cipher.console.oidc.domain.web.RoleForm">
+		SELECT role_id, role_name, roles, description, create_time, modify_time
+		FROM cipher_role
+		WHERE 1 = 1
+		<include refid="all"/>
+		        SELECT * FROM USER WHERE username LIKE '%${value}%'
+	</select>-->
+	
+	<insert id="insertRole" parameterType="cipher.console.oidc.domain.web.Role" >
+	  INSERT INTO cipher_role (role_name, roles, description, create_time, modify_time)
+	  VALUES (#{roleName}, #{roles}, #{description}, NOW(), NOW())
+	  <!--<selectKey resultType="java.lang.Integer" keyProperty="roleId" >
+	    SELECT LAST_INSERT_ID()
+	  </selectKey>-->
+	</insert>
+	
+	<update id="updateRole" parameterType="cipher.console.oidc.domain.web.Role" >
+	  UPDATE cipher_role SET modify_time = NOW(),
+	    <if test="roleName!=null">
+	      role_name = #{roleName},
+	    </if>
+	    <if test="roles!=null">
+	      roles = #{roles},
+		</if>
+	    <if test="description!=null">
+	      description = #{description}
+		</if>
+	  WHERE role_id = #{roleId}
+	</update>
+	
+	<delete id="deleteRole" parameterType="cipher.console.oidc.domain.web.Role">
+		delete from cipher_role where role_id = #{roleId}
+	</delete>
+	
+	
+	<!-- start 角色权限 -->
+	
+	<resultMap id="role_menu_result" type="cipher.console.oidc.domain.web.RoleMenu">
+		<result column="resource_id" property="resourceId"/>
+		<result column="role_id" property="roleId"/>
+	</resultMap>
+	
+	<select id="selectRoleMenu" resultMap="role_menu_result" parameterType="cipher.console.oidc.domain.web.RoleMenu">
+		select resource_id,role_id from cipher_role_resource
+		where resource_id = #{resourceId} and role_id = #{roleId}
+	</select>
+	
+	<insert id="insertRoleMenus" parameterType="cipher.console.oidc.domain.web.RoleMenu">
+		insert into cipher_role_resource(resource_id,role_id) values(#{resourceId},#{roleId})
+	</insert>
+	<delete id="deleteRoleMenu" parameterType="cipher.console.oidc.domain.web.RoleMenu">
+		delete from cipher_role_resource
+		where  1=1
+		<if test="roleId != null and roleId!=''">
+			and role_id=#{roleId}
+		</if>
+		<if test="resourceId != null and resourceId !=''">
+			and   resource_id=  #{resourceId}
+		</if>
+	</delete>
+
+<!--
+	<select id="selectMenuForms" resultMap="abatorgenerated_RoleResult" parameterType="cipher.console.oidc.domain.web.MenuForm">
+		SELECT resource_id, resource_name, permission,resource_url,parent,display_sort, display_type,description
+		FROM cipher_resource
+		WHERE 1= 1
+		<include refid="all"/>
+	</select>-->
+	<delete id="deleteRoleByMenuId" parameterType="cipher.console.oidc.domain.web.RoleMenu">
+		delete from cipher_role_resource where resource_id=#{resourceId}
+	</delete>
+	<!-- end 角色权限 -->
+		
+
+</mapper>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="cipher.console.oidc.mapper.ZhonghePostMapper">
+
+
+
+
+    <select id="addmap2Cipher" useCache="false" statementType="CALLABLE">
+         <![CDATA[
+        call add_user_group_map();
+        ]]>
+    </select>
+
+
+    <insert id="insertPostList">
+        insert into zhonghe_gangwei_interface(
+        pk,
+        is_active,
+        name,
+        parent_pk,
+        department,
+        create_time) values
+        <foreach collection="postList" item="post" index="post" separator=",">
+            (
+            #{post.pk},
+            #{post.is_active},
+            #{post.name},
+            #{post.parent_pk},
+            #{post.department},
+            NOW()
+            )
+        </foreach>
+    </insert>
+
+    <select id="queryAllZhPost" resultType="cipher.console.oidc.domain.zhonghe.ZhonghePost">
+        select * from zhonghe_gangwei_interface;
+    </select>
+
+
+</mapper>

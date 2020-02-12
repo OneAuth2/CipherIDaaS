@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="cipher.console.oidc.mapper.GoldMantisLogMapper">
+
+
+    <resultMap id="goldMantisUserLog" type="cipher.console.oidc.domain.gold_mantis.GoldMantisUserLog"
+               autoMapping="true">
+
+    </resultMap>
+
+    <select id="queryPageList" parameterType="cipher.console.oidc.domain.gold_mantis.GoldMantisUserLog"
+            resultMap="goldMantisUserLog">
+        SELECT *
+        FROM cipher_user_async_log
+        WHERE 1 = 1
+        <if test="queryName!=null and queryName!=''">
+            and admin_login_name LIKE CONCAT(CONCAT('%',#{queryName}),'%') OR
+            login_name LIKE CONCAT(CONCAT('%',#{queryName}),'%') OR
+            mobile LIKE CONCAT(CONCAT('%',#{queryName}),'%')
+        </if>
+        LIMIT #{pageData.currentRow}, #{pageData.rows}
+    </select>
+
+    <select id="queryPageListTotal" parameterType="cipher.console.oidc.domain.gold_mantis.GoldMantisUserLog"
+            resultType="int">
+        SELECT count(1)
+        FROM cipher_user_async_log
+        WHERE 1=1
+        <if test="queryName!=null and queryName!=''">
+            and admin_login_name LIKE CONCAT(CONCAT('%',#{queryName}),'%') OR
+            login_name LIKE CONCAT(CONCAT('%',#{queryName}),'%') OR
+            mobile LIKE CONCAT(CONCAT('%',#{queryName}),'%')
+        </if>
+    </select>
+
+
+</mapper>

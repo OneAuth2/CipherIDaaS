@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="cipher.console.oidc.mapper.GoldMantisMapper">
+
+    <resultMap id="BaseResultMap" type="cipher.console.oidc.domain.gold_mantis.GoldMantisUser" >
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="admin_login_name" property="adminLoginName" jdbcType="VARCHAR" />
+        <result column="admin_password" property="adminPassword" jdbcType="VARCHAR" />
+        <result column="tenant_name" property="tenantName" jdbcType="VARCHAR" />
+        <result column="identity_store_name" property="identityStoreName" jdbcType="VARCHAR" />
+        <result column="login_name" property="loginName" jdbcType="VARCHAR" />
+        <result column="group_path" property="groupPath" jdbcType="VARCHAR" />
+        <result column="personal_name" property="personalName" jdbcType="VARCHAR" />
+        <result column="unit" property="unit" jdbcType="VARCHAR" />
+        <result column="password" property="password" jdbcType="VARCHAR" />
+        <result column="need_password_policy" property="needPasswordPolicy" jdbcType="VARCHAR" />
+        <result column="mobile" property="mobile" jdbcType="VARCHAR" />
+        <result column="role_name" property="roleName" jdbcType="VARCHAR" />
+        <result column="role_names" property="roleNames" jdbcType="VARCHAR" />
+        <result column="role_mail" property="roleMail" jdbcType="VARCHAR" />
+        <result column="role_mobile" property="roleMobile" jdbcType="VARCHAR" />
+        <result column="start_time" property="startTime" jdbcType="VARCHAR" />
+        <result column="end_time" property="endTime" jdbcType="VARCHAR" />
+    </resultMap>
+
+
+    <insert id="insertGoldMantisUser">
+        INSERT INTO cipher_user_async (
+             admin_login_name,
+             admin_password,
+             tenant_name,
+             identity_store_name,
+             login_name,
+             group_path,
+             password,
+             mobile,
+             role_name,
+             role_names,
+             start_time,
+             end_time)
+            values (
+            #{adminLoginName},
+            #{adminPassword},
+            #{tenantName},
+            #{identityStoreName},
+            #{loginName},
+            #{groupPath},
+            #{password},
+            #{mobile},
+            #{roleName},
+            #{roleNames},
+            #{startTime},
+            #{endTime}
+        )
+    </insert>
+
+
+    <update id="updateGoldMantisUser">
+        UPDATE cipher_user_async
+        <set>
+            <if test="adminLoginName != null">
+                admin_login_name = #{adminLoginName},
+            </if>
+
+            <if test="adminPassword != null">
+                admin_password = #{adminPassword},
+            </if>
+
+            <if test="tenantName != null">
+                tenant_name = #{tenantName},
+            </if>
+
+            <if test="identityStoreName != null">
+                identity_store_name = #{identityStoreName},
+            </if>
+
+            <if test="loginName != null">
+                login_name = #{loginName},
+            </if>
+
+            <if test="groupPath != null">
+                group_path = #{groupPath},
+            </if>
+
+            <if test="password  != null">
+                password = #{password },
+            </if>
+
+            <if test="needPasswordPolicy != null">
+                need_password_policy = #{needPasswordPolicy},
+            </if>
+
+            <if test="roleName != null">
+                role_name = #{roleName},
+            </if>
+
+            <if test="roleNames  != null">
+                role_names = #{roleNames},
+            </if>
+
+            <if test="startTime != null">
+                start_time = #{startTime},
+            </if>
+            <if test="endTime != null">
+                end_time = #{endTime},
+            </if>
+            <if test="unit != null" >
+                unit=#{unit},
+            </if>
+            <if test="roleMail != null" >
+                role_mail=#{roleMail},
+            </if>
+            <if test="roleMobile != null" >
+                role_mobile=#{roleMobile},
+            </if>
+            <if test="mobile != null" >
+                mobile=#{mobile},
+            </if>
+        </set>
+        where id=#{id}
+
+    </update>
+
+
+    <select id="queryGoldMantisUserByMobile" resultMap="BaseResultMap">
+        SELECT *
+        FROM cipher_user_async
+        WHERE mobile = #{mobile} and company_id=#{companyId}
+        LIMIT 1;
+    </select>
+
+
+    <insert id="insertGoldMantisLog">
+        INSERT INTO cipher_user_async_log (admin_login_name, admin_password, tenant_name, identity_store_name, login_name, group_path, password, mobile, role_name, role_names, start_time, end_time,create_time)
+            VALUE (
+            #{adminLoginName},
+            #{adminPassword},
+            #{tenantName}, #{identityStoreName},
+            #{loginName},
+            #{groupPath}, #{password},
+            #{mobile}, #{roleName}, #{roleNames},
+            #{startTime}, #{endTime},NOW()
+        )
+    </insert>
+
+
+    <select id="selectVistorList" resultMap="BaseResultMap"  parameterType="cipher.console.oidc.domain.gold_mantis.GoldMantisUser">
+        SELECT *
+        FROM cipher_user_async
+        where 1=1 and company_id=#{companyId}
+        <if test="queryName!=null and queryName!=''">
+            and mobile LIKE CONCAT(CONCAT('%',#{queryName}),'%')OR
+            login_name LIKE CONCAT(CONCAT('%',#{queryName}),'%')
+        </if>
+        ORDER BY fksq_code desc,start_time desc
+        LIMIT #{pageData.currentRow}, #{pageData.rows}
+    </select>
+
+
+    <select id="selectVistorCount" resultType="int" parameterType="cipher.console.oidc.domain.gold_mantis.GoldMantisUser">
+     select count(1) from  cipher_user_async
+     where 1=1 and company_id=#{companyId}
+        <if test="queryName!=null and queryName!=''">
+            and mobile LIKE CONCAT(CONCAT('%',#{queryName}),'%')OR
+            login_name LIKE CONCAT(CONCAT('%',#{queryName}),'%')
+        </if>
+    </select>
+
+
+    <insert id="insertVistorUser" parameterType="cipher.console.oidc.domain.gold_mantis.GoldMantisUser">
+        insert into cipher_user_async
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                id,
+            </if>
+            <if test="adminLoginName != null" >
+                admin_login_name,
+            </if>
+            <if test="adminPassword != null" >
+                admin_password,
+            </if>
+            <if test="tenantName != null" >
+                tenant_name,
+            </if>
+            <if test="identityStoreName != null" >
+                identity_store_name,
+            </if>
+            <if test="loginName != null" >
+                login_name,
+            </if>
+            <if test="groupPath != null" >
+                group_path,
+            </if>
+            <if test="personalName != null" >
+                personal_name,
+            </if>
+            <if test="unit != null" >
+                unit,
+            </if>
+            <if test="password != null" >
+                password,
+            </if>
+            <if test="needPasswordPolicy != null" >
+                need_password_policy,
+            </if>
+            <if test="mobile != null" >
+                mobile,
+            </if>
+            <if test="roleName != null" >
+                role_name,
+            </if>
+            <if test="roleNames != null" >
+                role_names,
+            </if>
+            <if test="roleMail != null" >
+                role_mail,
+            </if>
+            <if test="roleMobile != null" >
+                role_mobile,
+            </if>
+            <if test="startTime != null" >
+                start_time,
+            </if>
+            <if test="endTime != null" >
+                end_time,
+            </if>
+            <if test="companyId != null" >
+                company_id,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                #{id,jdbcType=INTEGER},
+            </if>
+            <if test="adminLoginName != null" >
+                #{adminLoginName,jdbcType=VARCHAR},
+            </if>
+            <if test="adminPassword != null" >
+                #{adminPassword,jdbcType=VARCHAR},
+            </if>
+            <if test="tenantName != null" >
+                #{tenantName,jdbcType=VARCHAR},
+            </if>
+            <if test="identityStoreName != null" >
+                #{identityStoreName,jdbcType=VARCHAR},
+            </if>
+            <if test="loginName != null" >
+                #{loginName,jdbcType=VARCHAR},
+            </if>
+            <if test="groupPath != null" >
+                #{groupPath,jdbcType=VARCHAR},
+            </if>
+            <if test="personalName != null" >
+                #{personalName,jdbcType=VARCHAR},
+            </if>
+            <if test="unit != null" >
+                #{unit,jdbcType=VARCHAR},
+            </if>
+            <if test="password != null" >
+                #{password,jdbcType=VARCHAR},
+            </if>
+            <if test="needPasswordPolicy != null" >
+                #{needPasswordPolicy,jdbcType=VARCHAR},
+            </if>
+            <if test="mobile != null" >
+                #{mobile,jdbcType=VARCHAR},
+            </if>
+            <if test="roleName != null" >
+                #{roleName,jdbcType=VARCHAR},
+            </if>
+            <if test="roleNames != null" >
+                #{roleNames,jdbcType=VARCHAR},
+            </if>
+            <if test="roleMail != null" >
+                #{roleMail,jdbcType=VARCHAR},
+            </if>
+            <if test="roleMobile != null" >
+                #{roleMobile,jdbcType=VARCHAR},
+            </if>
+            <if test="startTime != null" >
+                #{startTime,jdbcType=VARCHAR},
+            </if>
+            <if test="endTime != null" >
+                #{endTime,jdbcType=VARCHAR},
+            </if>
+            <if test="companyId != null" >
+                #{companyId,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+
+</mapper>

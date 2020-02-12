@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="cipher.console.oidc.mapper.EquipmentManageMapper">
+    <select id="selectVpnConfigList" parameterType="cipher.console.oidc.domain.web.VpnConfigurationDomain" resultType="cipher.console.oidc.domain.web.VpnConfigurationDomain">
+         SELECT
+                id,uuid,company_id,devicename,equip_addr,describee,status,auth_origin,auth_type,towAuthWay,radius_server,auth_port,share_key
+         FROM cipher_vpn_configuration
+         WHERE company_id=#{companyId}
+         <if test="devicename!=null and devicename!=''">
+             AND devicename LIKE CONCAT(CONCAT('%',#{devicename}),'%')
+         </if>
+         ORDER BY create_time DESC
+         LIMIT #{pageModel.currentRow},#{pageModel.rows}
+    </select>
+
+    <select id="obtainVpnConfigCount" parameterType="string" resultType="int">
+         SELECT COUNT(id) from cipher_vpn_configuration
+         WHERE company_id=#{companyId}
+    </select>
+
+    <update id="updateVpnConfig" parameterType="cipher.console.oidc.domain.web.VpnConfigurationDomain">
+        UPDATE cipher_vpn_configuration
+        <set>
+            <if test="devicename != null and devicename!=''">
+                devicename=#{devicename},
+            </if>
+            <if test="equipAddr != null and equipAddr!=''">
+                equip_addr=#{equipAddr},
+            </if>
+                describee=#{describee},
+            <if test="status!=null">
+                status=#{status},
+            </if>
+            <if test="authOrigin!=null">
+                auth_origin=#{authOrigin},
+            </if>
+            <if test="authType!=null">
+                auth_type=#{authType},
+            </if>
+            <if test="towAuthWay!=null">
+                towAuthWay=#{towAuthWay},
+            </if>
+            <if test="radiusServer!=null and radiusServer!=''">
+                radius_server=#{radiusServer},
+            </if>
+                auth_port=#{authPort},
+            <if test="shareKey!=null and shareKey!=''">
+                share_key=#{shareKey},
+            </if>
+                modify_time=NOW()
+        </set>
+        WHERE uuid=#{uuid} AND company_id=#{companyId}
+    </update>
+
+    <insert id="insertVpnConfig" parameterType="cipher.console.oidc.domain.web.VpnConfigurationDomain">
+        insert into cipher_vpn_configuration
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="uuid != null and uuid!=''" >
+                uuid,
+            </if>
+            <if test="companyId != null and companyId!=''" >
+                company_id,
+            </if>
+            <if test="devicename != null and devicename!=''" >
+                devicename,
+            </if>
+            <if test="equipAddr != null and equipAddr!=''" >
+                equip_addr,
+            </if>
+            <if test="describee != null and describee!=''" >
+                describee,
+            </if>
+            <if test="status!=null">
+                status,
+            </if>
+            <if test="authOrigin!=null">
+                auth_origin,
+            </if>
+            <if test="authType!=null">
+                auth_type,
+            </if>
+            <if test="towAuthWay!=null">
+                towAuthWay,
+            </if>
+            <if test="radiusServer!=null and radiusServer!=''">
+                radius_server,
+            </if>
+            <if test="authPort!=null and authPort!=''">
+                auth_port,
+            </if>
+            <if test="shareKey!=null and shareKey!=''">
+                share_key,
+            </if>
+            create_time,
+            modify_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="uuid != null and uuid!=''" >
+                #{uuid,jdbcType=VARCHAR},
+            </if>
+            <if test="companyId != null and companyId!=''" >
+                #{companyId,jdbcType=VARCHAR},
+            </if>
+            <if test="devicename != null and devicename!=''" >
+                #{devicename,jdbcType=VARCHAR},
+            </if>
+            <if test="equipAddr != null and equipAddr!=''" >
+                #{equipAddr,jdbcType=VARCHAR},
+            </if>
+            <if test="describee != null and describee!=''" >
+                #{describee,jdbcType=VARCHAR},
+            </if>
+            <if test="status!=null">
+                #{status},
+            </if>
+            <if test="authOrigin!=null">
+                #{authOrigin,jdbcType=VARCHAR},
+            </if>
+            <if test="authType!=null">
+                #{authType,jdbcType=VARCHAR},
+            </if>
+            <if test="towAuthWay!=null">
+                #{towAuthWay,jdbcType=VARCHAR},
+            </if>
+            <if test="radiusServer!=null and radiusServer!=''">
+                #{radiusServer,jdbcType=VARCHAR},
+            </if>
+            <if test="authPort!=null and authPort!=''">
+                #{authPort,jdbcType=VARCHAR},
+            </if>
+            <if test="shareKey!=null and shareKey!=''">
+                #{shareKey,jdbcType=VARCHAR},
+            </if>
+                NOW(),
+                NOW()
+        </trim>
+    </insert>
+    <select id="vpnConfigByUuid" resultType="cipher.console.oidc.domain.web.VpnConfigurationDomain">
+             SELECT id,uuid,company_id,devicename,equip_addr,describee,status,auth_origin,auth_type,towAuthWay,radius_server,auth_port,share_key FROM cipher_vpn_configuration
+             WHERE uuid=#{uuid} and company_id=#{companyId}
+    </select>
+    <select id="selectDevicenameByUuid" parameterType="string" resultType="string">
+        SELECT devicename FROM cipher_vpn_configuration WHERE uuid=#{uuid}
+    </select>
+    <delete id="vpnConfigDel">
+         DELETE FROM cipher_vpn_configuration
+         WHERE uuid=#{uuid} and company_id=#{companyId}
+    </delete>
+
+</mapper>

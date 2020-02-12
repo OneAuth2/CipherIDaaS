@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="cipher.console.oidc.mapper.EmailInformMapper">
+    <resultMap id="BaseResultMap" type="cipher.console.oidc.domain.EmailInformDomain.EmailBasicDomain">
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="company_uuid" property="companyUuid" jdbcType="VARCHAR" />
+        <result column="smtp" property="smtp" jdbcType="VARCHAR" />
+        <result column="port" property="port" jdbcType="INTEGER" />
+        <result column="account" property="account" jdbcType="VARCHAR" />
+        <result column="pwd" property="pwd" jdbcType="VARCHAR" />
+        <result column="isSSL" property="isSSL" jdbcType="INTEGER" />
+    </resultMap>
+    <resultMap id="BaseResultMap1" type="cipher.console.oidc.domain.web.EmailInfoDomain">
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="smtp" property="smtp" jdbcType="VARCHAR" />
+        <result column="port" property="port" jdbcType="INTEGER" />
+        <result column="title" property="title" jdbcType="VARCHAR" />
+        <result column="account" property="account" jdbcType="VARCHAR" />
+        <result column="pwd" property="pwd" jdbcType="VARCHAR" />
+        <result column="describes" property="describes" jdbcType="VARCHAR" />
+        <result column="isSSL" property="isSSL" jdbcType="INTEGER" />
+        <result column="send_time" property="sendTime" jdbcType="INTEGER" />
+        <result column="interval_time" property="intervalTime" jdbcType="INTEGER" />
+        <result column="effective_time" property="extendTime" jdbcType="INTEGER" />
+        <result column="extend_time" property="effectiveTime" jdbcType="INTEGER" />
+    </resultMap>
+    <resultMap id="BaseResultMap2" type="cipher.console.oidc.domain.EmailInformDomain.RandomEmailDomain">
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="company_uuid" property="companyUuid" jdbcType="VARCHAR" />
+        <result column="title" property="title" jdbcType="VARCHAR" />
+        <result column="describes" property="writer" jdbcType="VARCHAR" />
+        <result column="effective_time" property="effectiveTime" jdbcType="INTEGER" />
+        <result column="interval_time" property="intervalTime" jdbcType="INTEGER" />
+        <result column="send_time" property="sendTime" jdbcType="INTEGER" />
+        <result column="extend_time" property="extendTime" jdbcType="INTEGER" />
+    </resultMap>
+    <resultMap id="BaseResultMap3" type="cipher.console.oidc.domain.EmailInformDomain.CreatEmailDomain">
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="company_uuid" property="companyUuid" jdbcType="VARCHAR" />
+        <result column="service_state" property="serviceState" jdbcType="VARCHAR" />
+        <result column="dredge_title" property="title" jdbcType="VARCHAR" />
+        <result column="dredge_describes" property="writer" jdbcType="VARCHAR" />
+    </resultMap>
+    <resultMap id="BaseResultMap4" type="cipher.console.oidc.domain.EmailInformDomain.SeedkeyEmailDomain">
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="company_uuid" property="companyUuid" jdbcType="VARCHAR" />
+        <result column="seedkey_title" property="title" jdbcType="VARCHAR" />
+        <result column="seedkey_describes" property="writer" jdbcType="VARCHAR" />
+    </resultMap>
+    <sql id="FieldColumn">
+        (company_uuid,smtp,port,account,pwd,isSSL,create_time,modify_time)
+    </sql>
+    <sql id="FieldColumn1">
+        (company_uuid,title,describes,effective_time,interval_time,send_time,extend_time,create_time,modify_time)
+    </sql>
+    <sql id="FieldColumn2">
+        (company_uuid,service_state,dredge_title,dredge_describes)
+    </sql>
+    <sql id="FieldColumn3">
+        (company_uuid,seedkey_title,seedkey_describes)
+    </sql>
+    <select id="companyUuidCount" parameterType="string" resultType="int">
+        SELECT count(id) FROM cipher_email_config
+        WHERE company_uuid=#{companyUuid};
+    </select>
+
+    <!--邮件通知基本配置-->
+    <insert id="insertEmailInform" parameterType="cipher.console.oidc.domain.EmailInformDomain.EmailBasicDomain">
+        INSERT INTO cipher_email_config
+        <include refid="FieldColumn"/>
+        VALUES
+        (#{companyUuid},
+        #{smtp},
+        #{port},
+        #{account},
+        #{pwd},
+        #{isSSL},
+        NOW(),
+        NOW())
+    </insert>
+    <update id="updateEmailInform" parameterType="cipher.console.oidc.domain.EmailInformDomain.EmailBasicDomain">
+        UPDATE cipher_email_config
+        <set>
+            <if test="smtp!=null">
+                smtp=#{smtp},
+            </if>
+            <if test="port!=null">
+                port=#{port},
+            </if>
+            <if test="account!=null">
+                account=#{account},
+            </if>
+            <if test="pwd!=null">
+                pwd=#{pwd},
+            </if>
+            <if test="isSSL!=null">
+                isSSL=#{isSSL},
+            </if>
+            modify_time=NOW()
+        </set>
+        WHERE company_uuid=#{companyUuid};
+    </update>
+    <select id="selectEmailInformBycompanyUuid" parameterType="string" resultMap="BaseResultMap">
+        SELECT id,company_uuid,smtp,port,account,pwd,isSSL
+        FROM cipher_email_config
+        WHERE company_uuid=#{companyUuid};
+    </select>
+    <select id="EmailInformByCompanyUuid" parameterType="string" resultMap="BaseResultMap1">
+        SELECT id,smtp,port,title,account,pwd,describes,isSSL,send_time,interval_time,effective_time,extend_time
+        FROM cipher_email_config
+        WHERE company_uuid=#{companyUuid};
+    </select>
+
+    <!--邮件通知随机码配置-->
+    <insert id="insertRandomEmail" parameterType="cipher.console.oidc.domain.EmailInformDomain.RandomEmailDomain">
+        INSERT INTO cipher_email_config
+        <include refid="FieldColumn1"/>
+        VALUES
+        (#{companyUuid},
+        #{title},
+        #{writer},
+        #{effectiveTime},
+        #{intervalTime},
+        #{sendTime},
+        #{extendTime},
+        NOW(),
+        NOW())
+    </insert>
+    <update id="updateRandomEmail" parameterType="cipher.console.oidc.domain.EmailInformDomain.RandomEmailDomain">
+        UPDATE cipher_email_config
+        <set>
+            <if test="title!=null">
+                title=#{title},
+            </if>
+            <if test="writer!=null">
+                describes=#{writer},
+            </if>
+            <if test="effectiveTime!=null">
+                effective_time=#{effectiveTime},
+            </if>
+            <if test="intervalTime!=null">
+                interval_time=#{intervalTime},
+            </if>
+            <if test="sendTime!=null">
+                send_time=#{sendTime},
+            </if>
+            <if test="extendTime!=null">
+                extend_time=#{extendTime},
+            </if>
+            modify_time=NOW()
+        </set>
+        WHERE company_uuid=#{companyUuid};
+    </update>
+    <select id="selectRandomEmailBycompanyUuid" parameterType="string" resultMap="BaseResultMap2">
+        SELECT id,company_uuid,title,describes,effective_time,interval_time,send_time,extend_time
+        FROM cipher_email_config
+        WHERE company_uuid=#{companyUuid};
+    </select>
+
+    <!--邮件通知开通账号配置-->
+    <insert id="insertCreatEmail" parameterType="cipher.console.oidc.domain.EmailInformDomain.CreatEmailDomain">
+        INSERT INTO cipher_email_config
+        <include refid="FieldColumn2"/>
+        VALUES
+        (#{companyUuid},
+        #{serviceState},
+        #{title},
+        #{writer},
+        NOW(),
+        NOW())
+    </insert>
+    <update id="updateCreatEmail" parameterType="cipher.console.oidc.domain.EmailInformDomain.CreatEmailDomain">
+        UPDATE cipher_email_config
+        <set>
+            <if test="serviceState!=null">
+                service_state=#{serviceState},
+            </if>
+            <if test="title!=null">
+                dredge_title=#{title},
+            </if>
+            <if test="writer!=null">
+                dredge_describes=#{writer},
+            </if>
+            modify_time=NOW()
+        </set>
+        WHERE company_uuid=#{companyUuid};
+    </update>
+    <select id="selectCreatEmailBycompanyUuid" parameterType="string" resultMap="BaseResultMap3">
+        SELECT id,company_uuid,service_state,dredge_title,dredge_describes
+        FROM cipher_email_config
+        WHERE company_uuid=#{companyUuid};
+    </select>
+    <insert id="insertSeedkeyEmail" parameterType="cipher.console.oidc.domain.EmailInformDomain.SeedkeyEmailDomain">
+        INSERT INTO cipher_email_config
+        <include refid="FieldColumn3"/>
+        VALUES
+        (#{companyUuid},
+        #{title},
+        #{writer},
+        NOW(),
+        NOW())
+    </insert>
+    <update id="updateSeedkeyEmail" parameterType="cipher.console.oidc.domain.EmailInformDomain.SeedkeyEmailDomain">
+        UPDATE cipher_email_config
+        <set>
+            <if test="title!=null">
+                seedkey_title=#{title},
+            </if>
+            <if test="writer!=null">
+                seedkey_describes=#{writer},
+            </if>
+            modify_time=NOW()
+        </set>
+        WHERE company_uuid=#{companyUuid};
+    </update>
+    <select id="selectSeedkeyEmailBycompanyUuid" parameterType="string" resultMap="BaseResultMap4">
+        SELECT id,company_uuid,seedkey_title,seedkey_describes
+        FROM cipher_email_config
+        WHERE company_uuid=#{companyUuid};
+    </select>
+
+</mapper>

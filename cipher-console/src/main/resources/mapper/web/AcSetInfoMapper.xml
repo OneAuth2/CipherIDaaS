@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cipher.console.oidc.mapper.AcSetInfoMapper">
+  <resultMap id="BaseResultMap" type="cipher.console.oidc.domain.web.AcSetInfo">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="ac_device_id" jdbcType="INTEGER" property="acDeviceId" />
+    <result column="descripetion" jdbcType="VARCHAR" property="descripetion" />
+    <result column="base_ip" jdbcType="VARCHAR" property="baseIp" />
+    <result column="base_port" jdbcType="VARCHAR" property="basePort" />
+    <result column="portal_ver" jdbcType="VARCHAR" property="portalVer" />
+    <result column="auth_type" jdbcType="VARCHAR" property="authType" />
+    <result column="time_out" jdbcType="VARCHAR" property="timeOut" />
+    <result column="shared_secret" jdbcType="VARCHAR" property="sharedSecret" />
+    <result column="url" jdbcType="VARCHAR" property="url" />
+    <result column="device_config" jdbcType="VARCHAR" property="deviceConfig" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, ac_device_id, descripetion, base_ip, base_port, portal_ver, auth_type, time_out,
+    shared_secret, create_time, modify_time,url,device_config
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select base_ip as acIp,
+    id, ac_device_id, descripetion, base_ip, base_port, portal_ver, auth_type, time_out,
+    shared_secret, create_time, modify_time,url,device_config
+    from cipher_portal_config
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from cipher_portal_config
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="cipher.console.oidc.domain.web.AcSetInfo">
+    insert into cipher_portal_config (id, ac_device_id, descripetion,
+    base_ip, base_port, portal_ver,
+    auth_type, time_out, shared_secret,
+    create_time, modify_time)
+    values (#{id,jdbcType=INTEGER}, #{acDeviceId,jdbcType=INTEGER}, #{descripetion,jdbcType=VARCHAR},
+    #{baseIp,jdbcType=VARCHAR}, #{basePort,jdbcType=VARCHAR}, #{portalVer,jdbcType=VARCHAR},
+    #{staffAuthType,jdbcType=VARCHAR}, #{timeOut,jdbcType=VARCHAR}, #{sharedSecret,jdbcType=VARCHAR},
+    #{createTime,jdbcType=TIMESTAMP}, #{modifyTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective"  useGeneratedKeys="true" keyProperty="acId">
+    insert into cipher_portal_config
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+
+      <if test="acDeviceId != null">
+        ac_device_id,
+      </if>
+
+      <if test="baseIp != null">
+        base_ip,
+      </if>
+      <if test="basePort != null">
+        base_port,
+      </if>
+      <if test="portalVer != null">
+        portal_ver,
+      </if>
+      <if test="authType != null">
+        auth_type,
+      </if>
+      <if test="timeOut != null">
+        time_out,
+      </if>
+
+      <if test="deviceConfig != null and deviceConfig != ''">
+          device_config,
+      </if>
+
+      <if test="companyId != null">
+        company_id,
+      </if>
+
+        create_time,
+
+        modify_time,
+
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+
+      <if test="acDeviceId != null">
+        #{acDeviceId,jdbcType=INTEGER},
+      </if>
+
+      <if test="baseIp != null">
+        #{baseIp,jdbcType=VARCHAR},
+      </if>
+      <if test="basePort != null">
+        #{basePort,jdbcType=VARCHAR},
+      </if>
+      <if test="portalVer != null">
+        #{portalVer,jdbcType=VARCHAR},
+      </if>
+      <if test="authType != null">
+        #{authType,jdbcType=VARCHAR},
+      </if>
+      <if test="timeOut != null">
+        #{timeOut,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceConfig != null and deviceConfig != ''">
+        #{deviceConfig},
+      </if>
+
+      <if test="companyId != null">
+        #{companyId,jdbcType=VARCHAR},
+      </if>
+        NOW(),
+        NOW(),
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="cipher.console.oidc.domain.web.AcSetInfo">
+    update cipher_portal_config
+    <set>
+      <if test="acDeviceId != null">
+        ac_device_id = #{acDeviceId,jdbcType=INTEGER},
+      </if>
+      <if test="descripetion != null">
+        descripetion = #{descripetion,jdbcType=VARCHAR},
+      </if>
+      <if test="baseIp != null">
+        base_ip = #{baseIp,jdbcType=VARCHAR},
+      </if>
+      <if test="basePort != null">
+        base_port = #{basePort,jdbcType=VARCHAR},
+      </if>
+      <if test="portalVer != null">
+        portal_ver = #{portalVer,jdbcType=VARCHAR},
+      </if>
+      <if test="authType != null">
+        auth_type = #{authType,jdbcType=VARCHAR},
+      </if>
+      <if test="timeOut != null">
+        time_out = #{timeOut,jdbcType=VARCHAR},
+      </if>
+      <if test="sharedSecret != null">
+        shared_secret = #{sharedSecret,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="url != null">
+         url= #{url,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceConfig != null and deviceConfig != ''">
+         device_config=#{deviceConfig},
+      </if>
+        modify_time = NOW(),
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cipher.console.oidc.domain.web.AcSetInfo">
+    update cipher_portal_config
+    set ac_device_id = #{acDeviceId,jdbcType=INTEGER},
+    descripetion = #{descripetion,jdbcType=VARCHAR},
+    base_ip = #{baseIp,jdbcType=VARCHAR},
+    base_port = #{basePort,jdbcType=VARCHAR},
+    portal_ver = #{portalVer,jdbcType=VARCHAR},
+    auth_type = #{authType,jdbcType=VARCHAR},
+    time_out = #{timeOut,jdbcType=VARCHAR},
+    shared_secret = #{sharedSecret,jdbcType=VARCHAR},
+    create_time = #{createTime,jdbcType=TIMESTAMP},
+    modify_time = #{modifyTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <select id="selectAcSetInfoList" resultMap="BaseResultMap" parameterType="cipher.console.oidc.domain.web.AcSetInfo">
+    select
+    <include refid="Base_Column_List" />
+    from cipher_portal_config where company_id=#{companyId}
+    order by create_time desc
+    LIMIT #{pageData.currentRow}, #{pageData.rows}
+  </select>
+
+  <select id="selectAcSetInfoCount" resultType="int">
+    select
+    count(id)
+    from cipher_portal_config
+    where company_id=#{companyId}
+  </select>
+  <insert id="insertWifiPortalSetInfo">
+    insert into cipher_portal_config
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+
+      <if test="acDeviceId != null">
+        ac_device_id,
+      </if>
+      <if test="descripetion != null">
+        descripetion,
+      </if>
+      <if test="baseIp != null">
+        base_ip,
+      </if>
+      <if test="basePort != null">
+        base_port,
+      </if>
+      <if test="portalVer != null">
+        portal_ver,
+      </if>
+      <if test="authType != null">
+        auth_type,
+      </if>
+      <if test="timeOut != null">
+        time_out,
+      </if>
+      <if test="sharedSecret != null">
+        shared_secret,
+      </if>
+      <if test="url != null">
+        url,
+      </if>
+      <if test="companyId != null">
+        company_id,
+      </if>
+
+      create_time,
+
+      modify_time,
+
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+
+      <if test="acDeviceId != null">
+        #{acDeviceId,jdbcType=INTEGER},
+      </if>
+      <if test="descripetion != null">
+        #{descripetion,jdbcType=VARCHAR},
+      </if>
+      <if test="baseIp != null">
+        #{baseIp,jdbcType=VARCHAR},
+      </if>
+      <if test="basePort != null">
+        #{basePort,jdbcType=VARCHAR},
+      </if>
+      <if test="portalVer != null">
+        #{portalVer,jdbcType=VARCHAR},
+      </if>
+      <if test="authType != null">
+        #{authType,jdbcType=VARCHAR},
+      </if>
+      <if test="timeOut != null">
+        #{timeOut,jdbcType=VARCHAR},
+      </if>
+      <if test="sharedSecret != null">
+        #{sharedSecret,jdbcType=VARCHAR},
+      </if>
+      <if test="url != null">
+        #{url,jdbcType=VARCHAR},
+      </if>
+      <if test="companyId != null">
+        #{companyId,jdbcType=VARCHAR},
+      </if>
+      NOW(),
+      NOW(),
+    </trim>
+  </insert>
+
+
+  <update id="updateAcSetInfo"  parameterType="cipher.console.oidc.domain.web.WifiPortalSetInfoDomain">
+    update cipher_portal_config
+    <set>
+      <if test="acDeviceId != null">
+        ac_device_id = #{acDeviceId,jdbcType=INTEGER},
+      </if>
+      <if test="baseIp != null">
+        base_ip = #{baseIp,jdbcType=VARCHAR},
+      </if>
+      <if test="basePort != null">
+        base_port = #{basePort,jdbcType=VARCHAR},
+      </if>
+      <if test="portalVer != null">
+        portal_ver = #{portalVer,jdbcType=VARCHAR},
+      </if>
+      <if test="authType != null">
+        auth_type = #{authType,jdbcType=VARCHAR},
+      </if>
+      <if test="timeOut != null">
+        time_out = #{timeOut,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceConfig != null and deviceConfig != ''">
+        device_config=#{deviceConfig},
+      </if>
+      modify_time = NOW(),
+    </set>
+    where id = #{acId}
+  </update>
+
+</mapper>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="cipher.console.oidc.mapper.WxLocalUserBindingMapper">
+
+
+    <select id="queryAlreDyInBindUser" resultType="java.lang.String">
+        <if test="list != null and list.size() != 0">
+            select wx_user_id from cipher_account_wx_bind_mapping where
+            wx_user_id in
+            <foreach collection="list" open="(" separator="," close=")" item="wxUser">
+                #{wxUser.userid}
+            </foreach>
+        </if>
+    </select>
+
+
+    <insert id="insertList">
+        <if test="list != null and list.size() != 0">
+            insert into cipher_account_wx_bind_mapping
+            (wx_user_id,
+            user_id,
+            company_id,
+            create_time,
+            modify_time)
+            values
+            <foreach collection="list" item="bindMap" separator=",">
+                (
+                #{bindMap.wxUserId},
+                #{bindMap.userId},
+                #{bindMap.companyId},
+                NOW(),
+                NOW()
+                )
+            </foreach>
+        </if>
+    </insert>
+</mapper>

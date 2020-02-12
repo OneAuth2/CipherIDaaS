@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cipher.console.oidc.mapper.LoginFailMapper">
+
+
+    <update id="updateLoginFailInfo" parameterType="cipher.console.oidc.domain.web.LoginFailInfo">
+        update cipher_login_exception_manage
+        <set>
+            <if test="timeRang != null">
+                time_range = #{timeRang},
+            </if>
+            <if test="failCount != null">
+                fail_count = #{failCount},
+            </if>
+            <if test="freezingTime != null">
+                freezing_time = #{freezingTime},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            modify_time=NOW()
+        </set>
+        where id = #{id}
+    </update>
+
+    <select id="getLoginFailInfo" resultType="cipher.console.oidc.domain.web.LoginFailInfo">
+           select id,   time_range as timeRang,
+              fail_count as failCount,
+              freezing_time as freezingTime,
+              status
+              from  cipher_login_exception_manage
+              where company_id=#{companyId}
+    </select>
+
+    <insert id="insertLoginFailInfo" parameterType="cipher.console.oidc.domain.web.LoginFailInfo">
+        insert into cipher_login_exception_manage
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="timeRang != null">
+                time_range,
+            </if>
+            <if test="failCount != null">
+                fail_count,
+            </if>
+            <if test="freezingTime != null">
+                freezing_time,
+            </if>
+            <if test="status != null">
+                status,
+            </if>
+            <if test="companyId != null">
+                company_id,
+            </if>
+             create_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="timeRang != null">
+                 #{timeRang},
+            </if>
+            <if test="failCount != null">
+                 #{failCount},
+            </if>
+            <if test="freezingTime != null">
+                #{freezingTime},
+            </if>
+            <if test="status != null">
+                 #{status},
+            </if>
+            <if test="companyId != null">
+                #{companyId},
+            </if>
+            NOW()
+        </trim>
+
+    </insert>
+
+
+    <select id="queryLoginFailedUser" resultType="cipher.console.oidc.domain.web.LoginFailedConfigEntity">
+      select  time_range as timeRange,
+              fail_count as failCount,
+              freezing_time as freezingTime,
+              status
+              from  cipher_login_exception_manage
+    </select>
+
+</mapper>

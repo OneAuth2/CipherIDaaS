@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="cipher.console.oidc.mapper.ZhongheDepMapper">
+
+
+    <insert id="insertZhDepList">
+        insert into zhonghe_bumen_interface(pk, is_active, master_post, name, parent_pk, create_time) values
+        <foreach collection="departmentList" item="dep" index="dep" separator=",">
+            (
+            #{dep.pk},
+            #{dep.is_active},
+            #{dep.master_post},
+            #{dep.name},
+            #{dep.parent_pk},
+            NOW()
+            )
+        </foreach>
+    </insert>
+
+    <select id="queryAllZhDep" resultType="cipher.console.oidc.domain.zhonghe.ZhongheDepartment">
+        select * from zhonghe_bumen_interface;
+    </select>
+
+    <select id="addGroup2Cipher" useCache="false" statementType="CALLABLE">
+         <![CDATA[
+        call add_group();
+        ]]>
+    </select>
+</mapper>

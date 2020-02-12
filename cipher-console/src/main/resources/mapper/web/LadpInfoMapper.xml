@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cipher.console.oidc.mapper.LadpInfoMapper">
+
+
+    <update id="updateLadpManageInfo" parameterType="cipher.console.oidc.domain.web.LadpInfoDomain">
+        update cipher_ldap_config
+        <set>
+            <if test="password != null and password!=''">
+                password = #{password},
+            </if>
+            <if test="port != null and port!=''">
+                port = #{port},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <if test="serverAddress != null and serverAddress!=''">
+                server_address = #{serverAddress},
+            </if>
+            <if test="accountNumber != null and accountNumber!=''">
+                account_number = #{accountNumber},
+            </if>
+            <if test="isSSL != null">
+                isSSL=#{isSSL},
+            </if>
+            modify_time=NOW()
+        </set>
+        where id = #{id}
+    </update>
+
+    <select id="getLadpManageInfo" resultType="cipher.console.oidc.domain.web.LadpInfoDomain">
+       select id,status,
+              port,password,isSSL,
+              server_address as serverAddress,
+              account_number as accountNumber
+              from cipher_ldap_config
+    </select>
+
+    <insert id="insertLadpManageInfo" parameterType="cipher.console.oidc.domain.web.LadpInfoDomain">
+        insert into cipher_ldap_config
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="password != null">
+                password,
+            </if>
+            <if test="status != null">
+                status,
+            </if>
+            <if test="port != null">
+                port,
+            </if>
+            <if test="serverAddress != null">
+                server_address,
+            </if>
+            <if test="accountNumber != null">
+                account_number,
+            </if>
+            <if test="isSSL != null">
+                isSSL,
+            </if>
+             create_time,
+             modify_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="password != null and password !='' ">
+                 #{password},
+            </if>
+            <if test="status != null">
+                 #{status},
+            </if>
+            <if test="port != null and port !=''">
+                #{port},
+            </if>
+            <if test="serverAddress != null and serverAddress= !''">
+                 #{serverAddress},
+            </if>
+            <if test="accountNumber != null and accountNumber!=''">
+                #{accountNumber},
+            </if>
+            <if test="isSSL != null">
+                #{isSSL},
+            </if>
+            NOW(),
+            NOW()
+        </trim>
+
+    </insert>
+
+
+
+</mapper>

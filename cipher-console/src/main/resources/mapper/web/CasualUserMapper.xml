@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cipher.console.oidc.mapper.CasualUserMapper">
+
+    <resultMap id="baseResultMap" type="cipher.console.oidc.domain.web.CasualUserInfo">
+        <result column="account_number" property="accountNumber" />
+        <result column="account_status" property="status" />
+    </resultMap>
+    <select id="selectCasualUserList" resultMap="baseResultMap"
+            parameterType="cipher.console.oidc.domain.web.CasualUserInfo">
+        select mm.*
+        from cipher_user_info mm
+        where 1=1 and mm.is_delete=0 and mm.account_authorized_date is not null and mm.account_authorized_valid_date is not null
+        <if test="queryName!=null and queryName!=''">
+            and user_name LIKE CONCAT(CONCAT('%',#{queryName}),'%') OR
+            account_number LIKE CONCAT(CONCAT('%',#{queryName}),'%'))
+        </if>
+        <if test="accountNumber!=null and accountNumber!=''">
+            and mm.account_number=#{accountNumber}
+        </if>
+        <if test="status!=null and status!=''">
+            and account_status=#{status}
+        </if>
+        <if test="sidx!=null and sidx=='accountNumber'.toString()">
+            order by account_number ${sord}
+        </if>
+        <if test="sidx!=null and sidx=='userName'.toString()">
+            order by user_name ${sord}
+        </if>
+        <if test="sidx!=null and sidx=='roleName'.toString()">
+            order by role_name ${sord}
+        </if>
+        LIMIT #{pageData.currentRow}, #{pageData.rows}
+    </select>
+    <select id="selectCasualCount" resultType="int" parameterType="cipher.console.oidc.domain.web.CasualUserInfo">
+        select COUNT(cipher_user_info.account_number)
+        from cipher_user_info
+        left join cipher_group_user_map
+        on cipher_user_info.account_number=cipher_group_user_map.account_number
+        where cipher_user_info.account_authorized_valid_date is not null and cipher_user_info.account_authorized_date is
+        not null
+        and is_delete=0
+        <if test="queryName!=null and queryName!=''">
+            and user_name like concat(concat('%',#{queryName}),'%') or
+            cipher_user_info.account_number like concat(concat('%',#{queryName}),'%'))
+        </if>
+        <if test="groupId!=null and groupId!=''">
+            and cipher_group_user_map.group_id=#{groupId}
+        </if>
+        <if test="status!=null and status!=''">
+            and account_status=#{status}
+        </if>
+    </select>
+    <select id="getCasualUser" resultType="cipher.console.oidc.domain.web.DatailCasualUserInfo" parameterType="String">
+          select
+          user_name,
+      cipher_user_info.account_number,
+      applications,
+      nickname,
+      phone_number,
+      mail,
+      job,
+      gender,
+      account_authorized_date,
+      account_authorized_valid_date
+
+      from cipher_user_info
+      left join cipher_group_user_map
+      on cipher_user_info.account_number=cipher_group_user_map.account_number
+      left join cipher_group_info
+      on cipher_group_user_map.group_id=cipher_group_info.group_id
+      left join (
+      select cipher_group_info.group_id,group_concat(application_name) as applications
+      from cipher_group_info,cipher_group_authorization_map,cipher_application_info
+      where cipher_group_info.group_id=cipher_group_authorization_map.group_id
+      and cipher_group_authorization_map.application_id=cipher_application_info.application_id
+      group by cipher_group_info.group_id
+      ) app_group
+      on cipher_group_user_map.group_id=app_group.group_id
+      left join (
+      select  account_number,group_concat(account_authorized_method) as methods
+      from cipher_user_authorization_map
+      group by account_number
+       ) user_method
+       on user_method.account_number=cipher_user_info.account_number
+     where cipher_user_info.account_number=#{accountNumber}
+
+
+    </select>
+    <select id="selectCasualUserListByGroupId" resultType="cipher.console.oidc.domain.web.CasualUserInfo">
+     select user_name AS userName,
+        cipher_user_info.account_number,
+        applications,
+        account_status as status
+        from cipher_user_info
+        left join cipher_group_user_map
+        on cipher_user_info.account_number=cipher_group_user_map.account_number
+        left join cipher_group_info
+        on cipher_group_user_map.group_id=cipher_group_info.group_id
+        left join (select cipher_group_info.group_id, GROUP_CONCAT(application_name) as applications
+        FROM cipher_group_info, cipher_group_authorization_map, cipher_application_info
+        where cipher_group_info.group_id=cipher_group_authorization_map.group_id
+        and cipher_group_authorization_map.application_id=cipher_application_info.application_id
+        group by cipher_group_info.group_id
+        ) app_group
+        on app_group.group_id=cipher_group_user_map.group_id
+        LEFT JOIN (
+        SELECT
+        account_number,
+        GROUP_CONCAT(account_authorized_method) AS methods
+        FROM cipher_user_authorization_map
+        GROUP BY account_number
+        ) user_method
+        ON user_method.account_number = cipher_user_info.account_number
+        where cipher_user_info.account_authorized_valid_date is not null and cipher_user_info.account_authorized_date is
+        not null and is_delete=0
+        and cipher_group_user_map.group_id=#{groupId}
+    </select>
+    <select id="getcasualUserList" resultType="cipher.console.oidc.domain.web.TreeNodesDomain">
+     select
+     tt.account_number as accountNumber,
+     user_name as userName,
+     nn.group_name as groupName,
+     mm.group_id as groupId
+     from cipher_user_info tt
+    right join cipher_group_user_map mm on tt.account_number=mm.account_number
+    LEFT JOIN cipher_group_info nn on mm.group_id=nn.group_id
+     where 1=1 and tt.is_delete=0
+     and tt.account_authorized_valid_date is not null and tt.account_authorized_date is
+        not null
+    </select>
+
+
+
+    <select id="selectCasualList" resultType="cipher.console.oidc.domain.web.CasualUserInfo" parameterType="cipher.console.oidc.domain.web.CasualUserInfo">
+        select mm.account_number as accountNumber,
+        user_name AS userName,
+        account_status as status
+        from cipher_user_info mm
+        Left JOIN cipher_group_user_map ff on ff.account_number=mm.account_number
+        Left join cipher_group_info  rr on rr.group_id=ff.group_id
+        where 1=1 and mm.is_delete=0 and  mm.account_authorized_date is not null and mm.account_authorized_valid_date is not null
+        and rr.group_id=#{groupId}
+        <if test="queryName!=null and queryName!=''">
+            and user_name LIKE CONCAT(CONCAT('%',#{queryName}),'%') OR
+            mm.account_number LIKE CONCAT(CONCAT('%',#{queryName}),'%'))
+        </if>
+        <if test="status!=null and status!=''">
+            and account_status=#{status}
+        </if>
+
+    </select>
+
+
+</mapper>

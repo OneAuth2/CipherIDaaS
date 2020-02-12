@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cipher.console.oidc.mapper.CompanyInfoMapper" >
+  <resultMap id="BaseResultMap" type="cipher.console.oidc.domain.web.CompanyInfoDomain" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="company_name" property="companyName" jdbcType="VARCHAR" />
+    <result column="maxsize" property="maxsize" jdbcType="INTEGER" />
+    <result column="is_stop" property="isStop" jdbcType="INTEGER" />
+    <result column="account_number" property="accountNumber" jdbcType="VARCHAR"/>
+    <result column="company_app_id" property="companyAppId" jdbcType="VARCHAR" />
+    <result column="company_secret_key" property="companySecretKey" jdbcType="VARCHAR" />
+    <result column="single_count" property="singleCount" jdbcType="INTEGER" />
+    <result column="left_count" property="leftCount" jdbcType="INTEGER" />
+    <result column="out_of_date" property="outOfDate" jdbcType="TIMESTAMP" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <select id="getCompanyInfoById" resultMap="BaseResultMap"
+          parameterType="java.lang.String">
+    select * from cipher_company_info where id=#{companyId}
+  </select>
+
+  <update id="updateLeftCount" parameterType="cipher.console.oidc.domain.web.CompanyInfoDomain">
+    update cipher_company_info set left_count=#{leftCount} where id=#{id}
+  </update>
+
+  <select id="queryCompanyId"
+          parameterType="cipher.console.oidc.domain.web.CompanyInfoDomain"
+          resultType="INTEGER">
+    select id from cipher_company_info where plat_user_id =#{platUserId}
+  </select>
+
+</mapper>

@@ -1,0 +1,415 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="cipher.console.oidc.mapper.SubAccountMapper">
+
+    <select id="getTheSubAccount" resultType="cipher.console.oidc.domain.web.SubAccountDomain">
+        SELECT *
+        FROM
+        cipher_sub_account
+        WHERE 1=1
+        <if test="subAccount!=null and subAccount!=''">
+            and sub_account = #{subAccount}
+        </if>
+        <if test="appClientId!=null and appClientId!=''">
+            and app_client_id=#{appClientId}
+        </if>
+    </select>
+
+    <select id="getSubAccountApplication" parameterType="String"
+            resultType="cipher.console.oidc.model.ApplicationSubAccountSubTableModel">
+        SELECT
+        cipher_sub_account.sub_account,
+        cipher_application_info.application_name,
+        cipher_application_info.application_authorized_date,
+        cipher_sub_account.modify_time,
+        cipher_application_info.application_id,
+        cipher_application_info.id
+        FROM cipher_sub_account_map, cipher_sub_account, cipher_application_info
+        WHERE cipher_sub_account_map.sub_id = cipher_sub_account.id
+        AND cipher_application_info.application_id = cipher_sub_account.app_client_id
+        AND cipher_sub_account_map.account_number = #{accountName}
+        <if test="sidx!=null and sidx=='appName'.toString()">
+            order by cipher_application_info.application_name ${sord}
+        </if>
+        <if test="sidx!=null and sidx=='subAccount'.toString()">
+            order by cipher_sub_account.sub_account ${sord}
+        </if>
+        <if test="sidx!=null and sidx=='visitDate'.toString()">
+            order by cipher_sub_account.modify_time ${sord}
+        </if>
+        <if test="sidx!=null and sidx=='authorizedDate'.toString()">
+            order by cipher_application_info.application_authorized_date ${sord}
+        </if>
+    </select>
+
+    <select id="getUnAuthorizedUserApplication" parameterType="String"
+            resultType="cipher.console.oidc.model.ApplicationSubAccountSubTableModel">
+        SELECT
+        cipher_application_info.application_name,
+        cipher_application_info.application_authorized_date,
+        cipher_application_info.modify_time,
+        cipher_application_info.application_id,
+        cipher_application_info.id
+        FROM cipher_application_info, cipher_user_info
+        WHERE
+        cipher_application_info.id IN
+        (SELECT cipher_group_authorization_map.application_id
+        FROM cipher_group_authorization_map
+        WHERE cipher_group_authorization_map.group_id
+        IN (
+        SELECT group_id
+        FROM cipher_group_user_map
+        WHERE cipher_group_user_map.account_number = #{accountName}
+        )
+        )
+        AND cipher_user_info.account_number = #{accountName}
+        AND cipher_application_info.application_id NOT IN (
+        SELECT cipher_application_info.application_id
+        FROM cipher_sub_account_map, cipher_sub_account, cipher_application_info
+        WHERE cipher_sub_account_map.sub_id = cipher_sub_account.id
+        AND cipher_application_info.application_id = cipher_sub_account.app_client_id
+        AND cipher_sub_account_map.account_number = #{accountName}
+        )
+
+        <if test="sidx!=null and sidx=='appName'.toString()">
+            order by cipher_application_info.application_name ${sord}
+        </if>
+        <if test="sidx!=null and sidx=='visitDate'.toString()">
+            order by cipher_application_info.modify_time ${sord}
+        </if>
+        <if test="sidx!=null and sidx=='authorizedDate'.toString()">
+            order by cipher_application_info.application_authorized_date ${sord}
+        </if>
+    </select>
+
+    <delete id="disconnectWithSubAccount">
+        DELETE
+        FROM cipher_sub_account_map
+        WHERE id
+            IN (
+                  SELECT id
+                  FROM (
+                           SELECT cipher_sub_account_map.id
+                           FROM cipher_sub_account_map
+                           WHERE account_number = #{account_number}
+                             AND sub_id IN (
+                               SELECT cipher_sub_account.id
+                               FROM cipher_sub_account
+                               WHERE sub_account = #{sub_account}
+                           )
+                       ) tab1
+              )
+    </delete>
+
+    <select id="subAccountList" resultType="cipher.console.oidc.model.MainSubAppAccountModel"
+            parameterType="cipher.console.oidc.model.MainSubAppAccountModel">
+        SELECT
+        user_info.account_number,
+        user_name AS userName,
+        account_app_info.id as subAccountId,
+        account_app_info.sub_account,
+        account_app_info.app_client_id,
+        account_app_info.application_name
+        FROM cipher_user_info user_info RIGHT JOIN (
+        SELECT
+        app.application_name,
+        account_info.*
+        FROM cipher_application_info app RIGHT JOIN (
+        SELECT
+        sub.id,
+        sub.sub_account,
+        sub.app_client_id,
+        sub_main_map.account_number
+        FROM
+        cipher_sub_account sub LEFT JOIN
+        cipher_sub_account_map sub_main_map
+        ON sub.id
+        =
+        sub_main_map.sub_id) account_info
+        ON account_info.app_client_id =
+        app.application_id) account_app_info
+        ON account_app_info.account_number = user_info.account_number
+        WHERE 1=1
+        <if test="appClientId!=null and appClientId!=''">
+            and app_client_id=#{appClientId}
+        </if>
+        <if test="queryType==1">
+            and user_info.account_number IS NULL
+        </if>
+
+        <if test="queryType==2">
+            and user_info.account_number IS NOT NULL
+        </if>
+
+        <if test="sidx!=null and sidx=='applicationName'.toString()">
+            order by account_app_info.application_name ${sord}
+        </if>
+        <if test="sidx!=null and sidx=='subAccount'.toString()">
+            order by account_app_info.sub_account ${sord}
+        </if>
+        <if test="sidx!=null and sidx=='accountNumber'.toString()">
+            order by user_info.account_number ${sord}
+        </if>
+        <if test="sidx!=null and sidx=='userName'.toString()">
+            order by user_info.user_name ${sord}
+        </if>
+        LIMIT #{pageData.currentRow}, #{pageData.rows}
+    </select>
+
+    <select id="subAccountListTotal" resultType="int" parameterType="cipher.console.oidc.model.MainSubAppAccountModel">
+        SELECT count(account_app_info.id)
+        FROM cipher_user_info user_info RIGHT JOIN (
+        SELECT
+        app.application_name,
+        account_info.*
+        FROM cipher_application_info app RIGHT JOIN (
+        SELECT
+        sub.id,
+        sub.sub_account,
+        sub.app_client_id,
+        sub_main_map.account_number
+        FROM
+        cipher_sub_account sub LEFT JOIN
+        cipher_sub_account_map sub_main_map
+        ON sub.id
+        =
+        sub_main_map.sub_id) account_info
+        ON account_info.app_client_id =
+        app.application_id) account_app_info
+        ON account_app_info.account_number = user_info.account_number
+        WHERE 1=1
+        <if test="appClientId!=null and appClientId!=''">
+            and app_client_id=#{appClientId}
+        </if>
+
+        <if test="queryType==1">
+            and user_info.account_number IS NULL
+        </if>
+
+        <if test="queryType==2">
+            and user_info.account_number IS NOT NULL
+        </if>
+
+
+    </select>
+
+    <select id="querySubAuthPageList" resultType="cipher.console.oidc.model.SubAccountAuthModel"
+            parameterType="cipher.console.oidc.model.SubAccountAuthModel">
+        SELECT
+        group_.group_name,
+        user_info_group.*
+        FROM cipher_group_info group_ RIGHT JOIN (
+        SELECT
+        group_user_map.group_id,
+        group_user_map.account_number,
+        user_name AS userName
+        FROM cipher_group_user_map group_user_map LEFT JOIN
+        cipher_user_info user
+        ON group_user_map.account_number =
+        user.account_number
+        where group_id IN (
+        SELECT cipher_group_authorization_map.group_id from cipher_group_authorization_map where
+        application_id=#{applicationId}
+        )
+        ) user_info_group
+        ON group_.group_id = user_info_group.group_id
+        WHERE 1=1
+        and user_info_group.account_number not IN (
+        SELECT account_number from cipher_sub_account_map where sub_id =
+        #{subId})
+        <if test="groupId!=null and groupId!=''">
+            and group_.group_id=#{groupId}
+        </if>
+        <if test="userName!=null and userName!=''">
+            and (userName LIKE CONCAT(CONCAT('%',#{userName}),'%') or user_info_group.account_number like
+            CONCAT(CONCAT('%',#{userName}),'%') )
+        </if>
+        <if test="sidx!=null and sidx=='userName'.toString()">
+            order by account_number ${sord}
+        </if>
+        <if test="sidx!=null and sidx=='accountNumber'.toString()">
+            order by user_info_group.account_number ${sord}
+        </if>
+        <if test="sidx!=null and sidx=='groupName'.toString()">
+            order by group_name ${sord}
+        </if>
+        LIMIT #{pageData.currentRow}, #{pageData.rows}
+    </select>
+
+    <select id="querySubAuthPageListTotal" resultType="int"
+            parameterType="cipher.console.oidc.model.SubAccountAuthModel">
+        SELECT
+        count(*)
+        FROM cipher_group_info group_ RIGHT JOIN (
+        SELECT
+        group_user_map.group_id,
+        group_user_map.account_number,
+        user_name AS userName
+        FROM cipher_group_user_map group_user_map LEFT JOIN
+        cipher_user_info user
+        ON group_user_map.account_number =
+        user.account_number
+        where group_id IN (
+        SELECT cipher_group_authorization_map.group_id from cipher_group_authorization_map where
+        application_id=#{applicationId}
+        )
+        ) user_info_group
+        ON group_.group_id = user_info_group.group_id
+        WHERE 1=1
+        and user_info_group.account_number not IN (SELECT account_number from cipher_sub_account_map where sub_id =
+        #{subId})
+        <if test="groupId!=null and groupId!=''">
+            and group_.group_id=#{groupId}
+        </if>
+        <if test="userName!=null and userName!=''">
+            and (userName LIKE CONCAT(CONCAT('%',#{userName}),'%') or user_info_group.account_number like
+            CONCAT(CONCAT('%',#{userName}),'%') )
+        </if>
+    </select>
+    <select id="insertSubAccountMap" parameterType="cipher.console.oidc.domain.web.SubAccountMapDomain">
+        INSERT INTO cipher_sub_account_map (user_id,account_number, sub_id, create_time, modify_time)
+        VALUES (#{userId},
+                #{accountNumber},
+                #{subId},
+                NOW(),
+                NOW())
+    </select>
+    <select id="deleteSubAccountMap" parameterType="cipher.console.oidc.domain.web.SubAccountMapDomain">
+        DELETE
+        FROM cipher_sub_account_map
+        WHERE user_id = #{uuid}
+          AND sub_id = #{subId};
+    </select>
+
+    <select id="querySubAccount" parameterType="cipher.console.oidc.domain.exceldomain.SubAccountExcel"
+            resultType="cipher.console.oidc.domain.web.SubAccountDomain">
+        SELECT *
+        FROM cipher_sub_account
+        WHERE sub_account = #{subAccount}
+          AND app_client_id = #{appClientId}
+        LIMIT 1;
+    </select>
+
+    <insert id="insertSubAccount" useGeneratedKeys="true" keyProperty="id"
+            parameterType="cipher.console.oidc.domain.exceldomain.SubAccountExcel">
+        INSERT INTO cipher_sub_account (sub_account, app_client_id, create_time, modify_time)
+        VALUES (#{subAccount},
+                #{appClientId},
+                NOW(),
+                NOW())
+    </insert>
+
+    <select id="querySubAccountByApplicationId" parameterType="cipher.console.oidc.model.SubAccountApplicationModel"
+            resultType="cipher.console.oidc.model.SubAccountApplicationModel">
+        SELECT cipher_sub_account.sub_account,
+        cipher_sub_account.app_client_id,
+        cipher_sub_account.id as subId
+        FROM cipher_sub_account,cipher_application_info
+        where cipher_sub_account.app_client_id = cipher_application_info.application_id
+        AND cipher_application_info.id = #{applicationId}
+        <if test="subAccount!=null and subAccount!=''">
+            AND cipher_sub_account.sub_account LIKE CONCAT(CONCAT('%',#{subAccount}),'%')
+        </if>
+        order by cipher_sub_account.sub_account ${sord}
+        LIMIT #{pageData.currentRow}, #{pageData.rows}
+    </select>
+    <select id="countAppSubAccount" resultType="int"
+            parameterType="cipher.console.oidc.model.SubAccountApplicationModel">
+        SELECT count(cipher_sub_account.id) as count
+        FROM cipher_sub_account,cipher_application_info
+        where cipher_sub_account.app_client_id = cipher_application_info.application_id
+        AND cipher_application_info.id = #{applicationId}
+        <if test="subAccount!=null and subAccount!=''">
+            AND cipher_sub_account.sub_account LIKE CONCAT(CONCAT('%',#{subAccount}),'%')
+        </if>
+    </select>
+
+
+    <select id="querySubAccountInfo" resultType="cipher.console.oidc.domain.web.SubAccountDomain">
+        select *
+        from cipher_sub_account tt
+                 LEFT JOIN cipher_sub_account_map mm on tt.id = mm.sub_id
+                 LEFT JOIN cipher_application_info rr on rr.application_id = tt.app_client_id
+                 LEFT JOIN cipher_user_info dd on dd.uuid = mm.user_id
+          where dd.uuid = #{uuid}
+          and tt.app_client_id = #{appClientId}
+    </select>
+
+    <select id="querySubAccountInfoByAccountNumber" parameterType="String"
+            resultType="cipher.console.oidc.domain.web.SubAccountDomain">
+        select cipher_sub_account.id,cipher_sub_account.sub_account,cipher_sub_account.app_client_id
+        from cipher_sub_account,
+             cipher_sub_account_map
+        where cipher_sub_account_map.account_number = #{accountNumber}
+          and cipher_sub_account_map.sub_id = cipher_sub_account.id;
+    </select>
+
+
+    <insert id="insertByBatch" parameterType="java.util.List" useGeneratedKeys="true">
+        <selectKey resultType="int" keyProperty="id" order="AFTER">
+            SELECT
+            LAST_INSERT_ID()
+        </selectKey>
+        insert into cipher_sub_account (sub_account, app_client_id, create_time, modify_time)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.subAccount}, #{item.appClientId},NOW(),NOW())
+        </foreach>
+    </insert>
+
+
+    <insert id="insertSubAccountInfo" useGeneratedKeys="true" keyProperty="id"
+            parameterType="cipher.console.oidc.domain.web.SubAccountInfoDomain">
+        INSERT INTO cipher_sub_account (sub_account, sub_pwd, app_client_id, create_time, modify_time)
+        VALUES (#{subAccount},
+                #{password},
+                #{appClientId},
+                NOW(),
+                NOW())
+    </insert>
+
+    <select id="selectAssAccountIdByAppId" parameterType="string" resultType="string">
+        select GROUP_CONCAT(id) ids FROM cipher_sub_account WHERE app_client_id=#{applicationId}
+    </select>
+
+    <delete id="deleteAssAccountId" parameterType="string">
+         DELETE FROM cipher_sub_account_map
+         WHERE sub_id IN (${assAccountIdByAppId});
+
+         DELETE FROM cipher_sub_account
+         WHERE app_client_id=#{applicationId}
+    </delete>
+
+
+    <select id="querySubPwdByClientAndName" resultType="java.lang.String">
+        select sub_pwd
+        from cipher_sub_account
+        where app_client_id = #{appClientId}
+          and sub_account = #{subAccount};
+    </select>
+
+
+
+    <update id="updateSubAccountInfo">
+        update cipher_sub_account
+        <set>
+            <if test="subAccount != null">
+                sub_account = #{subAccount},
+            </if>
+            <if test="password != null">
+                sub_pwd = #{password},
+            </if>
+            <if test="appClientId != null">
+                app_client_id = #{appClientId},
+            </if>
+            modify_time=NOW()
+        </set>
+        where id = #{id}
+    </update>
+    <select id="selectSubByuuidAndAppId" resultType="string" parameterType="string">
+       select a.sub_account from cipher_sub_account a,cipher_sub_account_map b
+       where a.id=b.sub_id and a.app_client_id=#{appClientId} and b.user_id=#{uuid}
+    </select>
+
+</mapper>

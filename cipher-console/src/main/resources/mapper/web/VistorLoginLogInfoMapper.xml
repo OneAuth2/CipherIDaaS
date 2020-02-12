@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cipher.console.oidc.mapper.VistorLoginLogInfoMapper">
+    <resultMap id="BaseResultMap" type="cipher.console.oidc.domain.web.VistorLoginLogInfo">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="vistor_name" property="vistorName" jdbcType="VARCHAR"/>
+        <result column="type" property="type" jdbcType="INTEGER"/>
+        <result column="ip" property="ip" jdbcType="VARCHAR"/>
+        <result column="operation" property="operation" jdbcType="VARCHAR"/>
+        <result column="visitor_type" property="visitorType" jdbcType="VARCHAR"/>
+        <result column="msg" property="msg" jdbcType="VARCHAR"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+    id, vistor_name, type, ip, operation, msg, create_time
+   </sql>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+        select
+        <include refid="Base_Column_List"/>
+        from cipher_vistor_login_log
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from cipher_vistor_login_log
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+    <insert id="insert" parameterType="cipher.console.oidc.domain.web.VistorLoginLogInfo">
+    insert into cipher_vistor_login_log (id, vistor_name, type,
+      ip, operation, msg,
+      create_time)
+    values (#{id,jdbcType=INTEGER}, #{vistorName,jdbcType=VARCHAR}, #{type,jdbcType=INTEGER},
+      #{ip,jdbcType=VARCHAR}, #{operation,jdbcType=VARCHAR}, #{msg,jdbcType=VARCHAR},
+      #{createTime,jdbcType=TIMESTAMP})
+  </insert>
+    <insert id="insertSelective" parameterType="cipher.console.oidc.domain.web.VistorLoginLogInfo">
+        insert into cipher_vistor_login_log
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="vistorName != null">
+                vistor_name,
+            </if>
+            <if test="type != null">
+                type,
+            </if>
+            <if test="ip != null">
+                ip,
+            </if>
+            <if test="operation != null">
+                operation,
+            </if>
+            <if test="msg != null">
+                msg,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=INTEGER},
+            </if>
+            <if test="vistorName != null">
+                #{vistorName,jdbcType=VARCHAR},
+            </if>
+            <if test="type != null">
+                #{type,jdbcType=INTEGER},
+            </if>
+            <if test="ip != null">
+                #{ip,jdbcType=VARCHAR},
+            </if>
+            <if test="operation != null">
+                #{operation,jdbcType=VARCHAR},
+            </if>
+            <if test="msg != null">
+                #{msg,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="cipher.console.oidc.domain.web.VistorLoginLogInfo">
+        update cipher_vistor_login_log
+        <set>
+            <if test="vistorName != null">
+                vistor_name = #{vistorName,jdbcType=VARCHAR},
+            </if>
+            <if test="type != null">
+                type = #{type,jdbcType=INTEGER},
+            </if>
+            <if test="ip != null">
+                ip = #{ip,jdbcType=VARCHAR},
+            </if>
+            <if test="operation != null">
+                operation = #{operation,jdbcType=VARCHAR},
+            </if>
+            <if test="msg != null">
+                msg = #{msg,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="cipher.console.oidc.domain.web.VistorLoginLogInfo">
+    update cipher_vistor_login_log
+    set vistor_name = #{vistorName,jdbcType=VARCHAR},
+      type = #{type,jdbcType=INTEGER},
+      ip = #{ip,jdbcType=VARCHAR},
+      operation = #{operation,jdbcType=VARCHAR},
+      msg = #{msg,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+
+    <select id="selectVistorLoginLogList" resultMap="BaseResultMap"
+            parameterType="cipher.console.oidc.domain.web.VistorLoginLogInfo">
+        SELECT
+        a.vistor_name,
+        a.name,
+        a.visitor_type,
+        a.type_name,
+        a.type,
+        a.ip,
+        b.description msg,
+        a.create_time
+        FROM
+        cipher_vistor_login_log a LEFT JOIN  cipher_ac_portal_config b
+        ON a.portal_id=b.portal_num
+        where 1=1
+        and a.company_id=#{companyId}
+        <if test="name != null and name!=''">
+            and (a.name LIKE CONCAT(CONCAT('%',#{name}),'%') OR a.vistor_name Like CONCAT(CONCAT('%',#{name}),'%'))
+        </if>
+        <if test="visitorType != null and visitorType!='' or visitorType==0">
+            and a.visitor_type = #{visitorType}
+        </if>
+        <if test="startTime != null and startTime!=''">
+            and a.create_time &gt;= #{startTime}
+        </if>
+        <if test="endTime != null and endTime!=''">
+            and a.create_time &lt; #{endTime}
+        </if>
+        order by a.create_time desc
+        LIMIT #{pageData.currentRow}, #{pageData.rows}
+    </select>
+
+    <select id="selectAllVistorLoginLogList" resultMap="BaseResultMap"
+            parameterType="cipher.console.oidc.domain.web.VistorLoginLogInfo">
+        select
+       *
+        from cipher_vistor_login_log
+        where 1=1
+        and type = 1 and company_id=#{companyId}
+        order by create_time desc
+    </select>
+
+
+
+
+
+
+
+    <select id="selectVistorLogCount" resultType="int" parameterType="cipher.console.oidc.domain.web.VistorLoginLogInfo">
+        SELECT count(id) FROM
+        cipher_vistor_login_log
+        where 1=1
+        and company_id=#{companyId}
+        <if test="name != null and name!=''">
+            and name LIKE CONCAT(CONCAT('%',#{name}),'%')
+        </if>
+        <if test="visitorType != null and visitorType!='' or visitorType==0">
+            and visitor_type = #{visitorType}
+        </if>
+        <if test="startTime != null and startTime!=''">
+            and create_time >= #{startTime}
+        </if>
+        <if test="endTime != null and endTime!=''">
+            and create_time &lt; #{endTime}
+        </if>
+    </select>
+    <select id="getUserNameState" resultType="cipher.console.oidc.domain.web.VistorLoginLogInfo">
+              select * from cipher_vistor_login_log  where vistor_name=#{userName}
+              ORDER BY ABS(NOW() - create_time) ASC
+              limit 1
+  </select>
+    <select id="downloadExcelLog" parameterType="cipher.console.oidc.domain.web.VistorLoginLogInfo" resultType="cipher.console.oidc.domain.exceldomain.WifeLogExcle">
+        select a.id,CONCAT(ifnull(a.name,""),"(",ifnull(a.vistor_name,""),")") visitorName,
+               CASE a.visitor_type WHEN 0 THEN "员工"
+                                 WHEN 1 THEN "访客"
+                                 ELSE "其他" END visitor_type
+                ,b.description msg,a.create_time from cipher_vistor_login_log a LEFT JOIN cipher_ac_portal_config b
+                ON a.portal_id = b.portal_num
+                where a.company_id=#{companyId}
+                 <if test="name!=null and name!=''">
+                      and a.name LIKE CONCAT(CONCAT('%',#{name}),'%')
+                 </if>
+                 <if test="visitorType!=null and visitorType!=0">
+                      and a.visitor_type = #{visitorType}
+                 </if>
+                 <if test="startTime!=null and startTime!=''">
+                      and a.create_time >= #{startTime}
+                 </if>
+                 <if test="endTime!=null and endTime!=''">
+                      and a.create_time &lt;= #{endTime}
+                 </if>
+                order by a.create_time desc
+    </select>
+    <select id="selectCount" resultType="java.lang.Integer">
+        select count(distinct vistor_name) from cipher_vistor_login_log
+        where type="1"
+          and create_time BETWEEN #{date5} AND #{date6}
+          AND visitor_type=#{type}
+          and company_id=#{companyId}
+    </select>
+
+
+    <insert id="insertDemo">
+    insert into cipher_vistor_login_log ( vistor_name, type,
+      ip, operation, msg,visitor_type,
+      create_time)
+    values ( "test1", "1",
+      "1.1.1.1", "登录","登录" ,
+      "0",
+      #{date })
+  </insert>
+    <select id="getEchartsYear" resultType="java.lang.Integer">
+        SELECT count(distinct vistor_name) FROM cipher_vistor_login_log
+        WHERE type="1"
+          AND  PERIOD_DIFF( date_format( #{date} , '%Y%m' ) , date_format( create_time, '%Y%m' ) ) =#{i}
+          AND visitor_type=#{type}
+          AND company_id=#{companyId}
+    </select>
+    <select id="selectPortalList" parameterType="string" resultType="cipher.console.oidc.domain.web.PortalLogInfo">
+        select distinct a.portal_id,b.description portal_name from cipher_vistor_login_log a LEFT JOIN cipher_ac_portal_config b
+        ON a.portal_id=b.portal_num
+        where a.company_id=#{companyId}
+    </select>
+    <select id="selectSsidCount" resultType="int">
+        SELECT count(distinct vistor_name) FROM cipher_vistor_login_log
+        WHERE type="1"
+          AND create_time BETWEEN #{startTime} and #{endTime}
+          AND portal_id=#{portalId}
+          AND company_id=#{companyId}
+    </select>
+    <select id="selectSsidMonthCount" resultType="int">
+        SELECT count(distinct vistor_name) FROM cipher_vistor_login_log
+        WHERE type="1"
+          AND  PERIOD_DIFF( date_format( #{date} , '%Y%m' ) , date_format( create_time, '%Y%m' ) ) =#{i}
+          AND  portal_id=#{portalId}
+          AND  company_id=#{companyId}
+    </select>
+
+</mapper>

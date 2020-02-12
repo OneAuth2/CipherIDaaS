@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="cipher.console.oidc.mapper.AutoSyncMapper">
+    <select id="obtainAdKey" parameterType="integer" resultType="string">
+        select concat(type,id) jobkey from cipher_ad_info where id=#{id}
+    </select>
+
+    <select id="obtainAppKey" parameterType="integer" resultType="string">
+        select application_id jobkey from cipher_application_info where id=#{id}
+    </select>
+
+    <select id="getAllDingId" resultType="cipher.console.oidc.domain.web.AutoSyncDingDomain">
+        select id,companyUUid,sync_config from cipher_ding_config_info
+    </select>
+
+    <select id="getAllAdId" resultType="cipher.console.oidc.domain.web.AutoSyncAdDomain">
+        SELECT id,company_id,auto_config FROM cipher_ad_info
+    </select>
+
+    <select id="getAllAppId" resultType="cipher.console.oidc.domain.web.AutoSyncAppDomain">
+        SELECT id,application_id,company_id,sync_config FROM cipher_application_info
+    </select>
+
+</mapper>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="cipher.console.oidc.mapper.AuthorizationMethodMapper">
+
+    <select id="queryAllAuthorizationMethod" resultType="cipher.console.oidc.domain.web.AuthorizationMethodDomain">
+        SELECT id,method,status FROM cipher_authorization_method_info;
+    </select>
+
+    <update id="updateAuthorizationMethod">
+        update cipher_authorization_method_info set status = #{status} where method = #{method};
+    </update>
+
+    <select id="queryUserAuthorizationMethod" resultType="cipher.console.oidc.domain.web.AuthorizationMethodDomain" parameterType="String">
+        SELECT cipher_authorization_method_info.method,cipher_authorization_method_info.id
+        from cipher_authorization_method_info,cipher_user_authorization_map
+        where cipher_user_authorization_map.account_number = #{accountNumber}
+        and cipher_authorization_method_info.method = cipher_user_authorization_map.account_authorized_method;
+    </select>
+
+
+</mapper>

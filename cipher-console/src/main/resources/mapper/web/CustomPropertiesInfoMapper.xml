@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cipher.console.oidc.mapper.CustomPropertiesInfoMapper" >
+  <resultMap id="BaseResultMap" type="cipher.console.oidc.domain.web.CustomPropertiesInfo" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="company_id" property="companyId" jdbcType="INTEGER" />
+    <result column="custom_value" property="customValue" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, company_id, custom_value, create_time, modify_time
+  </sql>
+
+  <select id="getInitData" parameterType="cipher.console.oidc.domain.web.CustomPropertiesInfo"
+          resultMap="BaseResultMap">
+    select * from cipher_custom_properties_info
+    where company_id=#{companyId} and state=#{state}
+  </select>
+
+  <update id="closeCustomProperties"
+          parameterType="cipher.console.oidc.domain.web.CustomPropertiesInfo">
+    update cipher_custom_properties_info
+    set state=#{state},modify_time=#{modifyTime}
+    where company_id=#{companyId} and custom_value=#{customValue}
+
+
+  </update>
+
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select
+    <include refid="Base_Column_List" />
+    from cipher_custom_properties_info
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from cipher_custom_properties_info
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="cipher.console.oidc.domain.web.CustomPropertiesInfo" >
+    insert into cipher_custom_properties_info (id, company_id, custom_value,state,
+      create_time, modify_time)
+    values (#{id,jdbcType=INTEGER}, #{companyId,jdbcType=INTEGER}, #{customValue,jdbcType=VARCHAR}, 
+      #{state,jdbcType=INTEGER},#{createTime,jdbcType=TIMESTAMP}, #{modifyTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="cipher.console.oidc.domain.web.CustomPropertiesInfo" >
+    insert into cipher_custom_properties_info
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="companyId != null" >
+        company_id,
+      </if>
+      <if test="customValue != null" >
+        custom_value,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="modifyTime != null" >
+        modify_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="companyId != null" >
+        #{companyId,jdbcType=INTEGER},
+      </if>
+      <if test="customValue != null" >
+        #{customValue,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modifyTime != null" >
+        #{modifyTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="cipher.console.oidc.domain.web.CustomPropertiesInfo" >
+    update cipher_custom_properties_info
+    <set >
+      <if test="companyId != null" >
+        company_id = #{companyId,jdbcType=INTEGER},
+      </if>
+      <if test="customValue != null" >
+        custom_value = #{customValue,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modifyTime != null" >
+        modify_time = #{modifyTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cipher.console.oidc.domain.web.CustomPropertiesInfo" >
+    update cipher_custom_properties_info
+    set company_id = #{companyId,jdbcType=INTEGER},
+      custom_value = #{customValue,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      modify_time = #{modifyTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

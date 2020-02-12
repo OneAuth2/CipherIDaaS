@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="cipher.console.oidc.mapper.TotpAuthorizationMapper">
+
+    <select id="queryAllTotpTable" resultType="cipher.console.oidc.model.TotpAuthorizationModel" parameterType="cipher.console.oidc.model.TotpAuthorizationModel">
+      SELECT * FROM (SELECT
+      user_name as  name,
+      cipher_totp_authorization_mag.account_number,
+      mail,phone_number,totp_binding_date,
+      cipher_group_info.group_id,
+      group_name,count(scratch_code) as count
+    FROM cipher_totp_authorization_mag,cipher_user_info  left join cipher_scratch_code_info on cipher_user_info.account_number = cipher_scratch_code_info.account_number,cipher_group_user_map,cipher_group_info
+    WHERE cipher_totp_authorization_mag.account_number = cipher_group_user_map.account_number
+    AND cipher_totp_authorization_mag.account_number = cipher_group_user_map.account_number
+    AND cipher_group_user_map.group_id = cipher_group_info.group_id
+    AND cipher_totp_authorization_mag.account_number = cipher_user_info.account_number
+    group by cipher_totp_authorization_mag.account_number
+    )tab1  WHERE 1=1
+        <if test="name==null and name!=''">
+          and  name like CONCAT(CONCAT('%',#{name}),'%')
+        </if>
+        <if test="sidx!=null and sidx=='name'.toString()">
+            order by user_name ${sord}
+        </if>
+        <if test="sidx!=null and sidx=='mail'.toString()">
+            order by mail ${sord}
+        </if>
+        <if test="sidx!=null and sidx=='phoneNumber'.toString()">
+            order by phone_number ${sord}
+        </if>
+        <if test="sidx!=null and sidx=='groupName'.toString()">
+            order by group_name ${sord}
+        </if>
+        <if test="sidx==null">
+            order by cipher_totp_authorization_mag.create_time ${sord}
+        </if>
+      LIMIT #{pageData.currentRow}, #{pageData.rows}
+    </select>
+
+    <select id="queryPageCount" resultType="int"  parameterType="cipher.console.oidc.model.TotpAuthorizationModel">
+      SELECT count(1) FROM (SELECT
+      user_name as  name,
+      cipher_totp_authorization_mag.account_number,
+      mail,phone_number,totp_binding_date,
+      cipher_group_info.group_id,
+      group_name,count(scratch_code) as count
+    FROM cipher_totp_authorization_mag,cipher_user_info  left join cipher_scratch_code_info on cipher_user_info.account_number = cipher_scratch_code_info.account_number,cipher_group_user_map,cipher_group_info
+    WHERE cipher_totp_authorization_mag.account_number = cipher_group_user_map.account_number
+    AND cipher_totp_authorization_mag.account_number = cipher_group_user_map.account_number
+    AND cipher_group_user_map.group_id = cipher_group_info.group_id
+    AND cipher_totp_authorization_mag.account_number = cipher_user_info.account_number
+    group by cipher_totp_authorization_mag.account_number
+    )tab1 WHERE name like CONCAT(CONCAT('%',#{name}),'%')
+    </select>
+
+    <select id="queryScratchCodeByAccountNumber" resultType="Integer" parameterType="String">
+        select scratch_code
+        from cipher_scratch_code_info
+        where account_number = #{accountNumber};
+    </select>
+
+</mapper>

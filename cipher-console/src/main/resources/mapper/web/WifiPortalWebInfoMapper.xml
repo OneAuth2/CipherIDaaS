@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cipher.console.oidc.mapper.WifiPortalWebInfoMapper" >
+  <resultMap id="BaseResultMap" type="cipher.console.oidc.domain.web.WifiPortalWebInfo" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="portal_address" property="portalAddress" jdbcType="VARCHAR" />
+    <result column="description" property="description" jdbcType="VARCHAR" />
+    <result column="title" property="title" jdbcType="VARCHAR" />
+    <result column="copy_writing" property="copyWriting" jdbcType="VARCHAR" />
+    <result column="master_picture" property="masterPicture" jdbcType="VARCHAR" />
+    <result column="bottom_title" property="bottomTitle" jdbcType="VARCHAR" />
+    <result column="sub_picture" property="subPicture" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, portal_address, description, title,bottom_title, copy_writing, master_picture, sub_picture,
+    create_time, modify_time,
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select
+    <include refid="Base_Column_List" />
+    from cipher_ac_portal_config
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from cipher_ac_portal_config
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="cipher.console.oidc.domain.web.WifiPortalWebInfo" >
+    insert into cipher_ac_portal_config (id, portal_address, description,bottom_title,
+      title, copy_writing, master_picture,
+      sub_picture, create_time, modify_time
+      )
+    values (#{id,jdbcType=INTEGER}, #{portalAddress,jdbcType=VARCHAR}, #{description,jdbcType=VARCHAR},  #{bottomTitle,jdbcType=VARCHAR},
+      #{title,jdbcType=VARCHAR}, #{copyWriting,jdbcType=VARCHAR}, #{masterPicture,jdbcType=VARCHAR},
+      #{subPicture,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{modifyTime,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="cipher.console.oidc.domain.web.WifiPotalPageSettingInfo" >
+    insert into cipher_ac_portal_config
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="portalAddress != null" >
+        portal_address,
+      </if>
+      <if test="description != null" >
+        description,
+      </if>
+      <if test="title != null" >
+        title,
+      </if>
+      <if test="bottomTitle != null" >
+        bottom_title,
+      </if>
+      <if test="copyWriting != null" >
+        copy_writing,
+      </if>
+      <if test="masterPicture != null" >
+        master_picture,
+      </if>
+      <if test="subPicture != null" >
+        sub_picture,
+      </if>
+
+        create_time,
+
+        modify_time,
+
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="portalAddress != null" >
+        #{portalAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="description != null" >
+        #{description,jdbcType=VARCHAR},
+      </if>
+      <if test="title != null" >
+        #{title,jdbcType=VARCHAR},
+      </if>
+      <if test="bottomTitle != null" >
+        #{bottomTitle,jdbcType=VARCHAR},
+      </if>
+      <if test="copyWriting != null" >
+        #{copyWriting,jdbcType=VARCHAR},
+      </if>
+      <if test="masterPicture != null" >
+        #{masterPicture,jdbcType=VARCHAR},
+      </if>
+      <if test="subPicture != null" >
+        #{subPicture,jdbcType=VARCHAR},
+      </if>
+      NOW(),
+      NOW()
+    </trim>
+  </insert>
+  <select id="selectCountByPortalNum" resultType="int">
+      select count(1) from cipher_ac_portal_config where id != #{id} and portal_num=#{portalNum}
+  </select>
+  <update id="updateByPrimaryKeySelective" parameterType="cipher.console.oidc.domain.web.WifiPotalPageSettingInfo" >
+    update cipher_ac_portal_config
+    <set >
+      <if test="portalAddress != null" >
+        portal_address = #{portalAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="description != null" >
+        description = #{description,jdbcType=VARCHAR},
+      </if>
+      <if test="portalType != null" >
+        portal_type = #{portalType,jdbcType=VARCHAR},
+      </if>
+      <if test="logo != null" >
+       logo= #{logo,jdbcType=VARCHAR},
+      </if>
+      <if test="loginDraw != null" >
+        login_draw = #{loginDraw,jdbcType=VARCHAR},
+      </if>
+      <if test="topText != null" >
+        top_text = #{topText,jdbcType=VARCHAR},
+      </if>
+      <if test="loginText != null" >
+        login_text = #{loginText,jdbcType=VARCHAR},
+      </if>
+      <if test="successText != null" >
+        success_Text = #{successText,jdbcType=VARCHAR},
+      </if>
+      <if test="portalNum != null" >
+        portal_num = #{portalNum,jdbcType=VARCHAR},
+      </if>
+      <if test="radiusId != null" >
+        radius_id = #{radiusId},
+      </if>
+      <if test="acId != null" >
+        ac_id = #{acId},
+      </if>
+        modify_time =  NOW(),
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cipher.console.oidc.domain.web.WifiPortalWebInfo" >
+    update cipher_ac_portal_config
+    set portal_address = #{portalAddress,jdbcType=VARCHAR},
+      description = #{description,jdbcType=VARCHAR},
+      title = #{title,jdbcType=VARCHAR},
+      copy_writing = #{copyWriting,jdbcType=VARCHAR},
+      master_picture = #{masterPicture,jdbcType=VARCHAR},
+      sub_picture = #{subPicture,jdbcType=VARCHAR},
+      bottom_title= #{bottomTitle,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      modify_time = #{modifyTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+
+  <select id="selectWifiPortalWebInfoList" resultType="cipher.console.oidc.domain.web.WifiPotalPageSettingInfo">
+    select *
+    from cipher_ac_portal_config where company_id=#{companyId}
+    order by create_time desc
+    LIMIT #{pageData.currentRow}, #{pageData.rows}
+  </select>
+
+  <select id="selectWifiPortalWebInfoCount" resultType="int">
+    select
+    count(id)
+    from cipher_ac_portal_config where company_id=#{companyId}
+  </select>
+
+  <select id="getEditProtal" resultType="cipher.console.oidc.domain.web.WifiPotalPageSettingInfo">
+          select *
+          from cipher_ac_portal_config
+          where id=#{id}
+  </select>
+
+
+  <insert id="insertWifiPotalPageSettingInfo">
+    insert into cipher_ac_portal_config
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+    <if test="portalAddress != null" >
+      portal_address,
+    </if>
+    <if test="description != null" >
+      description ,
+    </if>
+    <if test="portalType != null" >
+      portal_type,
+    </if>
+    <if test="logo != null" >
+      logo,
+    </if>
+    <if test="loginDraw != null" >
+      login_draw,
+    </if>
+    <if test="topText != null" >
+      top_text ,
+    </if>
+    <if test="loginText != null" >
+      login_text ,
+    </if>
+    <if test="successText != null" >
+      success_Text ,
+    </if>
+    <if test="portalNum != null" >
+      portal_num ,
+    </if>
+    <if test="radiusId != null" >
+      radius_id,
+    </if>
+    <if test="acId != null" >
+      ac_id ,
+    </if>
+      <if test="companyId != null" >
+        company_id ,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+    <if test="portalAddress != null" >
+      #{portalAddress,jdbcType=VARCHAR},
+    </if>
+    <if test="description != null" >
+      #{description,jdbcType=VARCHAR},
+    </if>
+    <if test="portalType != null" >
+      #{portalType,jdbcType=VARCHAR},
+    </if>
+    <if test="logo != null" >
+      #{logo,jdbcType=VARCHAR},
+    </if>
+    <if test="loginDraw != null" >
+      #{loginDraw,jdbcType=VARCHAR},
+    </if>
+    <if test="topText != null" >
+       #{topText,jdbcType=VARCHAR},
+    </if>
+    <if test="loginText != null" >
+      #{loginText,jdbcType=VARCHAR},
+    </if>
+    <if test="successText != null" >
+     #{successText,jdbcType=VARCHAR},
+    </if>
+    <if test="portalNum != null" >
+       #{portalNum,jdbcType=VARCHAR},
+    </if>
+    <if test="radiusId != null" >
+       #{radiusId},
+    </if>
+    <if test="acId != null" >
+       #{acId},
+    </if>
+      <if test="companyId != null" >
+        #{companyId},
+      </if>
+    </trim>
+
+  </insert>
+
+
+</mapper>

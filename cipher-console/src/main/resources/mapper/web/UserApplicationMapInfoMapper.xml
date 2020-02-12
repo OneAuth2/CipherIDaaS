@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cipher.console.oidc.mapper.UserApplicationMapInfoMapper">
+    <resultMap id="BaseResultMap" type="cipher.console.oidc.domain.web.UserApplicationMapInfo">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="account_number" property="accountNumber" jdbcType="VARCHAR"/>
+        <result column="application_id" property="applicationId" jdbcType="INTEGER"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+    id, account_number, application_id
+  </sql>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+        select
+        <include refid="Base_Column_List"/>
+        from cipher_user_application_map
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from cipher_user_application_map
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+    <insert id="insert" parameterType="cipher.console.oidc.domain.web.UserApplicationMapInfo">
+    insert into cipher_user_application_map (id, account_number, application_id
+      )
+    values (#{id,jdbcType=INTEGER}, #{accountNumber,jdbcType=VARCHAR}, #{applicationId,jdbcType=INTEGER}
+      )
+  </insert>
+    <insert id="insertSelective" parameterType="cipher.console.oidc.domain.web.UserApplicationMapInfo">
+        insert into cipher_user_application_map
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="accountNumber != null">
+                account_number,
+            </if>
+            <if test="applicationId != null">
+                application_id,
+            </if>
+            <if test="userId != null">
+                user_id,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=INTEGER},
+            </if>
+            <if test="accountNumber != null">
+                #{accountNumber,jdbcType=VARCHAR},
+            </if>
+            <if test="applicationId != null">
+                #{applicationId,jdbcType=INTEGER},
+            </if>
+            <if test="userId != null">
+                #{userId},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="cipher.console.oidc.domain.web.UserApplicationMapInfo">
+        update cipher_user_application_map
+        <set>
+            <if test="accountNumber != null">
+                account_number = #{accountNumber,jdbcType=VARCHAR},
+            </if>
+            <if test="applicationId != null">
+                application_id = #{applicationId,jdbcType=INTEGER},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="cipher.console.oidc.domain.web.UserApplicationMapInfo">
+    update cipher_user_application_map
+    set account_number = #{accountNumber,jdbcType=VARCHAR},
+      application_id = #{applicationId,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+    <select id="selectUserApplicationInfo" resultMap="BaseResultMap"
+            parameterType="cipher.console.oidc.domain.web.UserApplicationMapInfo">
+        select
+        <include refid="Base_Column_List"/>
+        from cipher_user_application_map where 1=1
+        <if test="accountNumber != null">
+            and account_number = #{accountNumber}
+        </if>
+        <if test="applicationId != null">
+            and application_id = #{applicationId}
+        </if>
+    </select>
+    <delete id="deleteUserAuth" parameterType="java.lang.Integer">
+      DELETE from cipher_user_application_map
+      WHERE application_id= #{applicationId}
+    </delete>
+</mapper>

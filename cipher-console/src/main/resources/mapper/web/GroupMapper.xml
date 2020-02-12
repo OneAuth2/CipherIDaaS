@@ -1,0 +1,856 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="cipher.console.oidc.mapper.GroupMapper">
+
+    <resultMap id="countResult" type="java.lang.Integer">
+        <result column="count" property="count" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <select id="getAllGroup" resultType="cipher.console.oidc.domain.web.GroupInfoDomain">
+        SELECT *
+        FROM cipher_group_info where company_id=#{companyId}
+    </select>
+
+    <select id="queryAllGroupToTree" resultType="cipher.console.oidc.domain.web.GroupTreeDomain">
+        SELECT group_id,parent_group_id,group_name
+        FROM cipher_group_info where company_id=#{companyId}
+    </select>
+
+    <select id="getGroupById" parameterType="int" resultType="cipher.console.oidc.domain.web.GroupInfoDomain">
+        SELECT *
+        FROM cipher_group_info
+        WHERE group_id = #{groupId}#;
+    </select>
+
+
+    <select id="queryGroupSelect" resultType="cipher.console.oidc.domain.web.GroupInfoDomain">
+        SELECT
+        group_id,
+        group_name,
+        parent_group_id
+        FROM cipher_group_info where company_id=#{companyId};
+    </select>
+
+    <select id="queryGroupByAccountName" resultType="cipher.console.oidc.domain.web.GroupInfoDomain"
+            parameterType="String">
+        SELECT group_id
+        FROM cipher_group_user_map
+        WHERE user_id = #{uuid}
+         limit 1
+    </select>
+
+    <select id="queryGroupByGroupName" resultType="cipher.console.oidc.domain.web.GroupInfoDomain"
+            parameterType="java.util.Map">
+        SELECT group_id
+        FROM cipher_group_info
+        WHERE group_name = #{groupName} AND group_id &lt;&gt; #{groupId};
+    </select>
+
+    <select id="queryAllGroupBaseInfo" resultType="cipher.console.oidc.model.GroupBaseModel"
+            parameterType="cipher.console.oidc.model.GroupBaseModel">
+        SELECT
+        group_name,
+        tab2.group_id,
+        user_count,
+        count(cipher_group_authorization_map.application_id) AS app_count,
+        (SELECT group_name
+        FROM cipher_group_info
+        WHERE group_id = tab2.parent_group_id) AS parentGroupName
+        FROM (
+        SELECT
+        cipher_group_info.group_name,
+        cipher_group_info.group_id,
+        user_count,
+        cipher_group_info.parent_group_id
+        FROM cipher_group_info
+        LEFT JOIN (
+        SELECT
+        cipher_group_info.group_id,
+        count(cipher_group_user_map.account_number) AS user_count
+        FROM cipher_group_info, cipher_group_user_map
+        WHERE cipher_group_info.group_id = cipher_group_user_map.group_id
+        GROUP BY cipher_group_info.group_id
+        ) tab1 ON tab1.group_id = cipher_group_info.group_id
+        ) tab2 LEFT JOIN cipher_group_authorization_map ON tab2.group_id = cipher_group_authorization_map.group_id
+        GROUP BY tab2.group_id
+        <if test="sidx!=null and sidx=='groupName'.toString()">
+            order by group_name ${sord}
+        </if>
+        <if test="sidx!=null and sidx=='parentGroupName'.toString()">
+            order by tab2.parent_group_id ${sord}
+        </if>
+        LIMIT #{pageData.currentRow}, #{pageData.rows}
+    </select>
+
+    <select id="countGroup" resultType="int">
+        SELECT count(group_id)
+        FROM cipher_group_info;
+    </select>
+
+    <select id="groupAuthorizedInfo" parameterType="cipher.console.oidc.model.GroupAuthorizationDetailModel"
+            resultType="cipher.console.oidc.model.GroupAuthorizationDetailModel">
+        SELECT
+        tab5.group_id,
+        tab5.account_number,
+        tab5.user_name,
+        tab5.name,
+        tab5.nickname,
+        tab5.application_id,
+        tab5.application_name,
+        tab5.app_client_id,
+        tab5.methods,
+        tab5.account_status,
+        tab6.sub_account
+        FROM (
+        SELECT
+        tab3.group_id,
+        tab3.account_number,
+        tab3.user_name,
+        tab3.name,
+        tab3.nickname,
+        tab4.application_id,
+        tab4.application_name,
+        tab4.app_client_id,
+        tab3.methods,
+        tab3.account_status
+        FROM (
+        SELECT
+        tab1.user_name,
+        tab1.name,
+        tab1.account_number,
+        tab1.group_id,
+        tab2.methods,
+        tab1.nickname,
+        tab1.account_status
+        FROM (
+        SELECT
+        cipher_user_info.account_number,
+        cipher_user_info.user_name,
+        cipher_user_info.nickname,
+        cipher_user_info.account_status,
+        cipher_user_info.user_name AS userName,
+        cipher_group_user_map.group_id
+        FROM cipher_group_user_map, cipher_user_info
+        WHERE cipher_group_user_map.account_number = cipher_user_info.account_number
+        ) tab1 LEFT JOIN (
+        SELECT
+        cipher_user_authorization_map.account_number,
+        GROUP_CONCAT(
+        cipher_user_authorization_map.account_authorized_method) AS methods
+        FROM cipher_user_authorization_map
+        GROUP BY cipher_user_authorization_map.account_number
+        ) tab2 ON tab1.account_number = tab2.account_number
+        ) tab3 LEFT JOIN (
+        SELECT
+        cipher_group_authorization_map.group_id,
+        cipher_group_authorization_map.application_id,
+        cipher_application_info.application_name,
+        cipher_application_info.application_id AS app_client_id
+        FROM cipher_group_authorization_map, cipher_application_info
+        WHERE
+        cipher_group_authorization_map.application_id =
+        cipher_application_info.id
+        ) tab4 ON tab3.group_id = tab4.group_id
+        WHERE tab3.group_id = #{groupId}
+        ) tab5 LEFT JOIN (
+        SELECT
+        cipher_sub_account_map.account_number,
+        cipher_sub_account_map.sub_id,
+        cipher_sub_account.sub_account,
+        cipher_sub_account.app_client_id
+        FROM cipher_sub_account, cipher_sub_account_map
+        WHERE cipher_sub_account.id = cipher_sub_account_map.sub_id
+        ) tab6
+        ON tab5.account_number = tab6.account_number AND tab5.app_client_id = tab6.app_client_id
+        <if test="sidx!=null and sidx=='accountNumber'.toString()">
+            order by tab5.account_number ${sord}
+        </if>
+        <if test="sidx!=null and sidx=='userName'.toString()">
+            order by tab5.user_name ${sord}
+        </if>
+        <if test="sidx!=null and sidx=='nickname'.toString()">
+            order by tab5.nickname ${sord}
+        </if>
+        <if test="sidx!=null and sidx=='applicationName'.toString()">
+            order by tab5.application_name ${sord}
+        </if>
+        LIMIT #{pageData.currentRow}, #{pageData.rows}
+    </select>
+
+    <select id="countGroupTable" resultType="int"
+            parameterType="cipher.console.oidc.model.GroupAuthorizationDetailModel">
+        SELECT count(tab7.group_id) AS COUNT
+        FROM (
+
+                 SELECT
+                     tab5.group_id,
+                     tab5.account_number,
+                     tab5.user_name,
+                     tab5.name,
+                     tab5.nickname,
+                     tab5.application_id,
+                     tab5.application_name,
+                     tab5.app_client_id,
+                     tab5.methods,
+                     tab5.account_status,
+                     tab6.sub_account
+                 FROM (
+                          SELECT
+                              tab3.group_id,
+                              tab3.account_number,
+                              tab3.user_name,
+                              tab3.name,
+                              tab3.nickname,
+                              tab4.application_id,
+                              tab4.application_name,
+                              tab4.app_client_id,
+                              tab3.methods,
+                              tab3.account_status
+                          FROM (
+                                   SELECT
+                                       tab1.user_name,
+                                       tab1.name,
+                                       tab1.account_number,
+                                       tab1.group_id,
+                                       tab2.methods,
+                                       tab1.nickname,
+                                       tab1.account_status
+                                   FROM (
+                                            SELECT
+                                                cipher_user_info.account_number,
+                                                cipher_user_info.user_name,
+                                                cipher_user_info.nickname,
+                                                cipher_user_info.account_status,
+                                                cipher_user_info.user_name AS userName,
+                                                cipher_group_user_map.group_id
+                                            FROM cipher_group_user_map, cipher_user_info
+                                            WHERE cipher_group_user_map.account_number = cipher_user_info.account_number
+                                        ) tab1 LEFT JOIN (
+                                                             SELECT
+                                                                 cipher_user_authorization_map.account_number,
+                                                                 GROUP_CONCAT(
+                                                                         cipher_user_authorization_map.account_authorized_method) AS methods
+                                                             FROM cipher_user_authorization_map
+                                                             GROUP BY cipher_user_authorization_map.account_number
+                                                         ) tab2 ON tab1.account_number = tab2.account_number
+                               ) tab3 LEFT JOIN (
+                                                    SELECT
+                                                        cipher_group_authorization_map.group_id,
+                                                        cipher_group_authorization_map.application_id,
+                                                        cipher_application_info.application_name,
+                                                        cipher_application_info.application_id AS app_client_id
+                                                    FROM cipher_group_authorization_map, cipher_application_info
+                                                    WHERE
+                                                        cipher_group_authorization_map.application_id =
+                                                        cipher_application_info.id
+                                                ) tab4 ON tab3.group_id = tab4.group_id
+                          WHERE tab3.group_id = #{groupId}
+                      ) tab5 LEFT JOIN (
+                                           SELECT
+                                               cipher_sub_account_map.account_number,
+                                               cipher_sub_account_map.sub_id,
+                                               cipher_sub_account.sub_account,
+                                               cipher_sub_account.app_client_id
+                                           FROM cipher_sub_account, cipher_sub_account_map
+                                           WHERE cipher_sub_account.id = cipher_sub_account_map.sub_id
+                                       ) tab6
+                         ON tab5.account_number = tab6.account_number AND tab5.app_client_id = tab6.app_client_id
+             ) tab7;
+    </select>
+
+    <select id="queryGroupAuth" parameterType="int" resultType="cipher.console.oidc.model.GroupAuthorizedModel">
+
+        SELECT
+            application_id,
+            authorized_id,
+            application_name
+        FROM (
+                 SELECT
+                     id AS application_id,
+                     application_name
+                 FROM cipher_application_info
+                 WHERE id NOT IN (1)
+             ) tab1 LEFT JOIN (
+                                  SELECT cipher_group_authorization_map.application_id AS authorized_id
+                                  FROM cipher_group_authorization_map, cipher_application_info
+                                  WHERE cipher_group_authorization_map.application_id = cipher_application_info.id
+                                        AND group_id = #{groupId}
+                              ) tab2 ON tab1.application_id = tab2.authorized_id
+
+    </select>
+
+    <delete id="deleteGroupAuth" parameterType="cipher.console.oidc.model.GroupAuthorizedModel">
+        DELETE FROM cipher_group_authorization_map
+        WHERE group_id = #{groupId} AND application_id = #{applicationId};
+    </delete>
+
+    <insert id="insetGroupAuth" parameterType="cipher.console.oidc.model.GroupAuthorizedModel">
+        INSERT INTO cipher_group_authorization_map (group_id, application_id) VALUES (#{groupId}, #{applicationId});
+    </insert>
+
+
+    <select id="queryGroupMember" resultType="cipher.console.oidc.model.GroupMemberAddModel"
+            parameterType="cipher.console.oidc.model.GroupMemberAddModel">
+        SELECT
+        cipher_user_info.account_number,
+        cipher_user_info.user_name,
+        cipher_user_info.phone_number,
+        cipher_user_info.account_status,
+        methods,
+        cipher_group_user_map.group_id,
+        cipher_group_info.group_name,
+        cipher_user_info.nickname
+        FROM cipher_user_info
+        LEFT JOIN cipher_group_user_map
+        ON cipher_group_user_map.account_number = cipher_user_info.account_number
+        LEFT JOIN cipher_group_info ON cipher_group_info.group_id = cipher_group_user_map.group_id
+        LEFT JOIN (
+        SELECT
+        cipher_user_authorization_map.account_number,
+        group_concat(cipher_user_authorization_map.account_authorized_method) AS methods
+        FROM cipher_user_authorization_map
+        GROUP BY account_number
+        ) tab1 ON cipher_user_info.account_number = tab1.account_number
+        WHERE cipher_user_info.account_number LIKE CONCAT(CONCAT('%', #{name}), '%')
+        <if test="groupId != 0">
+            and cipher_group_info.group_id = #{groupId}
+        </if>
+
+        <if test="sidx!=null and sidx=='nickname'.toString()">
+            order by cipher_user_info.nickname ${sord}
+        </if>
+        <if test="sidx!=null and sidx=='userName'.toString()">
+            order by cipher_user_info.user_name ${sord}
+        </if>
+        <if test="sidx!=null and sidx=='groupName'.toString()">
+            order by cipher_group_info.group_name ${sord}
+        </if>
+        <if test="sidx!=null and sidx=='accountNumber'.toString()">
+            order by cipher_user_info.account_number ${sord}
+        </if>
+        <if test="sidx!=null and sidx=='phoneNumber'.toString()">
+            order by cipher_user_info.phone_number ${sord}
+        </if>
+        <if test="sidx==null">
+            order by cipher_user_info.create_time desc
+        </if>
+        LIMIT #{pageData.currentRow}, #{pageData.rows}
+    </select>
+
+    <select id="countGroupMember" resultType="int" parameterType="cipher.console.oidc.model.GroupMemberAddModel">
+        SELECT count(cipher_user_info.account_number) AS count
+        FROM cipher_user_info
+        LEFT JOIN cipher_group_user_map
+        ON cipher_group_user_map.account_number = cipher_user_info.account_number
+        LEFT JOIN cipher_group_info ON cipher_group_info.group_id = cipher_group_user_map.group_id
+        LEFT JOIN (
+        SELECT
+        cipher_user_authorization_map.account_number,
+        group_concat(cipher_user_authorization_map.account_authorized_method) AS methods
+        FROM cipher_user_authorization_map
+        GROUP BY account_number
+        ) tab1 ON cipher_user_info.account_number = tab1.account_number
+        WHERE cipher_user_info.account_number LIKE CONCAT(CONCAT('%', #{name}), '%')
+        <if test="groupId != 0">
+            and cipher_group_info.group_id = #{groupId}
+        </if>
+    </select>
+
+    <insert id="insertNewGroup" useGeneratedKeys="true" keyProperty="groupId">
+        INSERT INTO cipher_group_info (group_name, group_description, account_number, parent_group_id,path,company_id,create_time,modify_time)
+        VALUES (#{groupName}, #{groupDescription}, #{accountNumber}, #{parentGroupId},#{path},#{companyId},NOW(),NOW());
+
+    </insert>
+
+    <update id="updateGroup" parameterType="cipher.console.oidc.model.GroupInfoModel">
+         UPDATE cipher_group_info
+         SET group_name = #{groupName},group_description = #{groupDescription},parent_group_id = #{parentGroupId},modify_time = NOW()
+         WHERE group_id = #{groupId} AND company_id=#{companyId}
+    </update>
+    <select id="selectGoupInfoByName" parameterType="cipher.console.oidc.domain.web.GroupInfoDomain"
+    resultType="cipher.console.oidc.domain.web.GroupInfoDomain">
+        SELECT group_id,ou, group_name, parent_group_id, group_description, account_number, create_time, modify_time
+        FROM cipher_group_info
+        WHERE 1=1 and company_id=#{companyId}
+        <if test="groupName!=null and groupName!=''">
+            and group_name = #{groupName}
+        </if>
+        <if test="groupId!=null and groupId!=''">
+            and group_id NOT IN (#{groupId})
+        </if>
+    </select>
+
+
+    <select id="selectEditGroupEcho" parameterType="integer" resultType="cipher.console.oidc.model.GroupInfoModel">
+         SELECT group_id,group_name,parent_group_id,group_description FROM cipher_group_info WHERE group_id=#{groupId}
+    </select>
+
+    <update id="updateGroupInfo" parameterType="cipher.console.oidc.model.GroupInfoModel">
+        UPDATE cipher_group_info
+        SET group_name = #{groupName}, group_description = #{groupDescription}, account_number = #{accountNumber},
+        modify_time = #{modifyTime}, parent_group_id = #{parentGroupId}
+        WHERE group_id = #{groupId};
+    </update>
+
+    <insert id="insetIntoGroup" parameterType="cipher.console.oidc.model.UserInfoModel">
+        INSERT INTO cipher_group_user_map (group_id, account_number) VALUES (#{groupId}, #{accountNumber});
+    </insert>
+
+    <delete id="deleteGroupMap" parameterType="cipher.console.oidc.model.UserInfoModel">
+        DELETE FROM cipher_group_user_map
+        WHERE account_number = #{accountNumber}
+    </delete>
+
+    <select id="checkGroupName" resultType="cipher.console.oidc.domain.web.GroupInfoDomain"
+            parameterType="java.util.Map">
+        SELECT group_id
+        FROM cipher_group_info
+        WHERE group_name = #{groupName} AND group_id &lt;&gt; #{groupId}
+    </select>
+
+
+    <select id="checkUserInfoByGroupId" resultType="java.lang.Integer" parameterType="java.lang.Integer">
+        SELECT count(1)
+        FROM cipher_group_info g, cipher_group_user_map m, cipher_user_info u
+        WHERE g.group_id = m.group_id AND m.account_number = u.account_number
+              AND u.account_status = 1 AND g.group_id = #{groupId}
+    </select>
+
+    <select id="checkLowerLevelByGroupId" resultType="java.lang.Integer" parameterType="java.lang.Integer">
+        SELECT count(1)
+        FROM cipher_group_info g
+        WHERE g.parent_group_id = #{groupId}
+    </select>
+
+    <delete id="deleteGroup" parameterType="java.lang.Integer">
+        DELETE FROM cipher_group_info
+        WHERE group_id = #{groupId}
+    </delete>
+
+    <delete id="deleteGroupUser" parameterType="java.lang.Integer">
+        DELETE FROM cipher_group_user_map
+        WHERE group_id = #{groupId}
+    </delete>
+
+    <select id="queryGoupByName" resultType="cipher.console.oidc.domain.web.GroupInfoDomain"
+            parameterType="java.lang.String">
+        SELECT
+        group_id,
+        ou,
+        group_name,
+        parent_group_id,
+        group_description,
+        account_number,
+        create_time,
+        modify_time
+        FROM cipher_group_info
+        WHERE group_name = #{groupName}
+        LIMIT 1;
+    </select>
+
+    <select id="queryGroupByNameAndcompanyId" resultType="cipher.console.oidc.domain.web.GroupInfoDomain"
+            parameterType="java.lang.String">
+        SELECT
+            group_id,
+            ou,
+            group_name,
+            parent_group_id,
+            group_description,
+            account_number,
+            create_time,
+            modify_time
+        FROM cipher_group_info
+        WHERE company_id = #{companyId} AND group_name = #{groupName}
+        LIMIT 1;
+    </select>
+
+    <insert id="insertGroup" useGeneratedKeys="true" keyProperty="groupId">
+        INSERT cipher_group_info (ou, group_name, parent_group_id, group_description, account_number,company_id,create_time, modify_time)
+        VALUES
+            (#{ou}, #{groupName}, #{parentGroupId}, #{groupDescription}, #{accountNumber}, #{companyId}, #{createTime}, #{modifyTime})
+    </insert>
+
+
+    <select id="queryGroupMemberByGroupId" resultType="cipher.console.oidc.model.GroupMemberAddModel">
+        SELECT cipher_user_info.account_number,
+        cipher_user_info.user_name,
+        cipher_user_info.phone_number,
+        cipher_user_info.account_status,
+        methods,
+        cipher_group_user_map.group_id,
+        cipher_group_info.group_name,
+        cipher_user_info.nickname
+        FROM cipher_user_info LEFT JOIN cipher_group_user_map
+        ON cipher_group_user_map.account_number = cipher_user_info.account_number
+        left join cipher_group_info on cipher_group_info.group_id = cipher_group_user_map.group_id
+        LEFT JOIN (
+        SELECT
+        cipher_user_authorization_map.account_number,group_concat(cipher_user_authorization_map.account_authorized_method)
+        as methods
+        from cipher_user_authorization_map
+        group by account_number
+        )tab1 on cipher_user_info.account_number = tab1.account_number
+        WHERE cipher_group_info.group_id=#{groupId}
+        and cipher_user_info.account_number LIKE CONCAT(CONCAT('%', #{name}), '%')
+
+        <if test="sidx!=null and sidx=='accountNumber'.toString()">
+            order by cipher_user_info.account_number ${sord}
+        </if>
+        <if test="sidx!=null and sidx=='userName'.toString()">
+            order by cipher_user_info.user_name ${sord}
+        </if>
+        <if test="sidx!=null and sidx=='mail'.toString()">
+            order by cipher_user_info.mail ${sord}
+        </if>
+        <if test="sidx!=null and sidx=='phoneNumber'.toString()">
+            order by cipher_user_info.phone_number ${sord}
+        </if>
+        <if test="sidx!=null and sidx=='groupName'.toString()">
+            order by cipher_group_info.group_name ${sord}
+        </if>
+        <if test="sidx==null">
+            order by cipher_user_info.create_time desc
+        </if>
+        LIMIT #{pageData.currentRow}, #{pageData.rows}
+    </select>
+
+
+    <select id="countGroupMemberByGroupId" resultType="java.lang.Integer"
+            parameterType="cipher.console.oidc.model.GroupMemberAddModel">
+        SELECT count(cipher_user_info.account_number) AS count
+        FROM cipher_user_info
+            LEFT JOIN cipher_group_user_map
+                ON cipher_group_user_map.account_number = cipher_user_info.account_number
+            LEFT JOIN cipher_group_info ON cipher_group_info.group_id = cipher_group_user_map.group_id
+            LEFT JOIN (
+                          SELECT
+                              cipher_user_authorization_map.account_number,
+                              group_concat(cipher_user_authorization_map.account_authorized_method) AS methods
+                          FROM cipher_user_authorization_map
+                          GROUP BY account_number
+                      ) tab1 ON cipher_user_info.account_number = tab1.account_number
+        WHERE cipher_group_info.group_id = #{groupId}
+              AND cipher_user_info.account_number LIKE CONCAT(CONCAT('%', #{name}), '%')
+    </select>
+
+
+    <select id="selectNoneGroupList" resultType="cipher.console.oidc.domain.web.GroupInfoDomain">
+        SELECT
+        group_id,
+        group_name
+        FROM cipher_group_info
+        where group_id not in
+
+        <foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+
+    </select>
+
+
+    <select id="selectGroupNameList" resultType="cipher.console.oidc.domain.web.GroupInfoDomain">
+        SELECT
+            dd.group_id,
+            group_name         AS groupName,
+            dd.parent_group_id AS parentGroupId
+        FROM cipher_group_info dd
+            LEFT JOIN cipher_group_user_map tt ON dd.group_id = tt.group_id
+        WHERE tt.user_id = #{uuid}
+
+    </select>
+
+
+    <select id="selectGroupList" resultType="cipher.console.oidc.domain.web.GroupInfoDomain">
+        SELECT *
+        FROM cipher_group_info
+        WHERE parent_group_id = #{groupId}
+    </select>
+    <select id="selectGroupNameListBycondition" resultType="cipher.console.oidc.domain.web.GroupInfoDomain">
+        SELECT
+        dd.group_id,
+        group_name AS groupName
+        FROM cipher_group_info dd
+        LEFT JOIN cipher_group_user_map tt ON dd.group_id = tt.group_id
+        WHERE tt.account_number = #{accountNumber} AND dd.group_id NOT IN (#{groupId})
+
+    </select>
+
+    <update id="updateGroupName" parameterType="cipher.console.oidc.model.GroupInfoModel">
+        UPDATE cipher_group_info
+        SET group_name = #{groupName},
+        group_description=#{groupDescription}
+        WHERE group_id = #{groupId};
+    </update>
+
+    <select id="countChildGroup" resultType="java.lang.Integer" parameterType="java.lang.Integer">
+        SELECT count(group_id) AS count
+        FROM cipher_group_info
+        WHERE parent_group_id = #{parentGroupId};
+    </select>
+
+    <select id="countGroupMembers" resultType="java.lang.Integer" parameterType="java.lang.Integer">
+       SELECT count(group_id) AS count
+        FROM cipher_group_user_map map
+        LEFT JOIN cipher_user_info info on map.user_id=info.uuid
+        WHERE group_id =#{groupId} and info.is_delete=0
+    </select>
+
+
+    <select id="queryGroupAuthByConditon" resultType="cipher.console.oidc.model.GroupAuthorizedModel">
+        SELECT
+            application_id,
+            authorized_id,
+            application_name
+        FROM (
+                 SELECT
+                     id AS application_id,
+                     application_name
+                 FROM cipher_application_info
+                 WHERE id NOT IN (1)
+             ) tab1 LEFT JOIN (
+                                  SELECT cipher_group_authorization_map.application_id AS authorized_id
+                                  FROM cipher_group_authorization_map, cipher_application_info, cipher_group_info
+                                  WHERE cipher_group_authorization_map.application_id = cipher_application_info.id AND
+                                        cipher_group_info.group_id = cipher_group_authorization_map.group_id
+
+                                        AND group_name = #{groupName}
+                              ) tab2 ON tab1.application_id = tab2.authorized_id
+    </select>
+
+
+    <select id="queryparentGroupList" resultType="cipher.console.oidc.domain.web.GroupInfoDomain">
+        SELECT *
+        FROM cipher_group_info
+        WHERE group_id = #{groupId}
+        LIMIT 1;
+    </select>
+
+
+    <select id="queryGoupInfoByName" resultType="cipher.console.oidc.domain.web.GroupInfoDomain"
+            parameterType="cipher.console.oidc.domain.web.GroupInfoDomain">
+        SELECT group_id,ou, group_name, parent_group_id, group_description, account_number, create_time, modify_time
+        FROM cipher_group_info
+        WHERE 1=1 and company_id=#{companyId}
+        <if test="groupName!=null and groupName!=''">
+            and group_name = #{groupName}
+        </if>
+        <if test="groupId!=null and groupId!=''">
+            and group_id = #{groupId}
+        </if>
+        <if test="queryName!=null and queryName!=''">
+            and group_name LIKE CONCAT(CONCAT('%', #{queryName}), '%');
+        </if>
+    </select>
+
+
+    <select id="queryGoupName" resultType="cipher.console.oidc.domain.web.GroupInfoDomain">
+        SELECT
+            dd.group_id,
+            group_name AS groupName
+        FROM cipher_group_info dd
+            LEFT JOIN cipher_group_user_map tt ON dd.group_id = tt.group_id
+        WHERE tt.account_number = #{accountNumber} AND dd.group_id NOT IN (#{groupId})
+    </select>
+
+
+    <select id="getGroupByParentId" resultType="cipher.console.oidc.domain.web.GroupInfoDomain">
+        SELECT *
+        FROM cipher_group_info
+        WHERE parent_group_id = #{parentId}
+        LIMIT 1;
+    </select>
+
+
+    <select id="selectGroupListByParentId" resultType="cipher.console.oidc.domain.web.GroupInfoDomain">
+        SELECT *
+        FROM cipher_group_info
+        WHERE parent_group_id = #{groupId}
+    </select>
+
+
+    <select id="selectGroupInfoList" resultType="cipher.console.oidc.domain.web.GroupInfoDomain"
+            parameterType="cipher.console.oidc.domain.web.GroupAuthorizationMapDomain">
+        SELECT
+        dd.group_id,
+        group_name AS groupName
+        FROM cipher_group_info dd
+        LEFT JOIN cipher_group_authorization_map map on dd.group_id=map.group_id
+        where 1=1
+        <if test="groupId!=null and groupId!=''">
+            and group_id = #{groupId}
+        </if>
+        <if test="applicationId!=null and applicationId!=''">
+            and application_id = #{applicationId}
+        </if>
+    </select>
+
+
+    <select id="selectGroupCount" resultType="int" parameterType="cipher.console.oidc.domain.web.GroupInfoDomain">
+        SELECT count(1)
+        FROM cipher_group_info where 1=1
+        <if test="groupName!= null and groupName != ''">
+            and group_name LIKE CONCAT(CONCAT('%', #{groupName}), '%')
+        </if>
+    </select>
+
+
+    <select id="selectGroupPageList" resultType="cipher.console.oidc.domain.web.GroupInfoDomain"
+            parameterType="cipher.console.oidc.domain.web.GroupInfoDomain">
+        SELECT * FROM cipher_group_info where 1=1
+        <if test="list!=null and list.size!=0">
+            and group_id not in
+            <foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="group.groupName!= null and group.groupName != ''">
+            and group_name LIKE CONCAT(CONCAT('%', #{group.groupName}), '%')
+        </if>
+        limit #{startPageNum},#{pageSize}
+    </select>
+
+    <select id="selectPageGroupCount" resultType="int">
+        SELECT count(1) FROM cipher_group_info where 1=1
+        <if test="list!=null and list.size!=0">
+            and group_id not in
+            <foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="group.groupName!= null and group.groupName != ''">
+            and group_name LIKE CONCAT(CONCAT('%', #{group.groupName}), '%')
+        </if>
+    </select>
+
+    <select id="selectApplicationGroupPage" resultType="cipher.console.oidc.domain.web.GroupInfoDomain" parameterType="cipher.console.oidc.domain.web.QueryInfoDomain">
+        select
+        info.group_id as groupId,
+        info.group_name as groupName
+        from cipher_group_info info
+        LEFT JOIN cipher_group_authorization_map map on info.group_id=map.group_id
+        where 1=1
+        <if test="applicationId!= null and applicationId != ''">
+            and map.application_id=#{applicationId}
+        </if>
+        <if test="queryName!= null and queryName != ''">
+            and group_name LIKE CONCAT(CONCAT('%', #{queryName}), '%')
+        </if>
+        LIMIT #{pageData.currentRow}, #{pageData.rows}
+    </select>
+    <select id="selectApplicationGroupCount" resultType="int" parameterType="cipher.console.oidc.domain.web.QueryInfoDomain">
+        select count(1)
+        from cipher_group_info info
+        LEFT JOIN cipher_group_authorization_map map on info.group_id=map.group_id
+        where 1=1
+        <if test="applicationId!= null and applicationId != ''">
+            and map.application_id=#{applicationId}
+        </if>
+        <if test="queryName!= null and queryName != ''">
+            and group_name LIKE CONCAT(CONCAT('%', #{queryName}), '%')
+        </if>
+    </select>
+
+
+
+    <select id="getGroupInfo" resultType="cipher.console.oidc.domain.web.GroupInfoDomain">
+      SELECT
+            dd.group_id,
+            parent_group_id as parentGroupId,
+            group_name AS groupName
+        FROM cipher_group_info dd
+            LEFT JOIN cipher_group_user_map tt ON dd.group_id = tt.group_id
+        WHERE tt.account_number = #{accountNumber} AND = #{groupId}
+    </select>
+
+    <insert id="insert" parameterType="cipher.console.oidc.domain.web.GroupInfoDomain">
+        insert into cipher_group_info(
+        group_name,
+        parent_group_id,
+        path,
+        company_id,
+        ding_id,
+        create_time,
+        modify_time) VALUE (
+        #{groupName} ,
+        #{parentGroupId} ,
+        #{path} ,
+        #{companyId} ,
+        #{dingId},
+        NOW(),
+        NOW()
+        )
+    </insert>
+
+    <select id="queryGroupIdBYDingId" resultType="java.lang.Integer">
+            select group_id from cipher_group_info where ding_id=#{dingId}
+    </select>
+
+    <insert id="insertGroupByDingGroup" parameterType="cipher.console.oidc.domain.web.DingGroupDomain">
+        insert into cipher_group_info(group_id,group_name, parent_group_id, company_id, ding_id, create_time, modify_time)
+        VALUE (
+               #{id},
+            #{name} ,
+            #{parentGroupId} ,
+            #{companyId} ,
+            #{id} ,
+            NOW(),
+            NOW()
+        )
+    </insert>
+
+    <select id="getGroupIdByDingGroupId" resultType="int">
+        select group_id from cipher_group_info where company_id=#{companyId} and ding_id=#{dingGroupId}
+    </select>
+
+    <update id="updateNewGroup" parameterType="cipher.console.oidc.model.GroupInfoModel">
+        UPDATE cipher_group_info
+        SET path = #{path}
+        WHERE group_id = #{groupId};
+    </update>
+
+    <select id="selectAppGroup" resultType="cipher.console.oidc.domain.web.GroupInfoDomain">
+
+        select cipher_group_info.group_id,group_name ,parent_group_id from  cipher_group_info
+
+        left join  cipher_group_authorization_map on cipher_group_info.group_id = cipher_group_authorization_map.group_id
+
+        left join cipher_group_user_map on cipher_group_info.group_id = cipher_group_user_map.group_id
+
+        where cipher_group_user_map.user_id = #{userId} and cipher_group_authorization_map.application_id = #{appId}
+        limit 1
+    </select>
+
+    <select id="getGroupListByParentId" resultType="cipher.console.oidc.domain.web.TreeNodesDomain">
+        SELECT
+        dd.group_id,
+        group_name AS groupName
+        FROM cipher_group_info dd
+        where 1=1 and company_id=#{companyId}
+        <if test="parentId!=null and parentId!=''">
+            and  parent_group_id = #{parentId}
+        </if>
+    </select>
+
+    <insert id="insertGroupByWxGroup" parameterType="cipher.console.oidc.domain.web.WxGroupDomain">
+        insert into cipher_group_info(group_name, parent_group_id, company_id, wx_id, create_time, modify_time)
+        values (
+            #{name} ,
+            #{parentGroupId} ,
+            #{companyId} ,
+            #{id} ,
+            NOW(),
+            NOW()
+        )
+    </insert>
+
+    <select id="queryGroupIdBYWxId" resultType="java.lang.Integer">
+        select group_id from cipher_group_info where wx_id=#{wxId}
+    </select>
+
+
+    <select id="getGroupIdByWxGroupId" resultType="int">
+        select group_id from cipher_group_info where company_id=#{companyId} and wx_id=#{wxGroupId}
+    </select>
+
+</mapper>

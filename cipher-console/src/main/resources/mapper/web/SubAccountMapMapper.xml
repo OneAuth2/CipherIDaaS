@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="cipher.console.oidc.mapper.SubAccountMapMapper">
+
+
+    <insert id="insertSubAccountMap" parameterType="cipher.console.oidc.domain.web.SubAccountMapDomain">
+        INSERT INTO cipher_sub_account_map (account_number, sub_id,user_id, create_time, modify_time) VALUES (
+            #{accountNumber},
+            #{subId},
+            #{userId},
+            NOW(),
+            NOW()
+        )
+    </insert>
+
+    <select id="querySubAccountMap" resultType="java.lang.Integer"
+            parameterType="cipher.console.oidc.domain.exceldomain.SubAccountExcel">
+        SELECT count(*)
+        FROM (
+                 SELECT
+                     sub_map.account_number,
+                     sub_account.sub_account,
+                     sub_account.app_client_id
+                 FROM cipher_sub_account_map sub_map LEFT JOIN cipher_sub_account sub_account
+                         ON sub_map.sub_id = sub_account.id) account_info
+        WHERE account_info.sub_account = #{subAccount}
+              and account_info.account_number = #{accountNumber}
+              and account_info.app_client_id=#{appClientId}
+    </select>
+
+    <select id="selectSubId" parameterType="cipher.console.oidc.domain.web.SubAccountDomain" resultType="Integer">
+        SELECT id FROM cipher_sub_account
+        WHERE sub_account = #{subAccount}
+        AND app_client_id = #{appClientId}
+    </select>
+    <delete id="deleteInfo" parameterType="String">
+        DELETE FROM cipher_sub_account_map WHERE account_number = #{accountNumber};
+    </delete>
+    <insert id="insertInfo" parameterType="cipher.console.oidc.domain.web.SubAccountMapDomain">
+        insert into cipher_sub_account_map(account_number, sub_id, create_time, modify_time)
+        VALUES (#{accountNumber},#{subId},NOW(),NOW())
+    </insert>
+
+
+    <delete id="deleteSubAccountNumber" parameterType="cipher.console.oidc.domain.web.SubAccountDomain">
+        DELETE FROM cipher_sub_account WHERE account_number = #{accountNumber} and app_client_id=#{clientId};
+    </delete>
+
+
+    <select id="querySubMap" resultType="cipher.console.oidc.domain.web.SubAccountMapDomain" parameterType="cipher.console.oidc.domain.web.SubAccountMapDomain">
+        SELECT id as id,sub_id as subId,account_number as accountNumber FROM cipher_sub_account_map
+        WHERE user_id = #{userId} and sub_id=#{subId}
+    </select>
+
+
+
+    <delete id="deleteSubAccountMap"  parameterType="cipher.console.oidc.domain.web.SubAccountMapDomain">
+      DELETE FROM  cipher_sub_account_map where
+       user_id = #{uuid} and sub_id=#{subId};
+    </delete>
+
+</mapper>

@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cipher.console.oidc.mapper.RoleApplicationMapInfoMapper">
+    <resultMap id="BaseResultMap" type="cipher.console.oidc.domain.web.RoleApplicationMapInfo">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="role_id" property="roleId" jdbcType="INTEGER"/>
+        <result column="application_id" property="applicationId" jdbcType="INTEGER"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+    id, role_id, application_id
+  </sql>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+        select
+        <include refid="Base_Column_List"/>
+        from cipher_role_application_map
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from cipher_role_application_map
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+    <insert id="insert" parameterType="cipher.console.oidc.domain.web.RoleApplicationMapInfo">
+    insert into cipher_role_application_map (id, role_id, application_id
+      )
+    values (#{id,jdbcType=INTEGER}, #{roleId,jdbcType=INTEGER}, #{applicationId,jdbcType=INTEGER}
+      )
+  </insert>
+    <insert id="insertSelective" parameterType="cipher.console.oidc.domain.web.RoleApplicationMapInfo">
+        insert into cipher_role_application_map
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="roleId != null">
+                role_id,
+            </if>
+            <if test="applicationId != null">
+                application_id,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=INTEGER},
+            </if>
+            <if test="roleId != null">
+                #{roleId,jdbcType=INTEGER},
+            </if>
+            <if test="applicationId != null">
+                #{applicationId,jdbcType=INTEGER},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="cipher.console.oidc.domain.web.RoleApplicationMapInfo">
+        update cipher_role_application_map
+        <set>
+            <if test="roleId != null">
+                role_id = #{roleId,jdbcType=INTEGER},
+            </if>
+            <if test="applicationId != null">
+                application_id = #{applicationId,jdbcType=INTEGER},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="cipher.console.oidc.domain.web.RoleApplicationMapInfo">
+    update cipher_role_application_map
+    set role_id = #{roleId,jdbcType=INTEGER},
+      application_id = #{applicationId,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+
+    <select id="selectApplicationName" resultType="cipher.console.oidc.domain.web.RoleApplicationMapInfo"
+            parameterType="cipher.console.oidc.domain.web.RoleApplicationMapInfo">
+    select
+    ss.id, ss.role_id as roleId,ss.application_id as applicationId,
+    tt.application_name as applicationName
+    from cipher_role_application_map ss
+    LEFT JOIN cipher_application_info  tt on ss.application_id=tt.id
+    where ss.role_id=#{roleId}
+  </select>
+
+
+    <delete id="deleteByRoleId" parameterType="java.lang.Integer">
+    delete from cipher_role_application_map
+    where role_id=#{roleId}
+  </delete>
+    <select id="selectApplication" resultType="cipher.console.oidc.domain.web.ApplicationInfoDomain">
+       select dd.id as id ,dd.application_name as applicationName,dd.application_id as applicationId,nn.user_id  from cipher_application_info dd
+       LEFT JOIN cipher_role_application_map mm on mm.application_id=dd.id
+       LEFT JOIN cipher_role_user_map nn on nn.role_id=mm.role_id
+       where nn.user_id=#{accountNumber} group by dd.application_name;
+    </select>
+
+
+    <select id="getUserAccount" resultType="java.lang.Integer">
+    select count(1) from cipher_role_user_map where role_id=#{roleId}
+  </select>
+
+
+    <select id="getUserListByApplicationId" resultType="cipher.console.oidc.domain.web.UserInfoDomain" parameterType="cipher.console.oidc.model.ApplicationSubAccountModel">
+     select hh.account_number as accountNumber,
+             hh.user_name AS userName,
+             hh.phone_number as phoneNumber,
+             hh.nickname as nickname,
+             hh.mail as mail,
+             hh.account_status as accountStatus from cipher_application_info tt
+     LEFT JOIN cipher_role_application_map nn on tt.id=nn.application_id
+     LEFT JOIN cipher_role_user_map gg on gg.role_id=nn.role_id
+     LEFT JOIN cipher_user_info hh on hh.account_number=gg.user_id
+     where tt.id=#{applicationId}
+     UNION
+     select  hh.account_number as accountNumber,
+             hh.user_name AS userName,
+             hh.phone_number as phoneNumber,
+             hh.nickname as nickname,
+             hh.mail as mail,
+             hh.account_status as accountStatus from cipher_application_info tt
+     LEFT JOIN cipher_role_application_map nn on tt.id=nn.application_id
+     LEFT JOIN cipher_role_group_map gg on gg.role_id=nn.role_id
+     LEFT JOIN cipher_group_user_map bb on bb.group_id=gg.group_id
+     LEFT JOIN cipher_user_info hh on hh.account_number=bb.account_number
+     where tt.id=#{applicationId} and hh.account_number is not null
+     LIMIT #{pageData.currentRow}, #{pageData.rows}
+
+    </select>
+    <select id="getUserListCountByApplicationId" resultType="int">
+    select count(1) from ( select hh.account_number as accountNumber,
+             hh.user_name AS userName,
+             hh.phone_number as phoneNumber,
+             hh.mail as mail,
+             hh.account_status as accountStatus from cipher_application_info tt
+     LEFT JOIN cipher_role_application_map nn on tt.id=nn.application_id
+     LEFT JOIN cipher_role_user_map gg on gg.role_id=nn.role_id
+     LEFT JOIN cipher_user_info hh on hh.account_number=gg.user_id
+     where tt.id=#{applicationId}
+     UNION
+     select  hh.account_number as accountNumber,
+             hh.user_name AS userName,
+             hh.phone_number as phoneNumber,
+             hh.mail as mail,
+             hh.account_status as accountStatus from cipher_application_info tt
+     LEFT JOIN cipher_role_application_map nn on tt.id=nn.application_id
+     LEFT JOIN cipher_role_group_map gg on gg.role_id=nn.role_id
+     LEFT JOIN cipher_group_user_map bb on bb.group_id=gg.group_id
+     LEFT JOIN cipher_user_info hh on hh.account_number=bb.account_number
+     where tt.id=#{applicationId} and hh.account_number is not null) tt
+    </select>
+    <select id="getUserListCountByApplicationId_1" resultType="int" parameterType="java.lang.Integer">
+         select count(1) from ( select hh.account_number as accountNumber,
+             hh.user_name AS userName,
+             hh.phone_number as phoneNumber,
+             hh.mail as mail,
+             hh.account_status as accountStatus from cipher_application_info tt
+     LEFT JOIN cipher_role_application_map nn on tt.id=nn.application_id
+     LEFT JOIN cipher_role_user_map gg on gg.role_id=nn.role_id
+     LEFT JOIN cipher_user_info hh on hh.account_number=gg.user_id
+     where tt.id=#{applicationId}
+     UNION
+     select  hh.account_number as accountNumber,
+             hh.user_name AS userName,
+             hh.phone_number as phoneNumber,
+             hh.mail as mail,
+             hh.account_status as accountStatus from cipher_application_info tt
+     LEFT JOIN cipher_role_application_map nn on tt.id=nn.application_id
+     LEFT JOIN cipher_role_group_map gg on gg.role_id=nn.role_id
+     LEFT JOIN cipher_group_user_map bb on bb.group_id=gg.group_id
+     LEFT JOIN cipher_user_info hh on hh.account_number=bb.account_number
+     where tt.id=#{applicationId} and hh.account_number is not null
+     UNION
+        select hh.account_number as accountNumber,
+             hh.user_name AS userName,
+             hh.phone_number as phoneNumber,
+             hh.mail as mail,
+             hh.account_status as accountStatus from cipher_application_info tt
+            left join cipher_team_application_map teamMap
+            on tt.application_id=teamMap.application_id
+            left join cipher_team_user_map team_user
+            on teamMap.team_id=team_user.team_id
+            left join cipher_user_info  hh
+            on team_user.user_id=hh.account_number
+             where tt.id=#{applicationId}
+      UNION
+         select hh.account_number as accountNumber,
+             hh.user_name AS userName,
+             hh.phone_number as phoneNumber,
+             hh.mail as mail,
+             hh.account_status as accountStatus from cipher_application_info tt
+            left join cipher_team_application_map teamMap
+            on tt.application_id=teamMap.application_id
+            left join cipher_team_user_map team_user
+            on teamMap.team_id=team_user.team_id
+            left join cipher_user_info  hh
+            on team_user.user_id=hh.account_number
+             where tt.id=#{applicationId} and hh.account_number is not null)dd
+
+
+    </select>
+
+
+</mapper>

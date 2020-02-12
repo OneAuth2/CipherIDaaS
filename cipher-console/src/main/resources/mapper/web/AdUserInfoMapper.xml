@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="cipher.console.oidc.mapper.AdUserInfoMapper">
+
+
+    <select id="insertAdUserInfoList">
+        INSERT INTO cipher_user_ad_info (user_name, nicnk_name,  node_info, mail, unique_name,
+        create_time, modify_time)
+        VALUES
+        <foreach collection="list" item="adUserInfo" index="index" separator=",">
+            (#{adUserInfo.userName},#{adUserInfo.nickName},#{adUserInfo.nodeInfo}, #{adUserInfo.mail}, #{adUserInfo.uniqueName},NOW(),NOW())
+        </foreach>
+    </select>
+
+
+    <select id="queryRepeatName" resultType="cipher.console.oidc.domain.web.AdUserInfoDomain">
+        SELECT mail from cipher_user_ad_info WHERE 1=1
+        <if test="list!=null">
+            and mail IN
+            <foreach collection="list" item="adUserInfo" index="index" open="(" separator="," close=")">
+                #{adUserInfo.mail}
+            </foreach>
+        </if>
+
+    </select>
+
+
+</mapper>

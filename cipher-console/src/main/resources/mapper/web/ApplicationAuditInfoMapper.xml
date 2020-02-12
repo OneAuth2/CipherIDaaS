@@ -1,0 +1,407 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cipher.console.oidc.mapper.ApplicationAuditInfoMapper">
+    <resultMap id="BaseResultMap" type="cipher.console.oidc.domain.web.ApplicationAuditInfo">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="application_id" property="applicationId" jdbcType="INTEGER"/>
+        <result column="ip" property="ip" jdbcType="VARCHAR"/>
+        <result column="sub_count_id" property="subcountId"/>
+        <result column="type" property="type" jdbcType="INTEGER"/>
+        <result column="msg" property="msg" jdbcType="VARCHAR"/>
+        <result column="operation" property="operation" jdbcType="VARCHAR"/>
+        <result column="remark" property="remark" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        id, application_id, ip, type, msg, remark, create_time, operation, sub_count_id
+    </sql>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+        select
+        <include refid="Base_Column_List"/>
+        from cipher_application_audit_log
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+        DELETE FROM cipher_application_audit_log
+        WHERE id = #{id,jdbcType=INTEGER}
+    </delete>
+    <insert id="insert" parameterType="cipher.console.oidc.domain.web.ApplicationAuditInfo">
+        INSERT INTO cipher_application_audit_log (id, application_id, ip, operation, sub_count_id,
+                                                  type, msg, remark,
+                                                  create_time)
+        VALUES (#{id,jdbcType=INTEGER}, #{applicationId,jdbcType=INTEGER}, #{ip,jdbcType=VARCHAR},
+                #{operation,jdbcType=VARCHAR},
+                #{subcountId},
+                #{type,jdbcType=INTEGER}, #{msg,jdbcType=VARCHAR}, #{remark,jdbcType=VARCHAR},
+                #{createTime,jdbcType=TIMESTAMP})
+    </insert>
+    <insert id="insertSelective" parameterType="cipher.console.oidc.domain.web.ApplicationAuditInfo">
+        insert into cipher_application_audit_log
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="applicationId != null">
+                application_id,
+            </if>
+            <if test="ip != null">
+                ip,
+            </if>
+            <if test="type != null">
+                type,
+            </if>
+            <if test="subcountId != null">
+                sub_count_id,
+            </if>
+            <if test="msg != null">
+                msg,
+            </if>
+            <if test="operation != null">
+                operation,
+            </if>
+            <if test="remark != null">
+                remark,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=INTEGER},
+            </if>
+            <if test="applicationId != null">
+                #{applicationId,jdbcType=INTEGER},
+            </if>
+            <if test="ip != null">
+                #{ip,jdbcType=VARCHAR},
+            </if>
+            <if test="type != null">
+                #{type,jdbcType=INTEGER},
+            </if>
+            <if test="subcountId != null">
+                #{subcountId},
+            </if>
+            <if test="msg != null">
+                #{msg,jdbcType=VARCHAR},
+            </if>
+            <if test="operation != null">
+                #{operation,jdbcType=VARCHAR},
+            </if>
+            <if test="remark != null">
+                #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="cipher.console.oidc.domain.web.ApplicationAuditInfo">
+        update cipher_application_audit_log
+        <set>
+            <if test="applicationId != null">
+                application_id = #{applicationId,jdbcType=INTEGER},
+            </if>
+            <if test="ip != null">
+                ip = #{ip,jdbcType=VARCHAR},
+            </if>
+            <if test="subcountId != null">
+                sub_count_id=#{subcountId},
+            </if>
+            <if test="type != null">
+                type = #{type,jdbcType=INTEGER},
+            </if>
+            <if test="operation != null">
+                operation = #{operation,jdbcType=VARCHAR},
+            </if>
+            <if test="msg != null">
+                msg = #{msg,jdbcType=VARCHAR},
+            </if>
+            <if test="remark != null">
+                remark = #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="cipher.console.oidc.domain.web.ApplicationAuditInfo">
+        UPDATE cipher_application_audit_log
+        SET application_id = #{applicationId,jdbcType=INTEGER},
+            ip             = #{ip,jdbcType=VARCHAR},
+            type           = #{type,jdbcType=INTEGER},
+            msg            = #{msg,jdbcType=VARCHAR},
+            operation      = #{operation,jdbcType=VARCHAR},
+            remark         = #{remark,jdbcType=VARCHAR},
+            create_time    = #{createTime,jdbcType=TIMESTAMP}
+        WHERE id = #{id,jdbcType=INTEGER}
+    </update>
+
+
+    <select id="selectApplicationAuditList" parameterType="cipher.console.oidc.domain.web.ApplicationAuditInfo" resultType="cipher.console.oidc.domain.web.ApplicationAuditInfo">
+        select user_name,CASE type WHEN 1 THEN '应用访问' WHEN 2 THEN '应用维护' WHEN 3 THEN '授权维护' WHEN 4 THEN '子账号维护' ELSE '其他' END type,
+            msg,create_time from cipher_application_audit_log
+        where 1=1 and application_id=#{applicationId} and company_id = #{companyId}
+        <if test="type != null and type!=0">
+            and type = #{type}
+        </if>
+        <if test="userName!=null and userName!=''">
+            and user_name LIKE CONCAT(CONCAT('%',#{userName}),'%')
+        </if>
+        <if test="startTime != null and startTime!=''">
+            and create_time &gt;= #{startTime}
+        </if>
+        <if test="endTime != null and endTime!=''">
+            and create_time &lt;= #{endTime}
+        </if>
+        order by create_time desc
+        LIMIT #{pageData.currentRow}, #{pageData.rows}
+    </select>
+
+    <select id="selectApplicationAuditCount" resultType="int">
+        select count(1) from cipher_application_audit_log
+        where 1=1 and application_id=#{applicationId} and company_id = #{companyId}
+        <if test="type != null and type!=0">
+            and type = #{type}
+        </if>
+        <if test="userName!=null and userName!=''">
+            and user_name LIKE CONCAT(CONCAT('%',#{userName}),'%')
+        </if>
+        <if test="startTime != null and startTime!=''">
+            and create_time &gt;= #{startTime}
+        </if>
+        <if test="endTime != null and endTime!=''">
+            and create_time &lt;= #{endTime}
+        </if>
+    </select>
+    <select id="selectAppAuditListBySev" parameterType="cipher.console.oidc.domain.web.ApplicationAuditInfo" resultType="cipher.console.oidc.domain.web.ApplicationAuditInfo">
+        select user_name,CASE type WHEN 1 THEN '应用访问' WHEN 2 THEN '应用维护' WHEN 3 THEN '授权维护' WHEN 4 THEN '子账号维护' ELSE '其他' END typeStr,
+        msg,create_time from cipher_application_audit_log
+        where 1=1 and application_id=#{applicationId} and company_id = #{companyId}
+        <if test="type != null and type!=0">
+            and type = #{type}
+        </if>
+        <if test="userName!=null and userName!=''">
+            and user_name LIKE CONCAT(CONCAT('%',#{userName}),'%')
+        </if>
+            and DATE_SUB(CURDATE(), INTERVAL 7 DAY) &lt;= date(create_time)
+        order by create_time desc
+        LIMIT #{pageData.currentRow}, #{pageData.rows}
+    </select>
+
+    <select id="selectAppAuditCountBySev" parameterType="cipher.console.oidc.domain.web.ApplicationAuditInfo" resultType="int">
+        select count(1) from cipher_application_audit_log
+        where 1=1 and application_id=#{applicationId} and company_id = #{companyId}
+        <if test="type != null and type!=0">
+            and type = #{type}
+        </if>
+        <if test="userName!=null and userName!=''">
+            and user_name LIKE CONCAT(CONCAT('%',#{userName}),'%')
+        </if>
+        and DATE_SUB(CURDATE(), INTERVAL 7 DAY) &lt;= date(create_time)
+    </select>
+    <select id="selectAppAuditListByMon" parameterType="cipher.console.oidc.domain.web.ApplicationAuditInfo" resultType="cipher.console.oidc.domain.web.ApplicationAuditInfo">
+        select user_name,CASE type WHEN 1 THEN '应用访问' WHEN 2 THEN '应用维护' WHEN 3 THEN '授权维护' WHEN 4 THEN '子账号维护' ELSE '其他' END typeStr,
+        msg,create_time from cipher_application_audit_log
+        where 1=1 and application_id=#{applicationId} and company_id = #{companyId}
+        <if test="type != null and type!=0">
+            and type = #{type}
+        </if>
+        <if test="userName!=null and userName!=''">
+            and user_name LIKE CONCAT(CONCAT('%',#{userName}),'%')
+        </if>
+            and DATE_SUB(CURDATE(), INTERVAL 1 MONTH) &lt;= date(create_time)
+        order by create_time desc
+        LIMIT #{pageData.currentRow}, #{pageData.rows}
+    </select>
+    <select id="selectAppAuditCountByMon" parameterType="cipher.console.oidc.domain.web.ApplicationAuditInfo" resultType="int">
+        select count(1) from cipher_application_audit_log
+        where 1=1 and application_id=#{applicationId} and company_id = #{companyId}
+        <if test="type != null and type!=0">
+            and type = #{type}
+        </if>
+        <if test="userName!=null and userName!=''">
+            and user_name LIKE CONCAT(CONCAT('%',#{userName}),'%')
+        </if>
+            and DATE_SUB(CURDATE(), INTERVAL 1 MONTH) &lt;= date(create_time)
+    </select>
+
+    <select id="selectAppAuditListByAll" parameterType="cipher.console.oidc.domain.web.ApplicationAuditInfo" resultType="cipher.console.oidc.domain.web.ApplicationAuditInfo">
+        select user_name,CASE type WHEN 1 THEN '应用访问' WHEN 2 THEN '应用维护' WHEN 3 THEN '授权维护' WHEN 4 THEN '子账号维护' ELSE '其他' END typeStr,
+        msg,create_time from cipher_application_audit_log
+        where 1=1 and application_id=#{applicationId} and company_id = #{companyId}
+        <if test="type != null and type!=0">
+            and type = #{type}
+        </if>
+        <if test="userName!=null and userName!=''">
+            and user_name LIKE CONCAT(CONCAT('%',#{userName}),'%')
+        </if>
+        order by create_time desc
+        LIMIT #{pageData.currentRow}, #{pageData.rows}
+    </select>
+    <select id="selectAppAuditCountByAll" parameterType="cipher.console.oidc.domain.web.ApplicationAuditInfo" resultType="int">
+        select count(1) from cipher_application_audit_log
+        where 1=1 and application_id=#{applicationId} and company_id = #{companyId}
+        <if test="type != null and type!=0">
+            and type = #{type}
+        </if>
+        <if test="userName!=null and userName!=''">
+            and user_name LIKE CONCAT(CONCAT('%',#{userName}),'%')
+        </if>
+    </select>
+    <resultMap id="ApplicationResultMap" type="cipher.console.oidc.domain.web.ApplicationInfo">
+        <result column="id" property="id"/>
+        <result column="application_name" property="applicationName"/>
+        <result column="application_status" property="applicationStatus"/>
+    </resultMap>
+
+
+    <select id="selectApplicationList" resultType="cipher.console.oidc.domain.web.ApplicationInfo">
+        select * from cipher_application_info where 1=1 and company_id=#{companyId}
+        <if test="applicationName != null and applicationName!=''">
+            and application_name  LIKE CONCAT(CONCAT('%',#{applicationName}),'%')
+        </if>
+        <if test="sidx!=null and sidx=='applicationName'.toString()">
+            order by application_name ${sord}
+        </if>
+        order by create_time
+        LIMIT #{pageData.currentRow}, #{pageData.rows}
+    </select>
+    <select id="selectIdsBycompanyid" parameterType="string" resultType="string">
+        select GROUP_CONCAT(id) ids FROM cipher_application_info where company_id=#{companyId}
+    </select>
+    <select id="getTotalByTime" resultType="integer" parameterType="string">
+        SELECT count(1)
+        FROM cipher_application_audit_log
+        WHERE 1=1 AND company_id=#{companyId}
+        <if test="endTime!=null and endTime!=''">
+            AND create_time &lt;= #{endTime}
+        </if>
+        <if test="startTime!=null and startTime!=''">
+            AND create_time >= #{startTime}
+        </if>
+        <if test="ids!=null and ids!=''">
+            AND application_id IN (${ids})
+        </if>
+    </select>
+    <select id="getCountByTime" resultType="integer">
+        SELECT count(1)
+        FROM cipher_application_audit_log
+        WHERE 1=1 AND company_id=#{companyId}
+              AND application_id = #{applicationId}
+        <if test="endTime!=null and endTime!=''">
+            AND create_time &lt;= #{endTime}
+        </if>
+        <if test="startTime!=null and startTime!=''">
+            AND create_time >= #{startTime}
+        </if>
+    </select>
+
+    <select id="getTotalByAll" parameterType="string" resultType="integer">
+        SELECT count(1)
+        FROM cipher_application_audit_log
+        WHERE company_id=#{companyId}
+        <if test="ids!=null and ids!=''">
+            AND application_id IN (${ids})
+        </if>
+    </select>
+    <select id="getCountByAll" resultType="int">
+        SELECT count(1)
+        FROM cipher_application_audit_log
+        WHERE company_id=#{companyId} AND
+            application_id = #{applicationId}
+    </select>
+
+    <select id="getTotalBySev" parameterType="string" resultType="integer">
+        SELECT count(1)
+        FROM cipher_application_audit_log
+        WHERE company_id=#{companyId}
+                  AND DATE_SUB(CURDATE(), INTERVAL 7 DAY) &lt;= date(create_time)
+              <if test="ids!=null and ids!=''">
+                  AND application_id IN (${ids})
+              </if>
+    </select>
+
+    <select id="getCountBySev" resultType="int">
+        SELECT count(1)
+        FROM cipher_application_audit_log
+        WHERE company_id=#{companyId} AND
+              application_id = #{applicationId}
+              AND DATE_SUB(CURDATE(), INTERVAL 7 DAY) &lt;= date(create_time);
+    </select>
+
+    <select id="getTotalByMon" resultType="integer" parameterType="string">
+        SELECT count(1)
+        FROM cipher_application_audit_log
+        WHERE company_id=#{companyId}
+            AND DATE_SUB(CURDATE(), INTERVAL 1 MONTH) &lt;= date(create_time)
+        <if test="ids!=null and ids!=''">
+            AND application_id IN (${ids})
+        </if>
+    </select>
+
+    <select id="getCountByMon" resultType="int">
+        SELECT count(1)
+        FROM cipher_application_audit_log
+        WHERE company_id=#{companyId} AND
+              application_id = #{applicationId}
+              AND DATE_SUB(CURDATE(), INTERVAL 1 MONTH) &lt;= date(create_time);
+    </select>
+
+    <select id="selectApplicationCount" resultType="int">
+        select count(1) from cipher_application_info where 1=1 and company_id=#{companyId}
+        <if test="applicationName != null and applicationName!=''">
+            and application_name = #{applicationName}
+        </if>
+
+    </select>
+    <select id="exportExcle" resultType="cipher.console.oidc.domain.exceldomain.ApplicationAuditExcle"
+            parameterType="cipher.console.oidc.domain.web.ApplicationAuditInfo">
+        select id,user_name,CASE type WHEN 1 THEN '应用访问'
+            WHEN 2 THEN '应用维护' WHEN 3 THEN '授权维护'
+            WHEN 4 THEN '子账号维护' ELSE '其他' END type,msg,create_time from cipher_application_audit_log
+        where company_id=#{companyId}
+          <if test="applicationId!=null and applicationId!=0">
+              and application_id=#{applicationId}
+          </if>
+          <if test="type!=null and type!=0">
+              and type=#{type}
+          </if>
+          <if test="userName!=null and userName!=''">
+              and user_name LIKE CONCAT(CONCAT('%',#{userName}),'%')
+          </if>
+          <if test="startTime!=null and startTime!=''">
+              and create_time >= #{startTime}
+          </if>
+          <if test="endTime!=null and endTime!=''">
+              and create_time &lt;= #{endTime}
+          </if>
+        order by create_time desc
+    </select>
+
+
+    <select id="getApplyList" resultType="cipher.console.oidc.domain.web.ApplicationInfo">
+        SELECT *
+        FROM cipher_application_info
+        where  company_id=#{companyId} and id not in(#{applicationId})
+    </select>
+
+    <select id="getApplyInfo" resultType="cipher.console.oidc.domain.web.ApplicationInfo">
+        SELECT *
+        FROM cipher_application_info
+        WHERE id = #{id}
+    </select>
+    <insert id="insertNew" parameterType="cipher.console.oidc.domain.web.AppAuditInfo">
+        INSERT INTO cipher_application_audit_log (application_id,user_name,type,msg,company_id,create_time) VALUES
+            (#{applicationId},#{userName},#{type},#{msg},#{companyId},NOW())
+    </insert>
+    <select id="getApplicationInfoList" parameterType="string" resultType="cipher.console.oidc.domain.web.ApplicationChartInfo">
+         SELECT id,application_name,application_type FROM cipher_application_info WHERE company_id=#{companyId}
+    </select>
+    <select id="getApplicationAuditCount" resultType="integer">
+        SELECT count(1) from cipher_application_audit_log WHERE TO_DAYS(NOW()) - TO_DAYS(create_time) &lt;= #{param}
+        and application_id=#{id}
+        and company_id = #{companyId}
+    </select>
+</mapper>

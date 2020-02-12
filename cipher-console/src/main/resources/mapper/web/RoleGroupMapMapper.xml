@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cipher.console.oidc.mapper.RoleGroupMapMapper" >
+  <resultMap id="BaseResultMap" type="cipher.console.oidc.domain.web.RoleGroupMapDomain" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="role_id" property="roleId" jdbcType="INTEGER" />
+    <result column="group_id" property="groupId" jdbcType="INTEGER" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, role_id, group_id
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from cipher_role_group_map
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteRoleGroupMap" parameterType="java.lang.Integer" >
+    delete from cipher_role_group_map
+    where 1=1
+    <if test="roleId != null" >
+    and  role_id = #{roleId,jdbcType=INTEGER}
+    </if>
+    <if test="groupId != null" >
+      and  group_id = #{groupId,jdbcType=INTEGER}
+    </if>
+    <if test="id != null" >
+      and  id = #{id,jdbcType=INTEGER}
+    </if>
+
+
+  </delete>
+  <insert id="insert" parameterType="cipher.console.oidc.domain.web.RoleGroupMapDomain" >
+    insert into cipher_role_group_map (id, role_id, group_id
+      )
+    values (#{id,jdbcType=INTEGER}, #{roleId,jdbcType=INTEGER}, #{groupId,jdbcType=INTEGER}
+      )
+  </insert>
+  <insert id="insertRoleGroupMap" parameterType="cipher.console.oidc.domain.web.RoleGroupMapDomain" >
+    insert into cipher_role_group_map
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="roleId != null" >
+        role_id,
+      </if>
+      <if test="groupId != null" >
+        group_id,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="roleId != null" >
+        #{roleId,jdbcType=INTEGER},
+      </if>
+      <if test="groupId != null" >
+        #{groupId,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="cipher.console.oidc.domain.web.RoleGroupMapDomain" >
+    update cipher_role_group_map
+    <set >
+      <if test="roleId != null" >
+        role_id = #{roleId,jdbcType=INTEGER},
+      </if>
+      <if test="groupId != null" >
+        group_id = #{groupId,jdbcType=INTEGER},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cipher.console.oidc.domain.web.RoleGroupMapDomain" >
+    update cipher_role_group_map
+    set role_id = #{roleId,jdbcType=INTEGER},
+      group_id = #{groupId,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+
+  <select id="selectUserMapList" resultType="cipher.console.oidc.domain.web.RoleGroupMapDomain" parameterType="cipher.console.oidc.domain.web.RoleGroupMapDomain" >
+    select
+    <include refid="Base_Column_List" />
+    from cipher_role_group_map
+    where 1=1
+    <if test="roleId != null " >
+     and role_id = #{roleId,jdbcType=INTEGER}
+    </if>
+    <if test="id != null" >
+      and id = #{id,jdbcType=INTEGER}
+    </if>
+  </select>
+
+
+    <select id="gerRoleGroupMapInfo" resultType="cipher.console.oidc.domain.web.RoleGroupMapDomain" parameterType="cipher.console.oidc.domain.web.RoleGroupMapDomain">
+      select
+      <include refid="Base_Column_List" />
+      from cipher_role_group_map
+      where 1=1
+      <if test="roleId != null " >
+        and role_id = #{roleId,jdbcType=INTEGER}
+      </if>
+      <if test="groupId != null" >
+        and group_id = #{groupId}
+      </if>
+    </select>
+
+
+   <select id="getRoleGroupMapList" resultType="cipher.console.oidc.domain.web.RoleGroupMapDomain" parameterType="cipher.console.oidc.domain.web.RoleGroupMapDomain">
+     select ss.id as id,
+     role_id as roleId,tt.group_id as groupId,tt.group_name as groupName, mm.role_name as roleName
+     from cipher_role_group_map  ss
+     LEFT JOIN cipher_group_info  tt on ss.group_id=tt.group_id
+     LEFT JOIN cipher_role_info mm on mm.id=ss.role_id
+     where 1=1
+     <if test="roleId != null " >
+       and mm.id = #{roleId}
+     </if>
+     <if test="groupId != null " >
+       and tt.group_id = #{groupId}
+     </if>
+   </select>
+
+
+
+    <select id="selectHaveRoleGroupList" resultType="cipher.console.oidc.domain.web.RoleGroupMapDomain" parameterType="cipher.console.oidc.domain.web.RoleGroupMapDomain">
+      select
+      role_id as roleId,ss.group_id as groupId,tt.role_name as roleName
+      from cipher_role_group_map  ss
+      LEFT JOIN cipher_role_info  tt on ss.role_id=tt.id
+      where 1=1
+      <if test="groupId != null " >
+        and group_id = #{groupId}
+      </if>
+    </select>
+
+
+
+
+
+
+
+  <select id="selectGroupAppList" resultType="cipher.console.oidc.domain.web.ApplicationInfoDomain">
+       select
+      nn.role_id as roleId,ss.group_id as groupId,tt.role_name as roleName,bb.application_id as applicationId
+      from cipher_role_group_map  ss
+      LEFT JOIN cipher_role_info  tt on ss.role_id=tt.id
+      LEFT JOIN cipher_role_application_map nn on tt.id=nn.role_id
+      left join cipher_application_info bb on bb.id=nn.application_id
+      where ss.group_id = #{groupId} and nn.application_id is not null GROUP BY bb.application_id
+  </select>
+
+
+  <select id="selectGroupApplicationList" resultType="cipher.console.oidc.model.GroupApplicationModel">
+      select
+       dd.id as id,dd.application_id as applicationId,dd.application_name as applicationName,nn.account_number as accountNumber from cipher_application_info dd
+       LEFT JOIN cipher_role_application_map mm on mm.application_id=dd.id
+       Left JOIN cipher_role_group_map ss on ss.role_id=mm.role_id
+       LEFT JOIN cipher_group_user_map nn on nn.group_id=ss.group_id
+       where nn.group_id = #{groupId} and dd.application_id is not null and application_status=1
+  </select>
+</mapper>

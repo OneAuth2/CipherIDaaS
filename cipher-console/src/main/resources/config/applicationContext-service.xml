@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<bean id="inserLdapUserBuffer" class="edu.hziee.common.queue.DelayExecuteBuffer"
+		  init-method="start" destroy-method="flush">
+		<property name="name" value="inserLdapUserBuffer" />
+		<property name="poolSize" value="${db.pool.size}" />
+		<property name="batchSize" value="${db.batch.size}" />
+		<property name="threads" value="${db.thread.size}" />
+		<property name="checkInterval" value="${db.check.interval}" />
+		<property name="batchExecutor" ref="inserLdapUserService" />
+	</bean>
+
+	<bean id="inserLdapUserService" class="cipher.console.oidc.service.impl.batchExecutor.LdapUserBatchExecutorServiceImpl" />
+
+
+	<bean id="updateAdUserBufferBuffer" class="edu.hziee.common.queue.DelayExecuteBuffer"
+		  init-method="start" destroy-method="flush">
+		<property name="name" value="updateAdUserBufferBuffer" />
+		<property name="poolSize" value="${db.pool.size}" />
+		<property name="batchSize" value="${db.batch.size}" />
+		<property name="threads" value="${db.thread.size}" />
+		<property name="checkInterval" value="${db.check.interval}" />
+		<property name="batchExecutor" ref="updateAdUserBufferService" />
+	</bean>
+
+	<bean id="updateAdUserBufferService" class="cipher.console.oidc.service.impl.batchExecutor.AdUserBufferBatchExecutorServiceImpl" />
+
+	<bean id="insertAdUserBufferBuffer" class="edu.hziee.common.queue.DelayExecuteBuffer"
+		  init-method="start" destroy-method="flush">
+		<property name="name" value="insertAdUserBufferBuffer" />
+		<property name="poolSize" value="${db.pool.size}" />
+		<property name="batchSize" value="${db.batch.size}" />
+		<property name="threads" value="${db.thread.size}" />
+		<property name="checkInterval" value="${db.check.interval}" />
+		<property name="batchExecutor" ref="insertAdUserBufferService" />
+	</bean>
+
+	<bean id="insertAdUserBufferService" class="cipher.console.oidc.service.impl.batchExecutor.InsertUserBufferBatchExecutorServiceImpl" />
+
+
+</beans>

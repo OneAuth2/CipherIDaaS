@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cipher.console.oidc.mapper.IdentityGroupMapMapper">
+
+
+    <insert id="insertIdentityGroupMap" parameterType="cipher.console.oidc.domain.web.IdentityGroupMapDomain">
+        insert into cipher_identity_group_mapping
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="identityId != null">
+                identity_id,
+            </if>
+            <if test="groupId != null">
+                group_id
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="identityId != null">
+                #{identityId},
+            </if>
+            <if test="groupId != null">
+                #{groupId}
+            </if>
+        </trim>
+    </insert>
+
+
+    <delete id="deleteIdentityGroupMap" parameterType="java.lang.Integer">
+           delete  from  cipher_identity_group_mapping  where identity_id= #{identityId}
+
+    </delete>
+
+    <select id="selectIdentityGroupMap" resultType="cipher.console.oidc.domain.web.IdentityGroupMapDomain">
+               select identity_id as identityId,ss.group_id as groupId,tt.group_name as groupName from cipher_identity_group_mapping ss
+               left JOIN  cipher_group_info  tt on ss.group_id =tt.group_id
+               where ss.identity_id= #{identityId}
+    </select>
+    <select id="selectedIdentityStrategy" parameterType="int" resultType="cipher.console.oidc.domain.web.IdentityGroupMapDomain">
+          select cipher_identity_group_mapping.group_id as groupId,cipher_group_info.group_name as groupName
+            from cipher_identity_auth_strategy
+            left join
+            cipher_identity_group_mapping
+            ON
+            cipher_identity_auth_strategy.id=cipher_identity_group_mapping.identity_id
+            left join
+            cipher_group_info
+            on
+            cipher_identity_group_mapping.group_id=cipher_group_info.group_id
+            where cipher_identity_auth_strategy.id=#{id}
+    </select>
+    <select id="notSelectIdentityStrategy" parameterType="int" resultType="cipher.console.oidc.domain.web.IdentityGroupMapDomain">
+            select distinct cipher_identity_group_mapping.group_id,cipher_group_info.group_name
+            from cipher_identity_auth_strategy
+            left join
+            cipher_identity_group_mapping
+            ON
+            cipher_identity_auth_strategy.id=cipher_identity_group_mapping.identity_id
+            left join
+            cipher_group_info
+            on
+            cipher_identity_group_mapping.group_id=cipher_group_info.group_id
+            where cipher_identity_group_mapping.group_id  not in
+
+            (select cipher_identity_group_mapping.group_id
+            from cipher_identity_auth_strategy
+            left join
+            cipher_identity_group_mapping
+            ON
+            cipher_identity_auth_strategy.id=cipher_identity_group_mapping.identity_id
+            left join
+            cipher_group_info
+            on
+            cipher_identity_group_mapping.group_id=cipher_group_info.group_id
+            where cipher_identity_auth_strategy.id=#{id})
+    </select>
+
+
+
+    <select id="notselectedIdentityGroupMapNew" resultType="cipher.console.oidc.domain.web.GroupInfoDomain">
+        SELECT
+        group_id as groupId,
+        group_name as groupName
+        FROM cipher_group_info
+        where group_id not in
+        <foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+
+</mapper>

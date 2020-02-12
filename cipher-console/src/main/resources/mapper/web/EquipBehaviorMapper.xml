@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="cipher.console.oidc.mapper.EquipBehaviorMapper">
+    <select id="getVpnList" parameterType="cipher.console.oidc.domain.web.EquipBehaviorDomain" resultType="cipher.console.oidc.domain.web.EquipBehaviorDomain">
+         SELECT uuid vpnId,company_id,devicename,status FROM cipher_vpn_configuration WHERE company_id=#{companyId}
+         <if test="devicename!=null and devicename!=''">
+             AND devicename LIKE CONCAT(CONCAT('%',#{devicename}),'%')
+         </if>
+         ORDER BY create_time DESC
+         LIMIT #{pageData.currentRow}, #{pageData.rows}
+    </select>
+    <select id="selectVpnCount" parameterType="cipher.console.oidc.domain.web.EquipBehaviorDomain" resultType="int">
+        SELECT COUNT(1) FROM cipher_vpn_configuration WHERE company_id=#{companyId}
+        <if test="devicename!=null and devicename!=''">
+            AND devicename LIKE CONCAT(CONCAT('%',#{devicename}),'%')
+        </if>
+    </select>
+    <select id="selectRecentlySeven" parameterType="string" resultType="int">
+        SELECT COUNT(1) FROM cipher_equip_behavior_log WHERE company_id=#{companyId}
+                                                         AND vpn_id=#{vpnId}
+                                                         AND DATE_SUB(CURDATE(), INTERVAL 7 DAY) &lt;= date(create_time)
+    </select>
+    <select id="selectRecentlyThirty" parameterType="string" resultType="int">
+        SELECT COUNT(1) FROM cipher_equip_behavior_log WHERE company_id=#{companyId}
+                                                         AND vpn_id=#{vpnId}
+                                                         AND DATE_SUB(CURDATE(), INTERVAL 1 MONTH) &lt;= date(create_time)
+    </select>
+    <select id="getEquipLogList" parameterType="cipher.console.oidc.domain.web.EquipBehaviorInfo" resultType="cipher.console.oidc.domain.web.EquipBehaviorInfo">
+        SELECT id,user_id,company_id,vpn_id,user_info,type,intro,msg,create_time FROM cipher_equip_behavior_log
+        WHERE vpn_id=#{vpnId} AND company_id=#{companyId}
+        <if test="userInfo!=null and userInfo!=''">
+            AND  user_info LIKE CONCAT(CONCAT('%',#{userInfo}),'%')
+        </if>
+        <if test="type==0 or type==1">
+            AND type=#{type}
+        </if>
+        <if test="endTime!=null and endTime!=''">
+            AND create_time &lt;= #{endTime}
+        </if>
+        <if test="startTime!=null and startTime!=''">
+            AND create_time >= #{startTime}
+        </if>
+        ORDER BY create_time DESC
+        LIMIT #{pageData.currentRow}, #{pageData.rows}
+    </select>
+    <select id="selectEquipLogCount" parameterType="cipher.console.oidc.domain.web.EquipBehaviorInfo" resultType="int">
+        SELECT COUNT(1) FROM cipher_equip_behavior_log
+        WHERE vpn_id=#{vpnId} AND company_id=#{companyId}
+        <if test="userInfo!=null and userInfo!=''">
+            AND  user_info LIKE CONCAT(CONCAT('%',#{userInfo}),'%')
+        </if>
+        <if test="type==0 or type==1">
+            AND type=#{type}
+        </if>
+        <if test="endTime!=null and endTime!=''">
+            AND create_time &lt;= #{endTime}
+        </if>
+        <if test="startTime!=null and startTime!=''">
+            AND create_time >= #{startTime}
+        </if>
+    </select>
+    <select id="selectEquipBehaviorExcle" parameterType="cipher.console.oidc.domain.web.EquipBehaviorInfo"
+            resultType="cipher.console.oidc.domain.exceldomain.EquipBehaviorExcle">
+        SELECT id,user_info,intro,msg,DATE_FORMAT(create_time, '%Y-%m-%d %k:%i:%s') create_time FROM cipher_equip_behavior_log
+        WHERE vpn_id=#{vpnId} AND company_id=#{companyId}
+        <if test="userInfo!=null and userInfo!=''">
+            AND  user_info LIKE CONCAT(CONCAT('%',#{userInfo}),'%')
+        </if>
+        <if test="type==0 or type==1">
+            AND type=#{type}
+        </if>
+        <if test="endTime!=null and endTime!=''">
+            AND create_time &lt;= #{endTime}
+        </if>
+        <if test="startTime!=null and startTime!=''">
+            AND create_time >= #{startTime}
+        </if>
+        ORDER BY create_time DESC
+    </select>
+</mapper>

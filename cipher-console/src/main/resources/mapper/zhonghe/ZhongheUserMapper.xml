@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="cipher.console.oidc.mapper.ZhongheUserDAO">
+
+
+    <insert id="insertZhUser">
+        insert into zhonghe_user_interface(
+        pk,
+        posts,
+        staff_name,
+        department,
+        post,
+        staff_status,
+        user_name,
+        email,
+        departments,
+        create_time
+        ) VALUES
+        <foreach collection="userList" index="user" item="user" separator=",">
+            (
+            #{user.pk},
+            #{user.posts},
+            #{user.staff_name},
+            #{user.department},
+            #{user.post},
+            #{user.staff_status},
+            #{user.user_name},
+            #{user.email},
+            #{user.departments},
+            NOW()
+            )
+        </foreach>
+    </insert>
+
+    <select id="zhonghe2cipheruser" useCache="false" statementType="CALLABLE">
+        <![CDATA[
+        call add_user_info();
+        ]]>
+    </select>
+
+
+    <select id="queryAllZhUser" resultType="cipher.console.oidc.domain.zhonghe.ZhongheUserDB">
+          select * from zhonghe_user_interface;
+    </select>
+
+
+</mapper>

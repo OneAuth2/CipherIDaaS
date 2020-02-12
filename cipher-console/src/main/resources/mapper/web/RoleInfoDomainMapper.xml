@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cipher.console.oidc.mapper.RoleInfoDomainMapper" >
+  <resultMap id="BaseResultMap" type="cipher.console.oidc.domain.web.RoleInfoDomain" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="role_name" property="roleName" jdbcType="VARCHAR" />
+    <result column="mark" property="mark" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, role_name, mark, create_time, modify_time
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select
+    <include refid="Base_Column_List" />
+    from cipher_role_info
+    where 1=1
+    <if test="id != null" >
+      and id = #{id}
+    </if>
+
+
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from cipher_role_info
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="cipher.console.oidc.domain.web.RoleInfoDomain" >
+    insert into cipher_role_info (id, role_name, mark, 
+      create_time, modify_time)
+    values (#{id,jdbcType=INTEGER}, #{roleName,jdbcType=VARCHAR}, #{mark,jdbcType=VARCHAR}, 
+      #{createTime,jdbcType=TIMESTAMP}, #{modifyTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="cipher.console.oidc.domain.web.RoleInfoDomain"  keyProperty="id"  useGeneratedKeys="true">
+    insert into cipher_role_info
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="roleName != null" >
+        role_name,
+      </if>
+      <if test="mark != null" >
+        mark,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="modifyTime != null" >
+        modify_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="roleName != null" >
+        #{roleName,jdbcType=VARCHAR},
+      </if>
+      <if test="mark != null" >
+        #{mark,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modifyTime != null" >
+        #{modifyTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="cipher.console.oidc.domain.web.RoleInfoDomain" >
+    update cipher_role_info
+    <set >
+      <if test="roleName != null" >
+        role_name = #{roleName,jdbcType=VARCHAR},
+      </if>
+      <if test="mark != null" >
+        mark = #{mark,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modifyTime != null" >
+        modify_time = #{modifyTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cipher.console.oidc.domain.web.RoleInfoDomain" >
+    update cipher_role_info
+    set role_name = #{roleName,jdbcType=VARCHAR},
+      mark = #{mark,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      modify_time = #{modifyTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+
+  <select id="selectRoleInfoList" resultMap="BaseResultMap" parameterType="cipher.console.oidc.domain.web.RoleInfoDomain">
+    select
+    <include refid="Base_Column_List" />
+    from cipher_role_info
+    LIMIT #{pageData.currentRow}, #{pageData.rows}
+  </select>
+
+
+  <select id="selectRoleInfoCount" resultType="int" parameterType="cipher.console.oidc.domain.web.RoleInfoDomain">
+   select count(1) from cipher_role_info
+  </select>
+
+
+
+    <select id="selectNoneRoleList" resultMap="BaseResultMap">
+      SELECT
+      id,
+      role_name
+      FROM cipher_role_info
+      where id not in
+      <foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+        #{item}
+      </foreach>
+    </select>
+
+  <select id="selectAllRoleList" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from cipher_role_info
+  </select>
+
+
+  <select id="selectRoleNameList" resultMap="BaseResultMap">
+    select
+     dd.id, role_name, mark, create_time, modify_time
+    from cipher_role_info dd
+    left join cipher_role_user_map tt on dd.id=tt.role_id
+    where tt.user_id=#{accountNumber}
+  </select>
+
+
+  <select id="selectRoleInfo" resultMap="BaseResultMap" parameterType="cipher.console.oidc.domain.web.RoleInfoDomain">
+    select
+    <include refid="Base_Column_List" />
+    from cipher_role_info
+    where 1=1
+    <if test="id != null" >
+      and id = #{id}
+    </if>
+    <if test="roleName != null" >
+      and role_name = #{roleName}
+    </if>
+  </select>
+
+
+
+    <select id="selectNoneRoleGroupList" resultMap="BaseResultMap">
+      SELECT
+      id,
+      role_name
+      FROM cipher_role_info
+      where id not in
+      <foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+        #{item}
+      </foreach>
+    </select>
+
+</mapper>

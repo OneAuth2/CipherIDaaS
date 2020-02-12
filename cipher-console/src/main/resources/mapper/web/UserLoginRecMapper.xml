@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cipher.console.oidc.mapper.UserLoginRecMapper">
+
+
+    <select id="selectUserLoginRecInfo" resultType="cipher.console.oidc.domain.web.UserLoginRecInfo">
+       select id as id, first_face_login_time as firstFaceLoginTime,account_number as accountNumber,
+       create_time as createTime,modify_time as modifyTime from cipher_user_login_rec where 1=1
+        <if test="uuid != null and uuid!=''">
+            and  user_id = #{uuid}
+        </if>
+    </select>
+
+    <update id="updateUserLoginRecInfo" parameterType="cipher.console.oidc.domain.web.UserLoginRecInfo">
+        UPDATE cipher_user_login_rec
+        SET first_face_login_time = #{firstFaceLoginTime}
+        WHERE user_id = #{uuid}
+    </update>
+
+    <delete id="deleteUserLoginRecInfo" parameterType="string">
+        DELETE FROM cipher_user_login_rec
+        WHERE user_id=#{uuid}
+    </delete>
+
+
+</mapper>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cipher.console.oidc.mapper.SubAccountDownMapper">
+
+
+    <select id="getSubAccountDownInfo" resultType="cipher.console.oidc.domain.subapp.SubAccountDownDomain">
+      select  *
+      from cipher_sub_down_log where user_id=#{userId} and app_id=#{appId}
+    </select>
+
+    <insert id="insertSubAccountDownInfo" parameterType="cipher.console.oidc.domain.subapp.SubAccountDownDomain">
+       INSERT INTO `cipher_sub_down_log`
+            (`user_id`,
+             `app_id`,
+             `create_time`,
+             `modify_time`
+            )
+          VALUES (
+          #{userId},
+          #{appId},
+          NOW(),
+          NOW())
+    </insert>
+</mapper>

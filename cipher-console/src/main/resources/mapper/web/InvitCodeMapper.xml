@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cipher.console.oidc.mapper.InvitCodeMapper" >
+  <resultMap id="BaseResultMap" type="cipher.console.oidc.domain.web.InvitCodeInfo" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="company_id" property="companyId" jdbcType="INTEGER" />
+    <result column="invit_code" property="invitCode" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <insert id="addInvitCodeInfo" parameterType="cipher.console.oidc.domain.web.InvitCodeInfo">
+    insert into cipher_invit_code_info(company_id,invit_code,create_time)
+    values
+    (#{companyId},#{invitCode},#{createTime})
+
+  </insert>
+
+  <select id="queryInvitCodeList"
+          parameterType="String"
+          resultMap="BaseResultMap">
+      select invit_code
+    from cipher_invit_code_info
+    where company_id=#{companyId}
+
+  </select>
+
+  <select id="findInvitCodeCount" parameterType="String"
+          resultType="int">
+    select count(*) from cipher_invit_code_info where company_id=#{companyId}
+  </select>
+</mapper>

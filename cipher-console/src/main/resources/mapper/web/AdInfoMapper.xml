@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="cipher.console.oidc.mapper.AdInfoMapper">
+
+
+    <insert id="insertAdInfo" useGeneratedKeys="true" keyProperty="id" parameterType="cipher.console.oidc.domain.web.AdInfoDomain" >
+        INSERT INTO cipher_ad_info (ip, port, user_name, password, ou_dc, object_class, search_scope, sync_ou,
+         kvConfig,ous,company_id,connection_type,secret,address,auto_config,create_time, modify_time)
+        VALUES (
+            #{ip},
+            #{port},
+            #{userName},
+            #{password},
+            #{ouDc},
+            #{objectClass},
+            #{searchScope},
+            #{syncOu},
+            #{kvConfig},
+            #{ous} ,
+            #{companyId},
+            #{connectionType},
+            #{secret},
+            #{address},
+            #{autoConfig},
+            NOW(),
+            NOW()
+        )
+    </insert>
+
+    <select id="queryAdInfo" resultType="cipher.console.oidc.domain.web.AdInfoDomain">
+        SELECT *
+        FROM cipher_ad_info where company_id=#{companyId}
+        ORDER BY id ASC
+        LIMIT 1;
+    </select>
+
+    <update id="updateAdInfo" parameterType="cipher.console.oidc.domain.web.AdInfoDomain">
+        UPDATE cipher_ad_info SET modify_time=NOW()
+        <if test="type!=null">
+            ,type=#{type}
+        </if>
+        <if test="ip!=null">
+            ,ip=#{ip}
+        </if>
+        <if test="port!=null">
+            ,port=#{port}
+        </if>
+        <if test="userName!=null">
+            ,user_name=#{userName}
+        </if>
+        <if test="password!=null">
+            ,password=#{password}
+        </if>
+        <if test="ouDc!=null">
+            ,ou_dc=#{ouDc}
+        </if>
+        <if test="objectClass!=null">
+            ,object_class=#{objectClass}
+        </if>
+        <if test="searchScope!=null">
+            ,search_scope=#{searchScope}
+        </if>
+        <if test="syncOu!=null">
+            ,sync_ou=#{syncOu}
+        </if>
+
+        <if test="kvConfig!=null">
+            ,kvConfig=#{kvConfig}
+        </if>
+
+        <if test="ous!=null">
+            ,ous=#{ous}
+        </if>
+        <if test="connectionType!=null and connectionType!=''">
+            ,connection_type=#{connectionType}
+        </if>
+        <if test="secret!=null and secret!=''">
+            ,secret=#{secret}
+        </if>
+        <if test="address!=null and address!=''">
+            ,address=#{address}
+        </if>
+
+        WHERE id=#{id}
+    </update>
+
+    <update id="updateAdAutSync">
+        UPDATE cipher_ad_info
+        SET auto_config=#{adAutoSyncInfo}
+        WHERE id=#{id}
+    </update>
+
+
+    <select id="queryList" resultType="cipher.console.oidc.domain.web.AdInfoDomain">
+        SELECT *
+        FROM cipher_ad_info
+        where 1=1 and company_id=#{companyId}
+        <if test="queryName!=null">
+            and cipher_ad_info.ip LIKE CONCAT(CONCAT('%',#{queryName}),'%')
+        </if>
+        ORDER BY create_time DESC
+
+        LIMIT #{pageData.currentRow}, #{pageData.rows}
+    </select>
+
+
+    <select id="count" resultType="int">
+        SELECT count(1)
+        FROM cipher_ad_info
+        where 1=1
+        <if test="queryName!=null">
+            and cipher_ad_info.ip LIKE CONCAT(CONCAT('%',#{queryName}),'%')
+        </if>
+    </select>
+
+
+    <select id="queryAdInfoById" resultType="cipher.console.oidc.domain.web.AdInfoDomain">
+        SELECT
+            ip,
+            port,
+            user_name,
+            password,
+            sync_ou,
+            kvConfig,
+            ous,
+            create_time,
+            modify_time
+        FROM cipher_ad_info
+        WHERE id = #{id}
+    </select>
+
+    <select id="queryAdSyncInfoById" resultType="string">
+        SELECT auto_config FROM cipher_ad_info
+        WHERE id = #{id}
+    </select>
+
+    <select id="lastSyncTimeByIp" resultType="java.util.Date">
+        SELECT create_time
+        FROM cipher_user_info
+        WHERE source = #{ip}
+        ORDER BY create_time DESC
+        LIMIT 1;
+    </select>
+    <delete id="deleteAd" parameterType="cipher.console.oidc.domain.web.AdInfoDomain">
+       delete  from cipher_ad_info WHERE cipher_ad_info.id=#{id}
+    </delete>
+
+    <select id="queryAdInfoNew" resultType="cipher.console.oidc.domain.web.AdInfoDomain">
+        SELECT *
+        FROM cipher_ad_info
+        where ip = #{ip}
+        limit 1;
+    </select>
+
+    <select id="queryByIpAndCompanyId" parameterType="cipher.console.oidc.domain.web.AdInfoDomain"
+            resultType="java.lang.Integer">
+        select count(id) from cipher_ad_info where  company_id =#{companyId}
+        <if test="ip != null and ip != ''">
+            and ip=#{ip}
+        </if>
+        <if test="address != null and address != ''">
+          and  address=#{address}
+        </if>
+    </select>
+
+
+    <select id="queryAdByIpAndCompanyId" resultType="cipher.console.oidc.domain.web.AdInfoDomain">
+          SELECT
+            ip,
+            port,
+            user_name,
+            password,
+            sync_ou,
+            kvConfig,
+            ous,
+            company_id,
+            create_time,
+            modify_time
+        FROM cipher_ad_info
+        WHERE company_id=#{companyId} and ip=#{ip}
+    </select>
+    <select id="selectAutoSync" parameterType="integer" resultType="cipher.console.oidc.domain.web.AutoSyncAdDomain">
+        SELECT id,company_id,auto_config FROM cipher_ad_info WHERE id=#{id}
+    </select>
+
+
+</mapper>

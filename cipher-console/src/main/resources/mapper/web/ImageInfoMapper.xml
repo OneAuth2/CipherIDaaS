@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cipher.console.oidc.mapper.ImageInfoMapper">
+    <resultMap id="BaseResultMap" type="cipher.console.oidc.domain.web.ImageInfoDomain">
+        <id column="image_id" property="imageId" jdbcType="INTEGER"/>
+        <result column="image_name" property="imageName" />
+        <result column="image_type" property="imageType" />
+        <result column="image_width" property="imageWidth"/>
+        <result column="image_height" property="imageHeight" />
+        <result column="image_url" property="imageUrl" />
+        <result column="status" property="status" />
+    </resultMap>
+
+    <select id="getImageList" resultMap="BaseResultMap" parameterType="cipher.console.oidc.domain.web.ImageInfoDomain">
+        select * from cipher_image where status=1
+    </select>
+
+</mapper>

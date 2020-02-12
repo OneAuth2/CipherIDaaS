@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="cipher.console.oidc.mapper.AccountAdBindingMapper">
+
+
+
+    <insert id="insert">
+        insert into cipher_account_ad_binding(user_id, upn, company_id, ip, create_time) VALUES
+        <foreach collection="list" separator="," item="adAccountBind">
+            (
+            #{adAccountBind.userId} ,
+            #{adAccountBind.upn} ,
+            #{adAccountBind.companyId} ,
+            #{adAccountBind.ip} ,
+            NOW()
+            )
+        </foreach>
+    </insert>
+</mapper>

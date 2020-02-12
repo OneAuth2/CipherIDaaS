@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cipher.console.oidc.mapper.AcAclInfoMapper">
+
+    <select id="selectAclInfo" resultType="cipher.console.oidc.domain.web.AcAclInfo"
+            parameterType="cipher.console.oidc.domain.web.AcAclInfo">
+        SELECT *
+        FROM cipher_acl_info
+        where 1=1 and company_id=#{companyId}
+        <if test="name!=null and name!=''">
+            and name LIKE CONCAT(CONCAT('%',#{name}),'%')
+        </if>
+        ORDER BY create_time desc
+
+        LIMIT #{pageData.currentRow}, #{pageData.rows}
+    </select>
+
+    <insert id="insertAclInfo" parameterType="cipher.console.oidc.domain.web.AcAclInfo">
+        insert into cipher_acl_info( name, application, ip, mac, create_time, modified_time, work_start_time, work_end_time,company_id)
+        values (#{name},#{application},#{ip},#{mac},NOW(),NOW(),#{workStartTime},#{workEndTime},#{companyId});
+    </insert>
+
+    <select id="selectAclInfoByMac" resultType="cipher.console.oidc.domain.web.AcAclInfo"
+            parameterType="String">
+        SELECT *
+        FROM cipher_acl_info
+        WHERE mac = #{mac} and company_id=#{companyId} limit 1;
+    </select>
+
+    <update id="updateAclInfoByMac" parameterType="cipher.console.oidc.domain.web.AcAclInfo">
+        update cipher_acl_info
+        <set>
+            <if test="name != null">
+                name = #{name,jdbcType=INTEGER},
+            </if>
+            <if test="application != null">
+                application = #{application,jdbcType=VARCHAR},
+            </if>
+            <if test="ip != null">
+                ip = #{ip,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime},
+            </if>
+            <if test="modifiedTime != null">
+                modified_time = #{modifiedTime},
+            </if>
+            <if test="workStartTime != null">
+                work_start_time = #{workStartTime},
+            </if>
+            <if test="workEndTime != null">
+                work_end_time = #{workEndTime},
+            </if>
+        </set>
+        where mac = #{mac,jdbcType=INTEGER}
+    </update>
+
+    <delete id="deleteAclInfoByMac" parameterType="String">
+        DELETE FROM cipher_acl_info where mac = #{mac};
+    </delete>
+
+
+
+    <select id="selectCount" resultType="java.lang.Integer">
+        SELECT count(1)
+        FROM cipher_acl_info
+        where 1=1 and company_id=#{companyId}
+        <if test="name!=null and name!=''">
+            and name LIKE CONCAT(CONCAT('%',#{name}),'%')
+        </if>
+    </select>
+
+
+    <update id="updateAclInfo" parameterType="cipher.console.oidc.domain.web.AcAclInfo">
+     update cipher_acl_info set  ip = #{ip,jdbcType=VARCHAR} where mac=#{mac}
+    </update>
+
+
+</mapper>

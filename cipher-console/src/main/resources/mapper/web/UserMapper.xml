@@ -1,0 +1,897 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="cipher.console.oidc.mapper.UserMapper">
+
+    <resultMap id="userTableMapper" type="cipher.console.oidc.model.UserManagementTableModel">
+        <id column="id" property="id"/>
+        <result property="accountNumber" column="account_number"/>
+        <result property="groupId" column="group_id"/>
+        <association property="user" column="account_number" select="getUserByAccountNumber"/>
+        <association property="group" column="group_id" select="cipher.console.oidc.mapper.GroupMapper.getGroupById"/>
+        <collection property="applications" column="group_id"
+                    select="cipher.console.oidc.mapper.ApplicationGroupMapper.getApplicationsByGroupId"/>
+        <collection property="methods" column="account_number"
+                    select="cipher.console.oidc.mapper.UserAuthorizationMapper.getUserAuthorizationMethods"/>
+    </resultMap>
+
+    <select id="queryUserTableMapper" resultType="cipher.console.oidc.model.UserManagementModel"
+            parameterType="cipher.console.oidc.model.UserManagementModel">
+        SELECT
+        cipher_user_info.account_number,
+        user_name as userName,
+        nickname,
+        mail,
+        job,
+        phone_number,
+        cipher_group_user_map.group_id,
+        group_name,
+        account_status,
+        applications,
+        methods,
+        is_admin
+        FROM cipher_user_info
+        LEFT JOIN cipher_group_user_map
+        ON cipher_user_info.account_number = cipher_group_user_map.account_number
+        LEFT JOIN cipher_group_info
+        ON cipher_group_user_map.group_id = cipher_group_info.group_id
+        LEFT JOIN (
+        SELECT
+        cipher_group_info.group_id,
+        GROUP_CONCAT(application_name) AS applications
+        FROM cipher_group_info, cipher_group_authorization_map, cipher_application_info
+        WHERE cipher_group_info.group_id = cipher_group_authorization_map.group_id
+        AND cipher_group_authorization_map.application_id = cipher_application_info.id
+        GROUP BY cipher_group_info.group_id
+        ) app_group
+        ON app_group.group_id = cipher_group_user_map.group_id
+        LEFT JOIN (
+        SELECT
+        account_number,
+        GROUP_CONCAT(account_authorized_method) AS methods
+        FROM cipher_user_authorization_map
+        GROUP BY account_number
+        ) user_method
+        ON user_method.account_number = cipher_user_info.account_number
+        WHERE 1=1
+        <if test="queryName!=null and queryName!=''">
+            and user_name LIKE CONCAT(CONCAT('%',#{queryName}),'%') OR
+            cipher_user_info.account_number LIKE CONCAT(CONCAT('%',#{queryName}),'%') OR
+            nickname LIKE CONCAT(CONCAT('%',#{queryName}),'%')OR
+            mail LIKE CONCAT(CONCAT('%',#{queryName}),'%')OR
+            phone_number LIKE CONCAT(CONCAT('%',#{queryName}),'%'))
+        </if>
+        <if test="status!= null and status != ''">
+            and account_status=#{status}
+        </if>
+        <if test="groupId!= null and groupId != ''and groupId!= 0">
+            and cipher_group_user_map.group_id=#{groupId}
+        </if>
+        <if test="sidx!=null and sidx=='accountNumber'.toString()">
+            order by cipher_user_info.account_number ${sord}
+        </if>
+        <if test="sidx!=null and sidx=='name'.toString()">
+            order by cipher_user_info.user_name ${sord}
+        </if>
+        <if test="sidx!=null and sidx=='groupName'.toString()">
+            order by cipher_group_info.group_name ${sord}
+        </if>
+        <if test="sidx==null">
+            order by cipher_user_info.create_time desc
+        </if>
+        LIMIT #{pageData.currentRow}, #{pageData.rows}
+    </select>
+
+    <select id="getUserPageDataCount" resultType="int" parameterType="cipher.console.oidc.model.UserManagementModel">
+        SELECT COUNT(cipher_user_info.account_number)
+        FROM cipher_user_info
+        LEFT JOIN cipher_group_user_map
+        ON cipher_user_info.account_number = cipher_group_user_map.account_number
+        where 1=1
+        <if test="queryName!=null and queryName!=''">
+            and user_name LIKE CONCAT(CONCAT('%',#{queryName}),'%') OR
+            cipher_user_info.account_number LIKE CONCAT(CONCAT('%',#{queryName}),'%') OR
+            nickname LIKE CONCAT(CONCAT('%',#{queryName}),'%')OR
+            mail LIKE CONCAT(CONCAT('%',#{queryName}),'%')OR
+            phone_number LIKE CONCAT(CONCAT('%',#{queryName}),'%'))
+        </if>
+        <if test="status!= 0 and status != ''">
+            and account_status=#{status}
+        </if>
+        <if test="groupId!= null and groupId != ''and groupId!= 0">
+            and cipher_group_user_map.group_id=#{groupId}
+        </if>
+    </select>
+
+    <select id="getAllUser" resultType="cipher.console.oidc.domain.web.UserInfoDomain">
+        SELECT account_number as accountNumber,
+               user_name      AS userName
+        FROM cipher_user_info
+        where is_delete = 0;
+    </select>
+
+    <select id="getUserByAccountNumber" resultType="cipher.console.oidc.domain.web.UserInfoDomain"
+            parameterType="String">
+        SELECT *
+        FROM cipher_user_info
+        WHERE uuid = #{uuid}
+        LIMIT 1
+    </select>
+    <select id="getUserByNewAccountNumber" resultType="cipher.console.oidc.domain.web.UserInfoDomain"
+            parameterType="String">
+        SELECT *
+        FROM cipher_user_info
+        WHERE account_number = #{accountNumber}
+          AND company_id = #{companyId}
+        LIMIT 1
+    </select>
+
+    <select id="getUserInfo" resultType="cipher.console.oidc.domain.web.UserInfoDomain"
+            parameterType="String">
+        SELECT *
+        FROM cipher_user_info tt
+        WHERE uuid = #{uuid}
+    </select>
+
+
+    <select id="getAllUserGroupMap" resultMap="userTableMapper">
+        SELECT cipher_user_info.account_number,
+               group_id
+        FROM cipher_user_info
+                 LEFT JOIN cipher_group_user_map ON
+            cipher_user_info.account_number = cipher_group_user_map.account_number
+    </select>
+
+    <select id="getUserCount" resultType="java.lang.Integer">
+        SELECT count(account_number)
+        FROM cipher_user_info;
+    </select>
+
+    <select id="authOutOfDateCount" resultType="java.lang.Integer">
+        SELECT count(account_number)
+        FROM cipher_user_info
+        WHERE account_authorized_valid_date IS NOT NULL
+          AND NOW() &gt; account_authorized_valid_date
+    </select>
+
+    <select id="authBanCount" resultType="java.lang.Integer">
+        SELECT count(account_number)
+        FROM cipher_user_info
+        WHERE account_status = 2
+    </select>
+
+    <update id="updateAccountStatus" parameterType="cipher.console.oidc.model.UserManagementModel">
+        UPDATE cipher_user_info
+        SET account_status = #{status}
+        WHERE uuid = #{uuid}
+    </update>
+
+    <select id="querySubAccountApp" parameterType="cipher.console.oidc.domain.web.GroupUserMapDomain"
+            resultType="cipher.console.oidc.model.UserSubAccountModel">
+        SELECT cipher_group_authorization_map.application_id,
+               cipher_application_info.application_name,
+               sub_account
+        FROM cipher_group_authorization_map,
+             cipher_application_info
+                 LEFT JOIN (
+                 SELECT cipher_sub_account.sub_account,
+                        cipher_application_info.id
+                 FROM cipher_sub_account_map,
+                      cipher_sub_account,
+                      cipher_application_info,
+                      cipher_group_user_map
+                 WHERE cipher_sub_account_map.sub_id = cipher_sub_account.id
+                   AND cipher_sub_account.app_client_id = cipher_application_info.application_id
+                   AND cipher_sub_account_map.account_number = cipher_group_user_map.account_number
+                   AND cipher_group_user_map.account_number = #{accountNumber}
+             ) tab1 ON tab1.id = cipher_application_info.id
+        WHERE group_id = #{groupId}
+          AND cipher_group_authorization_map.application_id = cipher_application_info.id;
+    </select>
+
+    <select id="queryNotAuthAccount" resultType="java.lang.String">
+        SELECT account_number
+        FROM cipher_user_info
+        WHERE account_number NOT IN (SELECT cipher_group_user_map.account_number
+                                     FROM cipher_group_user_map)
+        GROUP BY account_number
+    </select>
+
+
+    <select id="queryWelcomeUserPageList" resultType="cipher.console.oidc.model.UserManagementModel">
+
+        SELECT
+        cipher_user_info.account_number,
+        user_name AS userName,
+        nickname,
+        mail,
+        job,
+        phone_number,
+        cipher_group_user_map.group_id,
+        group_name,
+        account_status,
+        applications,
+        methods
+        FROM cipher_user_info
+        LEFT JOIN cipher_group_user_map
+        ON cipher_user_info.account_number = cipher_group_user_map.account_number
+        LEFT JOIN cipher_group_info
+        ON cipher_group_user_map.group_id = cipher_group_info.group_id
+        LEFT JOIN (
+        SELECT
+        cipher_group_info.group_id,
+        GROUP_CONCAT(application_name) AS applications
+        FROM cipher_group_info, cipher_group_authorization_map, cipher_application_info
+        WHERE cipher_group_info.group_id = cipher_group_authorization_map.group_id
+        AND cipher_group_authorization_map.application_id = cipher_application_info.id
+        GROUP BY cipher_group_info.group_id
+        ) app_group
+        ON app_group.group_id = cipher_group_user_map.group_id
+        LEFT JOIN (
+        SELECT
+        account_number,
+        GROUP_CONCAT(account_authorized_method) AS methods
+        FROM cipher_user_authorization_map
+        GROUP BY account_number
+        ) user_method
+        ON user_method.account_number = cipher_user_info.account_number
+        WHERE 1=1
+        <if test="nameList!=null">
+            and cipher_user_info.account_number IN
+            <foreach collection="nameList" open="(" separator="," close=")" item="name_" index="name_">
+                #{name_}
+            </foreach>
+        </if>
+        <if test="form.userName!=null and form.userName!=''">
+            and user_name LIKE CONCAT(CONCAT('%', #{form.name}), '%')
+        </if>
+
+        <if test="form.sidx!=null and form.sidx=='nickname'.toString()">
+            order by cipher_user_info.nickname ${form.sord}
+        </if>
+        <if test="form.sidx!=null and form.sidx=='userName'.toString()">
+            order by cipher_user_info.user_name ${form.sord}
+        </if>
+        <if test="form.sidx!=null and form.sidx=='groupName'.toString()">
+            order by cipher_group_info.group_name ${form.sord}
+        </if>
+        <if test="form.sidx!=null and form.sidx=='mail'.toString()">
+            order by cipher_user_info.mail ${form.sord}
+        </if>
+        <if test="form.sidx!=null and form.sidx=='phoneNumber'.toString()">
+            order by cipher_user_info.phone_number ${form.sord}
+        </if>
+        <if test="form.sidx==null">
+            order by cipher_user_info.create_time desc
+        </if>
+        LIMIT #{form.pageData.currentRow}, #{form.pageData.rows};
+    </select>
+
+    <select id="queryWelcomeUserPageListTotal" resultType="int">
+        SELECT
+        count(cipher_user_info.account_number)
+        FROM cipher_user_info
+        LEFT JOIN cipher_group_user_map
+        ON cipher_user_info.account_number = cipher_group_user_map.account_number
+        LEFT JOIN cipher_group_info
+        ON cipher_group_user_map.group_id = cipher_group_info.group_id
+        LEFT JOIN (
+        SELECT
+        cipher_group_info.group_id,
+        GROUP_CONCAT(application_name) AS applications
+        FROM cipher_group_info, cipher_group_authorization_map, cipher_application_info
+        WHERE cipher_group_info.group_id = cipher_group_authorization_map.group_id
+        AND cipher_group_authorization_map.application_id = cipher_application_info.id
+        GROUP BY cipher_group_info.group_id
+        ) app_group
+        ON app_group.group_id = cipher_group_user_map.group_id
+        LEFT JOIN (
+        SELECT
+        account_number,
+        GROUP_CONCAT(account_authorized_method) AS methods
+        FROM cipher_user_authorization_map
+        GROUP BY account_number
+        ) user_method
+        ON user_method.account_number = cipher_user_info.account_number
+        WHERE 1=1
+        <if test="nameList!=null">
+            and cipher_user_info.account_number IN
+            <foreach collection="nameList" open="(" separator="," close=")" item="name_" index="name_">
+                #{name_}
+            </foreach>
+        </if>
+        <if test="form.userName!=null and form.userName!=''">
+            and user_name LIKE CONCAT(CONCAT('%', #{form.userName}), '%')
+        </if>
+    </select>
+    <select id="queryTmpAuthOutOfDate" resultType="java.lang.String">
+        SELECT account_number
+        FROM cipher_user_info
+        WHERE account_authorized_valid_date IS NOT NULL
+          AND NOW() &gt; account_authorized_valid_date
+    </select>
+    <select id="queryAuthOutOfDate" resultType="java.lang.String">
+        SELECT account_number
+        FROM cipher_user_info
+        WHERE account_status = 2
+    </select>
+
+    <select id="queryRepeatAccount" resultType="cipher.console.oidc.domain.web.UserInfoDomain">
+        SELECT mail from cipher_user_info WHERE 1=1
+        <if test="list!=null">
+            and mail IN
+            <foreach collection="list" item="adUserInfo" index="index" open="(" separator="," close=")">
+                #{adUserInfo.mail}
+            </foreach>
+        </if>
+
+    </select>
+
+    <insert id="insertAdUserList" parameterType="cipher.console.oidc.domain.web.AdUserInfoDomain">
+        INSERT INTO cipher_user_info (account_number,user_account_control, user_name, nickname, mail,
+        create_time, modify_time)
+        VALUES
+        <foreach collection="list" item="adUserInfo" index="index" separator=",">
+            (#{adUserInfo.mail},#{adUserInfo.userAccountControl},#{adUserInfo.userName},
+            #{adUserInfo.nickName}, #{adUserInfo.mail},NOW(),NOW())
+        </foreach>
+    </insert>
+
+
+    <select id="queryRepeatNameAccountList" resultType="cipher.console.oidc.domain.web.UserInfoDomain">
+        SELECT account_number from cipher_user_info where 1=1
+        <if test="list!=null">
+            AND account_number IN
+            <foreach collection="list" item="excel" index="index" open="(" separator="," close=")">
+                #{excel.mail}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="queryAllUser" resultType="cipher.console.oidc.model.AccountInfoModel">
+        SELECT account_number
+        FROM cipher_user_info;
+    </select>
+
+    <delete id="deleteByAccountNumber" parameterType="cipher.console.oidc.domain.web.GroupUserMapDomain">
+        DELETE
+        FROM cipher_group_user_map
+        WHERE account_number = #{accountNumber};
+    </delete>
+
+    <insert id="insertAccountInMap" parameterType="cipher.console.oidc.domain.web.GroupUserMapDomain">
+        INSERT INTO cipher_group_user_map (group_id, account_number)
+        VALUES (#{groupId}, #{accountNumber});
+    </insert>
+
+    <select id="insertUserInfoExcel">
+        INSERT INTO cipher_user_info (account_number, user_name, nickname, mail, phone_number, create_time,
+        modify_time, gender)
+        VALUES
+        <foreach collection="list" item="excel" index="index" separator=",">
+            (#{excel.mail},#{excel.userName},#{excel.nickname},#{excel.mail},#{excel.phoneNumber},NOW(),NOW(),#{excel.gender})
+        </foreach>
+
+    </select>
+
+    <insert id="insetIntoUserTable" parameterType="cipher.console.oidc.model.UserInfoModel">
+        <selectKey keyProperty="uuid" resultType="java.lang.String" order="BEFORE">
+            select REPLACE(UUID(),'-','')
+        </selectKey>
+        INSERT INTO cipher_user_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="uuid!=null and uuid!=''">
+                uuid,
+            </if>
+            <if test="userName!=null and userName!=''">
+                user_name,
+            </if>
+            <if test="nickname!=null and nickname!=''">
+                nickname,
+            </if>
+            <if test="accountNumber!=null and accountNumber!=''">
+                account_number,
+            </if>
+            <if test="phoneNumber!=null and phoneNumber!=''">
+                phone_number,
+            </if>
+            <if test="gender!=null and gender!=''">
+                gender,
+            </if>
+            <if test="mail!=null and mail!=''">
+                mail,
+            </if>
+            <if test="job!=null and job!=''">
+                job,
+            </if>
+            <if test="source!=null and source!=''">
+                source,
+            </if>
+            <if test="jobNo!=null and jobNo!=''">
+                job_no,
+            </if>
+            <if test="birthday!=null and birthday!=''">
+                birthday,
+            </if>
+            <if test="companyId!=null and companyId!=''">
+                company_id,
+            </if>
+            <if test="idNum!=null and idNum!=''">
+                id_num,
+            </if>
+            create_time,
+            modify_time,
+            account_status
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="uuid!=null and uuid!=''">
+                #{uuid},
+            </if>
+            <if test="userName!=null and userName!=''">
+                #{userName},
+            </if>
+            <if test="nickname!=null and nickname!=''">
+                #{nickname},
+            </if>
+            <if test="accountNumber!=null and accountNumber!=''">
+                #{accountNumber},
+            </if>
+            <if test="phoneNumber!=null and phoneNumber!=''">
+                #{phoneNumber},
+            </if>
+            <if test="gender!=null and gender!=''">
+                #{gender},
+            </if>
+            <if test="mail!=null and mail!=''">
+                #{mail},
+            </if>
+            <if test="job!=null and job!=''">
+                #{job},
+            </if>
+            <if test="source!=null and source!=''">
+                #{source},
+            </if>
+            <if test="jobNo!=null and jobNo!=''">
+                #{jobNo},
+            </if>
+            <if test="birthday!=null and birthday!=''">
+                #{birthday},
+            </if>
+            <if test="companyId!=null and companyId!=''">
+                #{companyId},
+            </if>
+            <if test="idNum!=null and idNum!=''">
+                #{idNum},
+            </if>
+            NOW(),
+            NOW(),
+            '启用'
+        </trim>
+    </insert>
+
+    <update id="updateUserTable" parameterType="cipher.console.oidc.model.UserInfoModel">
+        UPDATE cipher_user_info
+        <set>
+            account_number = #{accountNumber},
+            nickname = #{nickname},
+            user_name = #{userName},
+            phone_number = #{phoneNumber},
+            <if test="gender != null and gender!=''">
+                gender = #{gender},
+            </if>
+            mail = #{mail},
+            job = #{job},
+            id_num=#{idNum},
+            account_authorized_date = #{startTime},
+            account_authorized_valid_date = #{endTime},
+            modify_time = NOW(),
+            job_no =#{jobNo},
+            <if test="birthday != null and birthday!=''">
+                birthday =#{birthday}
+            </if>
+        </set>
+
+        WHERE account_number = #{accountNumber}
+    </update>
+
+
+    <select id="queryAdminTableMapper" resultType="cipher.console.oidc.model.UserManagementModel"
+            parameterType="cipher.console.oidc.model.UserManagementModel">
+        SELECT
+        uuid,
+        cipher_user_info.account_number,
+        user_name AS userName,
+        nickname,
+        mail,
+        job,
+        phone_number,
+        account_status,
+        is_admin
+        FROM cipher_user_info
+        where 1=1 and is_delete=0 and is_admin=1 and account_authorized_date is null and account_authorized_valid_date
+        is null and company_id=#{companyId}
+        <if test="queryName!=null and queryName!=''">
+            and (user_name LIKE CONCAT(CONCAT('%',#{queryName}),'%') OR
+            account_number LIKE CONCAT(CONCAT('%',#{queryName}),'%'))
+        </if>
+        <if test="sidx!=null and sidx=='accountNumber'.toString()">
+            order by cipher_user_info.account_number ${sord}
+        </if>
+        <if test="sidx!=null and sidx=='userName'.toString()">
+            order by cipher_user_info.user_name ${sord}
+        </if>
+
+        <if test="sidx==null">
+            order by cipher_user_info.create_time desc
+        </if>
+        LIMIT #{pageData.currentRow}, #{pageData.rows}
+    </select>
+
+    <select id="getAdminPageDataCount" resultType="int">
+        SELECT COUNT(account_number)
+        FROM cipher_user_info where is_admin=1 and is_delete=0 and account_authorized_date is null and
+        account_authorized_valid_date is null and company_id=#{companyId}
+        <if test="queryName!=null and queryName!=''">
+            and user_name LIKE CONCAT(CONCAT('%',#{queryName}),'%') OR
+            cipher_user_info.account_number LIKE CONCAT(CONCAT('%',#{queryName}),'%') OR
+            nickname LIKE CONCAT(CONCAT('%',#{queryName}),'%')OR
+            mail LIKE CONCAT(CONCAT('%',#{queryName}),'%')OR
+            phone_number LIKE CONCAT(CONCAT('%',#{queryName}),'%')
+        </if>
+
+    </select>
+
+
+    <update id="updateAdmin" parameterType="cipher.console.oidc.model.UserManagementModel">
+        update cipher_user_info
+        set is_admin=#{isAdmin}
+        where uuid = #{uuid}
+    </update>
+
+
+    <select id="getOrignPageDataCount" resultType="int">
+        SELECT COUNT(account_number)
+        FROM cipher_user_info where is_admin=0 and cipher_user_info.account_status=1
+        <if test="queryName!=null and queryName!=''">
+            and user_name LIKE CONCAT(CONCAT('%',#{queryName}),'%') OR
+            cipher_user_info.account_number LIKE CONCAT(CONCAT('%',#{queryName}),'%') OR
+            nickname LIKE CONCAT(CONCAT('%',#{queryName}),'%')OR
+            mail LIKE CONCAT(CONCAT('%',#{queryName}),'%')OR
+            phone_number LIKE CONCAT(CONCAT('%',#{queryName}),'%')
+        </if>
+
+    </select>
+    <select id="queryOrignTableMapper" resultType="cipher.console.oidc.model.UserManagementModel">
+        SELECT
+        cipher_user_info.account_number,
+        user_name as userName,
+        nickname,
+        mail,
+        job,
+        phone_number,
+        account_status,
+        is_admin
+        FROM cipher_user_info
+        where 1=1 and is_delete=0 and is_admin=0 and account_authorized_date is null and account_authorized_valid_date
+        is null
+        <if test="queryName!=null and queryName!=''">
+            and (user_name LIKE CONCAT(CONCAT('%',#{queryName}),'%') OR
+            account_number LIKE CONCAT(CONCAT('%',#{queryName}),'%'))
+        </if>
+        <if test="sidx!=null and sidx=='accountNumber'.toString()">
+            order by cipher_user_info.account_number ${sord}
+        </if>
+        <if test="sidx!=null and sidx=='userName'.toString()">
+            order by cipher_user_info.user_name ${sord}
+        </if>
+        <if test="sidx!=null and sidx=='mail'.toString()">
+            order by cipher_user_info.mail ${sord}
+        </if>
+        <if test="sidx!=null and sidx=='phoneNumber'.toString()">
+            order by cipher_user_info.phone_number ${sord}
+        </if>
+        <if test="sidx!=null and sidx=='groupName'.toString()">
+            order by cipher_group_info.group_name ${sord}
+        </if>
+        <if test="sidx==null">
+            order by cipher_user_info.create_time desc
+        </if>
+        LIMIT #{pageData.currentRow}, #{pageData.rows}
+    </select>
+
+    <select id="queryUserByGrouId" resultType="cipher.console.oidc.domain.web.AdUserInfoDomain"
+            parameterType="java.lang.Integer">
+        SELECT user_info.account_number AS mail,
+               user_info.user_name,
+               user_info.nickname,
+               user_info.mail
+        FROM cipher_user_info user_info
+                 RIGHT JOIN
+             (
+                 SELECT account_number,
+                        group_id
+                 FROM cipher_group_user_map
+                 WHERE group_id = #{groupId}) group_user ON user_info.account_number = group_user.account_number;
+    </select>
+
+    <select id="queryPwdByAccount" resultType="cipher.console.oidc.model.UserPwdModel">
+        SELECT
+        user_info.user_name,
+        user_info.account_number,
+        user_info.mail,
+        pwd.password
+        FROM cipher_user_info user_info
+        RIGHT JOIN (
+        SELECT
+        account_number,
+        password
+        FROM cipher_password_authorization_mag
+        WHERE account_number IN
+        <foreach open="(" collection="nameList" item="name" index="index" separator="," close=")">
+            #{name}
+        </foreach>
+        ) pwd ON user_info.account_number = pwd.account_number;
+    </select>
+
+    <update id="updateUserBundledInfo" parameterType="cipher.console.oidc.domain.web.UserInfoDomain">
+        update cipher_user_info
+        set device_limit = #{deviceLimit},
+            limit_open   = #{limitOpen}
+        where account_number = #{accountNumber};
+    </update>
+
+
+    <select id="querycheckInfo" resultType="cipher.console.oidc.domain.web.UserInfoDomain">
+        SELECT ss.account_number
+        FROM cipher_user_info ss
+                 LEFT JOIN cipher_group_user_map mm
+                           ON ss.account_number = mm.account_number
+        where mm.group_id = #{groupId}
+    </select>
+
+
+    <select id="queryPwd" resultType="cipher.console.oidc.domain.web.UserInfoDomain">
+        SELECT
+        ss.uuid ,
+        ss.company_id,
+        ss.user_name,
+        ss.account_number,
+        ss.mail,
+        tt.password,
+        ss.is_admin
+        FROM cipher_user_info ss
+        LEFT JOIN cipher_password_authorization_mag tt on tt.user_id=ss.uuid
+        where ss.company_id=#{companyId}
+        <if test="accountNumber !=null">
+            and (phone_number =#{accountNumber} OR mail=#{accountNumber} OR ss.account_number=#{accountNumber})
+        </if>
+
+    </select>
+
+
+    <select id="getNewUserByAccountNumber" resultType="cipher.console.oidc.model.UserInfoModel"
+            parameterType="String">
+        SELECT *
+        FROM cipher_user_info
+        WHERE account_number = #{accountNumber}
+        LIMIT 1
+    </select>
+
+    <delete id="deleteUserInfoByAccountNumber">
+        DELETE
+        FROM cipher_user_info
+        WHERE user_id = #{uuid}
+    </delete>
+
+    <select id="getUserTableCustomInfo" resultType="string">
+        select COLUMN_NAME
+        from INFORMATION_SCHEMA.Columns
+        where table_name = 'cipher_user_info'
+          and table_schema = 'cipher_authorization_v1.5'
+    </select>
+
+    <select id="addCustomProperties"
+            parameterType="cipher.console.oidc.domain.web.CustomPropertiesInfo">
+
+        alter table cipher_user_info
+            add ${customValue} varchar(100) null
+    </select>
+    <select id="getDingDingAccount" resultType="int">
+        SELECT COUNT(*)
+        from cipher_account_ding_bind_mapping
+        where user_id = #{uuid}
+    </select>
+    <select id="getDabbyAccount" resultType="int">
+        SELECT COUNT(id)
+        from cipher_account_link_map
+        where user_id = #{uuid}
+          and 1 = 1
+    </select>
+    <select id="AllQueryOrignTableMapper" resultType="cipher.console.oidc.model.UserManagementModel">
+        SELECT uuid,
+               cipher_user_info.account_number,
+               user_name as userName,
+               nickname,
+               mail,
+               job,
+               phone_number,
+               account_status,
+               is_admin
+        FROM cipher_user_info
+        where 1 = 1
+          and is_delete = 0
+          and is_admin = 1
+          and account_authorized_date is null
+          and account_authorized_valid_date is null
+          and company_id = #{companyId}
+    </select>
+    <update id="deleteAdmin" parameterType="cipher.console.oidc.model.UserManagementModel">
+        update cipher_user_info set
+        is_admin=#{isAdmin}
+        where 1=1
+        <if test="uuid !=null">
+            and uuid=#{uuid}
+        </if>
+    </update>
+    <select id="getSaifubinding" resultType="java.lang.Integer">
+        select count(*)
+        from cipher_account_plat_mapping
+        where user_id = #{uuid}
+    </select>
+
+
+    <select id="selectUserInfo" resultType="cipher.console.oidc.domain.web.UserInfoDomain">
+        select * from cipher_user_info where 1=1
+        <if test="userName!=null and userName!=''">
+            and (user_name =#{userName} OR
+            phone_number =#{userName} OR mail=#{userName} OR account_number=#{userName})
+        </if>
+
+    </select>
+
+    <delete id="delectBindingByUuid">
+        delete
+        from ${table}
+        where user_id = #{uuid}
+    </delete>
+
+    <select id="queryRepeatList" resultType="cipher.console.oidc.domain.exceldomain.NewUserInfoExcle">
+        SELECT * from cipher_user_info where 1=1
+        <if test="list!=null">
+            AND account_number IN
+            <foreach collection="list" item="excel" index="index" open="(" separator="," close=")">
+                #{excel.accountNumber}
+            </foreach>
+        </if>
+    </select>
+
+    <insert id="insertUserList">
+        <if test="list != null and list.size() != 0">
+            insert into cipher_user_info(
+            uuid,
+            company_id,
+            account_number,
+            user_name,
+            nickname,
+            mail,
+            phone_number,
+            create_time,
+            modify_time,
+            gender,
+            job,
+            job_no,
+            birthday
+            )
+            values
+            <foreach collection="list" item="user" separator=",">
+                (
+                #{user.uuid},
+                #{user.companyId},
+                #{user.accountNumber},
+                #{user.userName},
+                #{user.nickname},
+                #{user.mail},
+                #{user.phoneNumber},
+                NOW(),
+                NOW(),
+                #{user.gender},
+                #{user.job},
+                #{user.jobNo},
+                #{user.birthday}
+                )
+            </foreach>
+        </if>
+    </insert>
+
+    <insert id="insertNewUserInfoExcel">
+        INSERT INTO cipher_user_info
+        (uuid,company_id,user_name,account_number,mail,phone_number,nickname,job_no,job,gender,create_time,
+        modify_time)
+        VALUES
+        <foreach collection="list" item="excel" index="index" separator=",">
+            (#{excel.uuid},#{excel.companyId},#{excel.userName},#{excel.accountNumber},#{excel.mail},#{excel.phoneNumber},#{excel.nickname},#{excel.jobNo},#{excel.job},#{excel.gender},NOW(),NOW())
+        </foreach>
+    </insert>
+
+    <select id="getUserInfoByCompany" resultType="cipher.console.oidc.domain.web.UserInfoDomain">
+        select * from cipher_user_info where 1=1
+        <if test="uuid!=null and uuid!=''">
+            and uuid=#{uuid}
+        </if>
+
+    </select>
+
+    <select id="getAdBinding" resultType="string" parameterType="string">
+        SELECT source
+        FROM cipher_user_info
+        WHERE uuid = #{uuid}
+    </select>
+
+    <select id="getAdBindAccount" resultType="java.lang.String">
+        select upn from cipher_account_ad_binding where user_id=#{uuid} ;
+    </select>
+
+
+    <update id="updatePhoneNumber">
+      update cipher_user_info_bak
+      set  phone_number =#{phoneNumber}
+      where account_number=#{accountNumber}
+    </update>
+    <select id="selectUserInfoCount" parameterType="string" resultType="int">
+        SELECT COUNT(1) FROM cipher_user_info WHERE account_number=#{accountNumber} AND company_id=#{companyId}
+    </select>
+
+    <update id="updateUserInfo" parameterType="cipher.console.oidc.domain.exceldomain.UpdateUserInfoExcle">
+        UPDATE cipher_user_info
+        <trim prefix="set" suffixOverrides=",">
+            modify_time = NOW(),
+            <if test="excle.userName!=null and excle.userName!=''">user_name=#{excle.userName},</if>
+            <if test="excle.mail!=null and excle.mail!=''">mail=#{excle.mail},</if>
+            <if test="excle.phoneNumber!=null and excle.phoneNumber!=''">phone_number=#{excle.phoneNumber},</if>
+            <if test="excle.idNum!=null and excle.idNum!=''">id_num=#{excle.idNum},</if>
+            <if test="excle.gender!=null and excle.gender!=''">gender=#{excle.gender},</if>
+            <if test="excle.job!=null and excle.job!=''">job=#{excle.job},</if>
+            <if test="excle.jobNo!=null and excle.jobNo!=''">job_no=#{excle.jobNo},</if>
+        </trim>
+        WHERE account_number=#{excle.accountNumber} AND company_id=#{companyId}
+    </update>
+
+    <select id="selectCountByETI" resultType="int">
+        SELECT COUNT(1) FROM cipher_user_info
+        WHERE company_id=#{companyId} AND account_number != #{accountNumber}
+        <if test="mail!=null and mail!=''">
+            AND mail=#{mail}
+        </if>
+        <if test="phoneNumber!=null and phoneNumber!=''">
+            AND phone_number=#{phoneNumber}
+        </if>
+        <if test="idNum!=null and idNum!=''">
+            AND id_num=#{idNum}
+        </if>
+    </select>
+
+    <select id="queryUserNumber" parameterType="string" resultType="int">
+          select
+          count(1)
+          from
+          cipher_user_info
+          where
+          company_id =#{companyId}
+          and
+          is_delete = 0
+    </select>
+
+    <select id="getWxAccount" resultType="int">
+       select count(1) from cipher_account_wx_bind_mapping where user_id=#{userId}
+    </select>
+
+
+    <delete id="deleteWxAccountMap">
+        delete from cipher_account_wx_bind_mapping where user_id=#{userId}
+        </delete>
+
+
+   <update id="updateUserIssue">
+      UPDATE cipher_user_info set issue_status=#{issueStatus} where uuid=#{userId}
+    </update>
+        </mapper>

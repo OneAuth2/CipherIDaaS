@@ -1,0 +1,386 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cipher.console.oidc.mapper.AdUserBufferMapper">
+
+
+    <select id="queryUserByBufferUser" resultType="cipher.console.oidc.domain.web.UserInfoDomain">
+        select distinct objectGUID FROM (
+        select objectGUID
+        from cipher_user_info
+        <if test="bufferDomainList.size() > 0">
+            where objectGUID in
+            <foreach collection="bufferDomainList" separator="," open="(" close=")" index="bufferDomain"
+                     item="bufferDomain">
+                #{bufferDomain.objectGUID}
+            </foreach>
+        and company_id=#{companyId}
+        </if>
+        union all
+        select objectGUID
+        from cipher_ad_user_buffer
+        <if test="bufferDomainList.size() > 0">
+            where objectGUID in
+            <foreach collection="bufferDomainList" separator="," open="(" close=")" index="bufferDomain"
+                     item="bufferDomain">
+                #{bufferDomain.objectGUID}
+            </foreach>
+            and company_id=#{companyId}
+        </if>
+        ) ldap_cipher;
+    </select>
+
+
+    <insert id="insertBufferList">
+        INSERT INTO cipher_ad_user_buffer (
+        account_number,
+        dn,
+        user_name,
+        nickname,
+        mail,
+        phone_number,
+        userAccountControl,
+        account_status,
+        job,
+        job_no,
+        manager,
+        is_add,
+        objectGUID,
+        whenChanged,
+        create_time,
+        modify_time,
+        company_id,
+        source
+        )
+        VALUES
+        <foreach collection="bufferDomainList" item="bufferDomain" index="bufferDomain" separator=",">
+            (
+            #{bufferDomain.accountNumber},
+            #{bufferDomain.dn},
+            #{bufferDomain.userName},
+            #{bufferDomain.nickname},
+            #{bufferDomain.mail},
+            #{bufferDomain.phoneNumber},
+            #{bufferDomain.userAccountControl},
+            #{bufferDomain.accountStatus},
+            #{bufferDomain.job},
+            #{bufferDomain.jobNo} ,
+            #{bufferDomain.manager},
+            #{bufferDomain.isAdd},
+            #{bufferDomain.objectGUID},
+            #{bufferDomain.whenChanged},
+            NOW(),
+            NOW(),
+            #{bufferDomain.companyId},
+            #{bufferDomain.source}
+            )
+        </foreach>
+    </insert>
+
+    <select id="queryInBufferList" resultType="cipher.console.oidc.domain.web.AdUserBufferDomain">
+        select DISTINCT objectGUID
+        from cipher_ad_user_buffer
+        where objectGUID in
+        <foreach collection="userInfoDomainList" separator="," open="(" close=")" index="userInfoDomain"
+                 item="userInfoDomain">
+            #{userInfoDomain.objectGUID}
+        </foreach>
+        and company_id=#{companyId}
+    </select>
+
+
+    <update id="updateBufferList">
+
+        UPDATE cipher_ad_user_buffer
+
+        <trim prefix="set" suffixOverrides=",">
+
+            <trim prefix="user_name=case" suffix="end,">
+                <foreach collection="bufferList" item="buffer" index="index">
+                    <if test="buffer.userName!=null">
+                        when objectGUID=#{buffer.objectGUID} then #{buffer.userName}
+                    </if>
+                </foreach>
+            </trim>
+
+
+            <trim prefix="nickname=case" suffix="end,">
+                <foreach collection="bufferList" item="buffer" index="index">
+                    <if test="buffer.nickname!=null">
+                        when objectGUID=#{buffer.objectGUID} then #{buffer.nickname}
+                    </if>
+                </foreach>
+            </trim>
+
+            <trim prefix="mail=case" suffix="end,">
+                <foreach collection="bufferList" item="buffer" index="index">
+                    <if test="buffer.mail!=null">
+                        when objectGUID=#{buffer.objectGUID} then #{buffer.mail}
+                    </if>
+                </foreach>
+            </trim>
+
+
+            <trim prefix="phone_number=case" suffix="end,">
+                <foreach collection="bufferList" item="buffer" index="index">
+                    <if test="buffer.phoneNumber!=null">
+                        when objectGUID=#{buffer.objectGUID} then #{buffer.phoneNumber}
+                    </if>
+                </foreach>
+            </trim>
+
+
+            <trim prefix="account_status=case" suffix="end,">
+                <foreach collection="bufferList" item="buffer" index="index">
+                    <if test="buffer.accountStatus!=null">
+                        when objectGUID=#{buffer.objectGUID} then #{buffer.accountStatus}
+                    </if>
+                </foreach>
+            </trim>
+
+
+            <trim prefix="job=case" suffix="end,">
+                <foreach collection="bufferList" item="buffer" index="index">
+                    <if test="buffer.job!=null">
+                        when objectGUID=#{buffer.objectGUID} then #{buffer.job}
+                    </if>
+                </foreach>
+            </trim>
+
+
+            <trim prefix="manager=case" suffix="end,">
+                <foreach collection="bufferList" item="buffer" index="index">
+                    <if test="buffer.manager!=null">
+                        when objectGUID=#{buffer.objectGUID} then #{buffer.manager}
+                    </if>
+                </foreach>
+            </trim>
+
+
+            <trim prefix="is_add=case" suffix="end,">
+                <foreach collection="bufferList" item="buffer" index="index">
+                    <if test="buffer.isAdd!=null">
+                        when objectGUID=#{buffer.objectGUID} then #{buffer.isAdd}
+                    </if>
+                </foreach>
+            </trim>
+
+
+            <trim prefix="account_number=case" suffix="end,">
+                <foreach collection="bufferList" item="buffer" index="index">
+                    <if test="buffer.objectGUID!=null">
+                        when objectGUID=#{buffer.objectGUID} then #{buffer.accountNumber}
+                    </if>
+                </foreach>
+            </trim>
+
+
+            <trim prefix="userAccountControl=case" suffix="end,">
+                <foreach collection="bufferList" item="buffer" index="index">
+                    <if test="buffer.objectGUID!=null">
+                        when objectGUID=#{buffer.objectGUID} then #{buffer.userAccountControl}
+                    </if>
+                </foreach>
+            </trim>
+
+            <trim prefix="modify_time=case" suffix="end,">
+                <foreach collection="bufferList" item="buffer" index="index">
+                    when objectGUID=#{buffer.objectGUID} then NOW()
+                </foreach>
+            </trim>
+
+        </trim>
+        where
+        <foreach collection="bufferList" separator="or" item="buffer" index="index">
+            objectGUID=#{buffer.objectGUID}
+        </foreach>
+
+    </update>
+
+
+    <select id="queryInBufferListByByffer" resultType="cipher.console.oidc.domain.web.AdUserBufferDomain">
+        select DISTINCT objectGUID
+        from cipher_ad_user_buffer
+        where objectGUID in
+        <foreach collection="bufferDomainList" separator="," open="(" close=")" index="index"
+                 item="bufferDomain">
+            #{bufferDomain.objectGUID}
+        </foreach>
+        and  company_id=#{companyId}
+    </select>
+
+
+    <select id="queryUserByBufferList" resultType="cipher.console.oidc.domain.web.AdUserBufferDomain">
+        SELECT account_number,dn, user_name, nickname, mail, phone_number,
+        job, manager, is_add, objectGUID, create_time, modify_time from cipher_ad_user_buffer WHERE
+        objectGUID IN
+        <foreach collection="bufferDomainList" index="index" item="buffer" separator="," open="(" close=")">
+            #{buffer.objectGUID}
+        </foreach>
+        and  company_id=#{companyId}
+
+    </select>
+
+    <select id="queryListByIdList" resultType="cipher.console.oidc.domain.web.AdUserBufferDomain">
+        select *
+        from (select buffer.*, cipher_user.objectGUID as check_number
+        from cipher_ad_user_buffer buffer
+        left join cipher_user_info cipher_user on buffer.objectGUID = cipher_user.objectGUID) buffer_and_user
+        where buffer_and_user.id IN
+        <foreach collection="idList" open="(" separator="," close=")" item="id" index="index">
+            #{id}
+        </foreach>
+    </select>
+
+    <insert id="insertIntoCipherUser">
+        INSERT into cipher_user_info(uuid,account_number, user_name, nickname, mail,
+        phone_number,user_account_control, create_time, modify_time, job,job_no,source,posts,objectGUID,company_id) VALUES
+        <foreach collection="bufferDomainList" index="index" item="buffer" separator=",">
+            (
+            #{buffer.uuid},
+            #{buffer.accountNumber},
+            #{buffer.userName},
+            #{buffer.nickname},
+            #{buffer.mail},
+            #{buffer.phoneNumber},
+            #{buffer.userAccountControl},
+            NOW(),
+            NOW(),
+            #{buffer.job},
+            #{buffer.jobNo} ,
+            #{buffer.source},
+            #{buffer.manager},
+            #{buffer.objectGUID},
+            #{buffer.companyId}
+            )
+        </foreach>
+    </insert>
+
+
+    <update id="updateCipherUserByBuffer">
+        UPDATE cipher_user_info
+        <trim prefix="set" suffixOverrides=",">
+
+            <trim prefix="account_number=case" suffix="end,">
+                <foreach collection="bufferList" item="buffer" index="index">
+                    <if test="buffer.accountNumber!=null">
+                        when objectGUID=#{buffer.objectGUID} then #{buffer.accountNumber}
+                    </if>
+                </foreach>
+            </trim>
+
+            <trim prefix="user_name=case" suffix="end,">
+                <foreach collection="bufferList" item="buffer" index="index">
+                    <if test="buffer.userName!=null">
+                        when objectGUID=#{buffer.objectGUID} then #{buffer.userName}
+                    </if>
+                </foreach>
+            </trim>
+
+            <!--<trim prefix="lastname=case" suffix="end,">
+                <foreach collection="bufferList" item="buffer" index="index">
+                    <if test="buffer.lastname!=null">
+                        when objectGUID=#{buffer.objectGUID} then #{buffer.lastname}
+                    </if>
+                </foreach>
+            </trim>-->
+
+            <trim prefix="nickname=case" suffix="end,">
+                <foreach collection="bufferList" item="buffer" index="index">
+                    <if test="buffer.nickname!=null">
+                        when objectGUID=#{buffer.objectGUID} then #{buffer.nickname}
+                    </if>
+                </foreach>
+            </trim>
+
+            <trim prefix="mail=case" suffix="end,">
+                <foreach collection="bufferList" item="buffer" index="index">
+                    <if test="buffer.mail!=null">
+                        when objectGUID=#{buffer.objectGUID} then #{buffer.mail}
+                    </if>
+                </foreach>
+            </trim>
+
+            <trim prefix="user_account_control=case" suffix="end,">
+                <foreach collection="bufferList" item="buffer" index="index">
+                    <if test="buffer.userAccountControl!=null">
+                        when objectGUID=#{buffer.objectGUID} then #{buffer.userAccountControl}
+                    </if>
+                </foreach>
+            </trim>
+
+
+            <trim prefix="phone_number=case" suffix="end,">
+                <foreach collection="bufferList" item="buffer" index="index">
+                    <if test="buffer.phoneNumber!=null">
+                        when objectGUID=#{buffer.objectGUID} then #{buffer.phoneNumber}
+                    </if>
+                </foreach>
+            </trim>
+
+
+            <trim prefix="account_status=case" suffix="end,">
+                <foreach collection="bufferList" item="buffer" index="index">
+                    <if test="buffer.accountStatus!=null">
+                        when objectGUID=#{buffer.objectGUID} then #{buffer.accountStatus}
+                    </if>
+                </foreach>
+            </trim>
+
+
+            <trim prefix="job=case" suffix="end,">
+                <foreach collection="bufferList" item="buffer" index="index">
+                    <if test="buffer.job!=null">
+                        when objectGUID=#{buffer.objectGUID} then #{buffer.job}
+                    </if>
+                </foreach>
+            </trim>
+
+
+            <trim prefix="posts=case" suffix="end,">
+                <foreach collection="bufferList" item="buffer" index="index">
+                    <if test="buffer.manager!=null">
+                        when objectGUID=#{buffer.objectGUID} then #{buffer.manager}
+                    </if>
+                </foreach>
+            </trim>
+
+            <trim prefix="modify_time=case" suffix="end,">
+                <foreach collection="bufferList" item="buffer" index="index">
+                    when objectGUID=#{buffer.objectGUID} then NOW()
+                </foreach>
+            </trim>
+        </trim>
+        where
+        <foreach collection="bufferList" separator="or" item="buffer" index="index">
+            objectGUID=#{buffer.objectGUID}
+        </foreach>
+
+    </update>
+
+    <delete id="deleteByIdList">
+        DELETE from cipher_ad_user_buffer WHERE id IN
+        <if test="idList.size()>0">
+        <foreach collection="idList" item="id" index="index" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        </if>
+    </delete>
+
+
+    <select id="queryUserInfoByBufferList" resultType="cipher.console.oidc.domain.web.UserInfoDomain">
+        SELECT * from cipher_user_info where company_id=#{companyId} and objectGUID IN
+        <foreach collection="bufferDomainList" index="index" item="buffer" open="(" separator="," close=")">
+            #{buffer.objectGUID}
+        </foreach>
+    </select>
+
+
+    <select id="queryAllBufferUser" resultType="cipher.console.oidc.domain.web.AdUserBufferDomain">
+        select *
+        from (select buffer.*, cipher_user.objectGUID as check_number
+        from cipher_ad_user_buffer buffer
+        left join cipher_user_info cipher_user on buffer.objectGUID = cipher_user.objectGUID) buffer_and_user
+        where  buffer_and_user.company_id=#{companyId}
+    </select>
+
+</mapper>

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="cipher.console.oidc.mapper.DeviceInfoMapper">
+
+    <select id="accountBundledCount" resultType="int" parameterType="String">
+          SELECT  COUNT(id) as count FROM cipher_device_info where account_number = #{accountNumber};
+    </select>
+
+    <delete id="clearBundleInfo" parameterType="String">
+        DELETE FROM cipher_device_info WHERE account_number = #{accountNumber};
+    </delete>
+
+
+    <select id="selectDeviceInfoList" resultType="cipher.console.oidc.domain.web.DeviceInfo">
+       select tt.account_number as accountNumber,
+       id as id,
+       user_name as 'name',
+       htyoe as hman,
+       mac as mac,
+       imei as imei,
+       tt.create_time as createTime
+       from  cipher_device_info  tt
+       LEFT JOIN cipher_user_info ss on ss.uuid=tt.user_id
+       where 1=1 and company_id=#{companyId}
+        <if test="queryName!=null and queryName!=''">
+        and tt.account_number LIKE CONCAT(CONCAT('%',#{queryName}),'%') OR
+            user_name LIKE CONCAT(CONCAT('%',#{queryName}),'%')
+        </if>
+        group by ss.uuid
+        order by tt.create_time ${sord}
+        LIMIT #{pageData.currentRow}, #{pageData.rows}
+    </select>
+
+    <select id="selectDeviceCount" resultType="int">
+        select count(1) from (select count(ss.uuid)
+        from  cipher_device_info  tt
+        LEFT JOIN cipher_user_info ss on ss.uuid=tt.user_id
+        where 1=1 and company_id=#{companyId}
+        <if test="queryName!=null and queryName!=''">
+            and tt.account_number LIKE CONCAT(CONCAT('%',#{queryName}),'%') OR
+            user_name LIKE CONCAT(CONCAT('%',#{queryName}),'%')
+        </if>
+        group by ss.uuid) mm
+    </select>
+
+
+    <delete id="deleteDevice" parameterType="cipher.console.oidc.domain.web.DeviceInfo">
+        DELETE FROM cipher_device_info
+        WHERE id = #{id};
+    </delete>
+
+
+    <select id="selectDeviceInfoListByAccountNumber" resultType="cipher.console.oidc.domain.web.DeviceInfo">
+        select tt.account_number as accountNumber,
+        id as id,
+        user_name as 'name',
+        htyoe as hman,
+        mac as mac,
+        imei as imei,
+        tt.create_time as createTime
+        from  cipher_device_info  tt
+        LEFT JOIN cipher_user_info ss on ss.uuid=tt.user_id
+        where 1=1
+        <if test="accountNumber!=null and accountNumber!=''">
+            and tt.account_number =#{accountNumber}
+        </if>
+        order by tt.create_time desc
+        LIMIT #{pageData.currentRow}, #{pageData.rows}
+    </select>
+
+
+    <select id="selectDeviceCountByAccountNumber" resultType="int">
+        select count(tt.account_number)
+        from  cipher_device_info  tt
+        LEFT JOIN cipher_user_info ss on tt.user_id=ss.uuid
+        where 1=1
+        <if test="accountNumber!=null and accountNumber!=''">
+            and tt.account_number =#{accountNumber}
+        </if>
+
+    </select>
+
+
+    <update id="updateDevice">
+       update cipher_user_info set device_limit=#{number},
+       limit_open=#{openSelect}  where  company_id=#{companyId}
+    </update>
+
+
+    <select id="getHmansList" resultType="java.lang.String">
+      select hman  FROM cipher_device_info where account_number =#{accountNumber}
+    </select>
+
+    <select id="getDeviceNum" resultType="java.lang.Integer">
+     select device_limit from cipher_user_info where company_id=#{companyId} limit 1
+    </select>
+    <select id="getAccountNumber" resultType="java.lang.String" parameterType="java.lang.Integer" >
+        select account_number from cipher_device_info
+        where id=#{id}
+    </select>
+</mapper>

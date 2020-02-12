@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cipher.console.oidc.mapper.ResMenuMapper">
+	<resultMap id="abatorgenerated_MenuResult" type="cipher.console.oidc.domain.web.MenuForm" >
+	    <result column="resource_id" property="resourceId" />
+	    <result column="resource_name" property="resourceName" />
+	    <result column="permission" property="permission" />
+	    <result column="resource_url" property="resourceUrl" />
+	    <result column="parent" property="parent" />
+	    <result column="display_sort" property="displaySort" />
+	    <result column="display_type" property="displayType" />
+	    <result column="description" property="description" />
+	</resultMap>
+	<resultMap id="select_tree_MenuResult" type="cipher.console.oidc.domain.web.MenuForm" >
+	    <result column="resource_id" property="resourceId" />
+	    <result column="resource_name" property="resourceName" />
+	    <result column="permission" property="permission" />
+	    <result column="resource_url" property="resourceUrl" />
+	    <result column="parent" property="parent" />
+	    <!--<result column="parent_id" property="state"/>-->
+	    <result column="display_sort" property="displaySort" />
+	    <result column="display_type" property="displayType" />
+	    <result column="description" property="description" />
+	</resultMap>
+
+	<sql id="abatorgenerated_cipher_resource_query_conditions" >
+	    <if test="resourceName!=null">
+			  resource_name = #{resourceName},
+		     </if>
+	        <if test="permission!=null">
+			  permission = #{permission},
+		     </if>
+	        <if test="description!=null">
+			  description = #{description}
+		     </if>
+
+	</sql>
+
+	<select id="selectMenuList" resultType="cipher.console.oidc.domain.web.MenuForm" parameterType="cipher.console.oidc.domain.web.MenuForm">
+		SELECT resource_id, resource_name, description,resource_url,display_sort
+		FROM cipher_resource
+		WHERE display_type = 2
+		order by display_sort
+		LIMIT #{pageData.currentRow}, #{pageData.rows}
+	</select>
+
+	<select id="selectMenuInfoCount" resultType="int">
+		select
+			   count(resource_id)
+		from cipher_resource
+	</select>
+	<select id="selectChildByParent" resultType="cipher.console.oidc.domain.web.MenuForm" parameterType="cipher.console.oidc.domain.web.MenuForm">
+		        SELECT *
+				FROM cipher_resource
+				WHERE parent = #{resourceId}
+				LIMIT #{pageData.currentRow}, #{pageData.rows}
+	</select>
+	<select id="selectMenuListByParent" resultType="cipher.console.oidc.domain.web.MenuForm" parameterType="cipher.console.oidc.domain.web.MenuForm">
+		SELECT *
+		FROM cipher_resource
+		WHERE parent = #{resourceId}
+	</select>
+	<select id="selectRootMenu" resultType="cipher.console.oidc.domain.web.MenuForm" parameterType="cipher.console.oidc.domain.web.MenuForm">
+		   SELECT *
+		   FROM cipher_resource
+		   WHERE parent = #{parent}
+	</select>
+	<select id="selectRoleMenuList" resultType="cipher.console.oidc.domain.web.RoleMenu" parameterType="cipher.console.oidc.domain.web.RoleMenu">
+		select
+		role_id as roleId,ss.resource_id as resourceId,tt.role_name as roleName
+		from cipher_role_resource  ss
+		LEFT JOIN cipher_role  tt on ss.role_id=tt.id
+		where 1=1
+		<if test="resourceId != null " >
+			and resource_id = #{resourceId}
+		</if>
+	</select>
+	<select id="selectAllChild" resultType="cipher.console.oidc.domain.web.MenuTreeNodesDomain">
+		select resource_id, resource_name, parent
+		from cipher_resource
+		where display_type = 2
+	</select>
+
+	<select id="selectAllRootName" resultType="cipher.console.oidc.domain.web.MenuForm">
+		select resource_name
+		from cipher_resource
+		where display_type = 1
+	</select>
+	<select id="selectAllRoot" resultType="cipher.console.oidc.domain.web.MenuForm">
+		select *
+		from cipher_resource
+		where display_type = 1 and state=0
+		order by display_sort
+	</select>
+	<select id="findall" resultType="cipher.console.oidc.domain.web.MenuForm">
+		select *
+		from cipher_resource
+	</select>
+	<select id="selectMenuForms" resultMap="abatorgenerated_MenuResult" parameterType="cipher.console.oidc.domain.web.MenuForm">
+				SELECT resource_id, resource_name, permission,resource_url,parent,display_sort, display_type,description
+				FROM cipher_resource
+				WHERE 1= 1
+				<include refid="abatorgenerated_cipher_resource_query_conditions"/>
+	</select>
+
+	<select id="queryMenuForm" resultType="cipher.console.oidc.domain.web.MenuForm"  parameterType="cipher.console.oidc.domain.web.MenuForm">
+		SELECT *
+		FROM cipher_resource
+		WHERE resource_id = #{resourceId}
+	</select>
+
+
+	<insert id="insertResMenu" parameterType="cipher.console.oidc.domain.web.MenuForm" >
+	  INSERT INTO cipher_resource ( resource_name, permission,resource_url,parent,display_sort, display_type, description, create_time, modify_time)
+	  VALUES (#{resourceName}, #{permission}, #{resourceUrl},#{parent},#{displaySort},#{displayType},#{description}, NOW(), NOW())
+	</insert>
+
+	<update id="updateResMenu" parameterType="cipher.console.oidc.domain.web.MenuForm" >
+	  UPDATE cipher_resource SET modify_time = NOW(),
+	    <if test="resourceName!=null">
+			  resource_name = #{resourceName},
+		</if>
+		<if test="description!=null">
+			description = #{description},
+		</if>
+		<if test="resourceUrl!=null">
+			resource_url = #{resourceUrl},
+		</if>
+		<if test="displaySort!=null">
+			display_sort = #{displaySort},
+		</if>
+		<if test="displayType!=null">
+			display_type = #{displayType}
+		</if>
+	  WHERE resource_id = #{resourceId}
+	</update>
+
+	<delete id="deleteResMenu" parameterType="cipher.console.oidc.domain.web.MenuForm">
+		delete from cipher_resource where resource_id = #{resourceId}
+	</delete>
+
+
+	<select id="selectAllChildNew" resultType="cipher.console.oidc.domain.web.MenuInfoDomain">
+        select * from cipher_resource
+		where display_type = 2 and state=0
+	</select>
+
+
+	<select id="selectAllRootNew" resultType="cipher.console.oidc.domain.web.MenuInfoDomain">
+        select * from cipher_resource
+		where display_type = 1 and state=0
+	</select>
+
+</mapper>

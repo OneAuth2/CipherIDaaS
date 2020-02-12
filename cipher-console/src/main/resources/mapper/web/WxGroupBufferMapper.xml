@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="cipher.console.oidc.mapper.WxGroupBufferMapper">
+
+
+    <select id="queryList" resultType="cipher.console.oidc.domain.web.WxGroupDomain">
+       select id,name, parentid, company_id, create_time, modify_time
+         from cipher_wx_group_buffer where company_id=#{companyId}
+        limit #{dataGridModel.currentRow},#{dataGridModel.rows}
+    </select>
+
+
+    <select id="queryCountByCompany" resultType="int">
+select count(id) from cipher_wx_group_buffer where company_id=#{companyId}
+    </select>
+
+    <insert id="insert">
+        <if test="list != null and list.size() != 0">
+            insert into cipher_wx_group_buffer
+            (id, name, parentid, company_id,
+            create_time, modify_time)
+            values
+            <foreach collection="list" separator="," item="wxGroup">
+                (
+                #{wxGroup.id},
+                #{wxGroup.name},
+                #{wxGroup.parentid},
+                #{wxGroup.companyId},
+                NOW(),
+                NOW()
+                )
+            </foreach>
+        </if>
+    </insert>
+
+    <select id="queryIdList" resultType="java.lang.Long">
+        <if test="list != null and list.size() != 0">
+            select id from cipher_wx_group_buffer where id in
+            <foreach collection="list" item="buffer" open="(" close=")" separator=",">
+                #{buffer.id}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="queryGroupByCompany" resultType="cipher.console.oidc.domain.web.WxGroupDomain">
+    select id, name, parentid, company_id, create_time, modify_time from cipher_wx_group_buffer where company_id=#{companyId}
+    </select>
+
+    <delete id="delete" >
+         delete from cipher_wx_group_buffer where company_id=#{companyId}
+    </delete>
+</mapper>

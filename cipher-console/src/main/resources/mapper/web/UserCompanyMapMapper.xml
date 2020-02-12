@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="cipher.console.oidc.mapper.UserCompanyMapMapper">
+
+
+
+    <select id="queryCompanyId" parameterType="STRING"
+            resultType="String">
+        select company_id  from  plat_cipher_user_map  where account_number=#{userName}
+    </select>
+
+    <select id="getInvitAndUserInfo"
+            parameterType="cipher.console.oidc.domain.web.UserCompanyMapDomain"
+    resultType="cipher.console.oidc.domain.web.UserCompanyMapDomain">
+       select m.id,n.user_name,n.phone_number,n.mail,m.create_time,m.invit_code
+         from cipher_user_company_map m,platform_user_info n
+         where m.platform_user_id=n.id and m.company_id=#{companyId}
+        <if test="queryName!=null and queryName!=''">
+            and (n.user_name LIKE CONCAT(CONCAT('%',#{queryName}),'%') OR
+            n.mail LIKE CONCAT(CONCAT('%',#{queryName}),'%'))
+        </if>
+         LIMIT #{pageData.currentRow}, #{pageData.rows}
+    </select>
+
+    <select id="getUsedInvitCount"
+            parameterType="String"
+            resultType="INTEGER">
+        select count(*)from cipher_user_company_map where company_id=#{companyId}
+    </select>
+
+
+
+
+</mapper>

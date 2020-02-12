@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="cipher.console.oidc.mapper.WirelessAuthMapper">
+    <resultMap id="BaseResultMap" type="cipher.console.oidc.domain.authsettingsdomain.IdentitySettingInfo">
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="company_uuid" property="company_uuid" jdbcType="VARCHAR" />
+        <result column="type" property="type" jdbcType="INTEGER" />
+        <result column="auth_mode" property="auth_mode" jdbcType="VARCHAR" />
+        <result column="binding_flow" property="binding_flow" jdbcType="VARCHAR" />
+        <result column="regist_flow" property="regist_flow" jdbcType="VARCHAR" />
+        <result column="forget_flow" property="forget_flow" jdbcType="VARCHAR" />
+        <result column="create_time" property="create_time" jdbcType="TIMESTAMP" />
+        <result column="modify_time" property="modify_time" jdbcType="TIMESTAMP" />
+    </resultMap>
+    <sql id="FieldColumn">
+        (company_uuid,type,auth_mode,binding_flow,regist_flow,create_time,modify_time)
+    </sql>
+    <select id="companyUuidCount" parameterType="string" resultType="int">
+        SELECT count(id) FROM cipher_identity_setting_info
+        WHERE company_uuid=#{companyUuid} AND type=3;
+    </select>
+    <insert id="insertWirelessAuth" parameterType="cipher.console.oidc.domain.authsettingsdomain.IdentitySettingInfo">
+        INSERT INTO cipher_identity_setting_info
+        <include refid="FieldColumn"/>
+        VALUES
+        (#{company_uuid},
+        #{type},
+        #{auth_mode},
+        #{binding_flow},
+        #{regist_flow},
+        NOW(),
+        NOW())
+    </insert>
+    <update id="updateWirelessAuth" parameterType="cipher.console.oidc.domain.authsettingsdomain.IdentitySettingInfo">
+        UPDATE cipher_identity_setting_info
+        <set>
+            <if test="auth_mode!=null">
+                auth_mode=#{auth_mode},
+            </if>
+            <if test="binding_flow!=null">
+                binding_flow=#{binding_flow},
+            </if>
+            <if test="regist_flow!=null">
+                regist_flow=#{regist_flow},
+            </if>
+            modify_time=NOW()
+        </set>
+        WHERE company_uuid=#{company_uuid} AND type=3;
+    </update>
+    <select id="selectWirelessAuthBycompanyUuid" parameterType="string" resultMap="BaseResultMap">
+        SELECT id,company_uuid,type,auth_mode,binding_flow,regist_flow,forget_flow,create_time,modify_time
+        FROM cipher_identity_setting_info
+        WHERE company_uuid=#{companyUuid} AND type=3;
+    </select>
+
+</mapper>

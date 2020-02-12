@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="cipher.console.oidc.mapper.RadiusConfigMapper">
+
+
+    <select id="querySecretByUserName" resultType="java.lang.String" parameterType="java.lang.String">
+        SELECT totp_key
+        FROM cipher_totp_authorization_mag
+        WHERE account_number = #{userName};
+    </select>
+
+
+    <select id="queyPwdByUserName" resultType="java.lang.String" parameterType="java.lang.String">
+        SELECT password
+        FROM cipher_password_authorization_mag
+        WHERE account_number = #{userName};
+    </select>
+
+    <select id="queryRadiusConfig" resultType="cipher.console.oidc.domain.web.RadiusConfigDomain">
+        SELECT
+            id,
+            auth_type,
+            protocol,
+            ip,
+            port,
+            shared_key,
+            create_time
+        FROM cipher_radius_config
+        WHERE company_id=#{companyId};
+    </select>
+
+
+    <select id="updateRadiusConfig" parameterType="cipher.console.oidc.domain.web.RadiusConfigDomain">
+        UPDATE cipher_radius_config
+        SET auth_type = #{authType}, port = #{port}, shared_key = #{sharedKey},ip = #{ip},fee_port=#{feePort},protocol_type=#{protocolType}
+        where id=#{id}
+    </select>
+
+
+    <select id="queryRadiusConfigById" resultType="cipher.console.oidc.domain.web.RadiusConfigDomain">
+        SELECT
+            id,
+            auth_type,
+            fee_port,
+            protocol,
+            protocol_type,
+            ip,
+            port,
+            shared_key,
+            create_time
+        FROM cipher_radius_config
+        WHERE id=#{id}
+    </select>
+
+
+    <insert id="insertRadiusConfig" useGeneratedKeys="true" keyProperty="radiusId">
+        insert into cipher_radius_config
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="feePort != null">
+                fee_port,
+            </if>
+            <if test="protocolType != null">
+                protocol_type,
+            </if>
+            <if test="port != null">
+                port,
+            </if>
+            <if test="sharedKey != null">
+                shared_key,
+            </if>
+            <if test="companyId != null">
+                company_id,
+            </if>
+            <if test="ip != null">
+                ip,
+            </if>
+
+            create_time
+
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+
+            <if test="feePort != null">
+                #{feePort},
+            </if>
+            <if test="protocolType != null">
+                #{protocolType},
+            </if>
+            <if test="port != null">
+                #{port},
+            </if>
+            <if test="sharedKey != null">
+                #{sharedKey},
+            </if>
+            <if test="companyId != null">
+                #{companyId},
+            </if>
+            <if test="ip != null">
+                #{ip},
+            </if>
+            NOW()
+        </trim>
+    </insert>
+
+
+    <delete id="deleteRadiusConfig">
+     delete from cipher_radius_config where id=#{id}
+    </delete>
+
+
+
+
+    <update id="updateRadiusInfo" parameterType="cipher.console.oidc.domain.web.WifiPortalSetInfoDomain">
+        UPDATE cipher_radius_config
+        <set>
+        <if test="authType != null">
+            auth_type = #{authType},
+        </if>
+        <if test="port != null">
+            port = #{port},
+        </if>
+        <if test="sharedKey != null">
+            shared_key = #{sharedKey},
+        </if>
+        <if test="ip != null">
+            ip = #{ip},
+        </if>
+        <if test="feePort != null">
+            fee_port=#{feePort},
+        </if>
+        <if test="protocolType != null">
+            protocol_type=#{protocolType},
+        </if>
+        </set>
+        where id = #{radiusId}
+    </update>
+
+</mapper>

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cipher.console.oidc.mapper.AppInfoManageMapper">
+    <select id="queryallinfo" resultType="cipher.console.oidc.domain.web.AppManageinfo" parameterType="cipher.console.oidc.domain.web.AppManageinfo">
+       SELECT * FROM cipher_file_resource_Info
+       LIMIT #{pageData.currentRow}, #{pageData.rows}
+    </select>
+    <select id="queryInfoById" resultType="cipher.console.oidc.domain.web.AppManageinfo" >
+        SELECT * FROM cipher_file_resource_Info
+        WHERE id =#{id}
+    </select>
+    <select id="insertAppinfo" parameterType="cipher.console.oidc.domain.web.AppManageinfo">
+        INSERT INTO cipher_file_resource_Info (app_id, channel_id,province_id, city_id,title,content,update_type,
+        package_name, res_ver, res_name,res_size, res_url,res_md5, url_md5,create_time,modify_time) values (
+         #{AppId},
+         #{ChannelId},
+         #{ProvinceId},
+         #{CityId},
+         #{Title},
+         #{Content},
+         #{UpdateType},
+         #{PackageName},
+         #{ResVer},
+         #{ResName},
+         #{ResSize},
+         #{ResUrl},
+         #{ResMd5} ,
+         #{UrlMd5},
+         #{CreateTime},
+         #{ModifyTime}
+        )
+
+    </select>
+    <select id="updateAppInfoId" parameterType="cipher.console.oidc.domain.web.AppManageinfo">
+        UPDATE cipher_file_resource_Info SET modify_time=NOW()
+        <if test="AppId!=null" >
+            ,app_id ="${AppId}"
+        </if>
+        <if test="ChannelId!=null">
+            ,channel_id ="${ChannelId}"
+        </if>
+        <if test="ProvinceId!=null">
+            ,province_id ="${ProvinceId}"
+        </if>
+        <if test="CityId!=null">
+            ,city_id ="${CityId}"
+        </if>
+        <if test="Title!=null">
+            ,title ="${Title}"
+        </if>
+        <if test="Content!=null">
+            ,content ="${Content}"
+        </if>
+        <if test="UpdateType!=null">
+            ,update_type ="${UpdateType}"
+        </if>
+        <if test="PackageName!=null">
+            ,package_name ="${PackageName}"
+        </if>
+        <if test="ResVer!=null">
+            ,res_ver ="${ResVer}"
+        </if>
+        <if test="ResName!=null">
+            ,res_name ="${ResName}"
+        </if>
+        <if test="ResSize!=null">
+            ,res_size ="${ResSize}"
+        </if>
+        <if test="ResUrl!=null">
+            ,res_url ="${ResUrl}"
+        </if>
+        <if test="ResMd5!=null">
+            ,res_md5 ="${ResMd5}"
+        </if>
+        <if test="UrlMd5!=null">
+            ,url_md5 ="${UrlMd5}"
+        </if>
+        <if test="CreateTime!=null">
+            ,create_time ="${CreateTime}"
+        </if>
+        <if test="ModifyTime!=null">
+            ,modify_time ="${ModifyTime}"
+        </if>
+     WHERE id =${ID}
+    </select>
+<delete id="deleteInfoById" parameterType="java.lang.Integer">
+    DELETE FROM cipher_file_resource_Info
+    WHERE id =#{id}
+</delete>
+    <select id="selectAppInfoCount" resultType="int">
+        select
+               count(id)
+        from cipher_file_resource_Info
+    </select>
+</mapper>

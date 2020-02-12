@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cipher.console.oidc.mapper.AdActivityMapper">
+    <resultMap id="baseResultMap" type="cipher.console.oidc.domain.web.AdActivityDomain">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="is_add" property="isAdd" jdbcType="INTEGER"></result>
+        <result column="account_number" property="accountNumber"></result>
+    </resultMap>
+
+
+    <select id="selectAllUsers" parameterType="cipher.console.oidc.domain.web.AdActivityDomain"
+            resultType="cipher.console.oidc.domain.web.AdActivityDomain">
+        SELECT id,account_number,user_name AS username,uuid,
+        nickname,mail,phone_number, account_status,job,manager,is_add,objectGUID,
+        create_time,modify_time,check_number
+        FROM (SELECT
+        buffer.*,
+        cipher_user.uuid as uuid,
+        cipher_user.company_id as companyId,
+        cipher_user.account_number AS check_number
+        FROM cipher_ad_user_buffer buffer
+        LEFT JOIN cipher_user_info cipher_user
+        ON buffer.account_number = cipher_user.account_number) buffer_and_user
+        where 1=1 and buffer_and_user.company_id=#{companyId}
+        <if test="source!=null">
+            and buffer_and_user.source=#{source}
+        </if>
+
+        <if test="checkNumber==1">
+            and check_number is null
+        </if>
+        <if test="checkNumber==2">
+            and check_number is not null
+        </if>
+
+        <if test="sidx!=null and sidx=='accountNumber'.toString()">
+            order by account_number #{sord}
+        </if>
+        <if test="sidx!=null and sidx=='username'.toString()">
+            order by username #{sord}
+        </if>
+        <if test="sidx==null and sidx==''">
+            order by create_time desc
+        </if>
+        LIMIT #{pageData.currentRow}, #{pageData.rows}
+    </select>
+
+
+    <select id="getAllUsersCount" resultType="java.lang.Integer"
+            parameterType="cipher.console.oidc.domain.web.AdActivityDomain">
+        SELECT COUNT(1)
+        FROM (SELECT
+        buffer.*,
+        cipher_user.uuid as uuid,
+        cipher_user.company_id as companyId,
+        cipher_user.account_number AS check_number
+        FROM cipher_ad_user_buffer buffer
+        LEFT JOIN cipher_user_info cipher_user
+        ON buffer.account_number = cipher_user.account_number) buffer_and_user
+        where 1=1 and buffer_and_user.company_id=#{companyId}
+
+        <if test="source!=null">
+            and buffer_and_user.source=#{source}
+        </if>
+
+
+        <if test="checkNumber==1">
+            and check_number is null
+        </if>
+        <if test="checkNumber==2">
+            and check_number is not null
+        </if>
+    </select>
+    <select id="getUserBufferInfo" parameterType="java.lang.String"
+            resultType="cipher.console.oidc.domain.web.AdActivityDomain">
+        SELECT
+            id,
+            account_number,
+            user_name AS username,
+            nickname,
+            mail,
+            phone_number,
+            job,
+            manager,
+            check_number
+        FROM
+            (SELECT buff.*, cipher_user.account_number AS check_number
+             FROM cipher_ad_user_buffer buff
+                      LEFT JOIN cipher_user_info cipher_user
+                                ON buff.account_number = cipher_user.account_number) buffer_and_user
+        where account_number = #{accountNumber}
+    </select>
+    <select id="getUserInfo" parameterType="java.lang.String"
+            resultType="cipher.console.oidc.domain.web.AdActivityDomain">
+        SELECT
+            account_number,
+            user_name AS username,
+            nickname,
+            mail,
+            phone_number,
+            job,
+            posts                       AS manager
+        FROM
+            cipher_user_info
+        where account_number = #{accountNumber}
+    </select>
+
+</mapper>
