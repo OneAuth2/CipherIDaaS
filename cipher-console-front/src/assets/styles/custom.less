@@ -1,0 +1,103 @@
+// @变量
+// Color颜色-开始
+// 主色
+@colorDarkPrimary: #73B5D0;
+@colorPrimary: #81CFE6;
+@colorLightPrimary: #D2F0F9;
+// 辅助色
+@colorDarkBlue: #124678;
+@colorInfo: #8EC0EE;
+@colorFormDark: #08142C; // form里面的标题颜色
+@colorTableBlue: #81CFE6; // table里面的蓝色字体
+@colorHover: #46a6ff; // hover移上去颜色
+// 整体背景颜色
+@colorBg: #F8F8F8;
+// 字体颜色
+@colorFontDark: #08142C;
+@colorFontLightBlack: #A7A7A7;
+@colorFontGrey: #CECECE;
+@colorFontLightGrey: #E7E7E7;
+@colorFontLight: #F8F8F8;
+@colorFontSub: #979797;
+@colorFontMain: #6D7278;
+// 阴影颜色
+@colorShadom: #E7E7E7;
+// 其他颜色
+@colorWhite: #fff;
+// Color颜色-结束
+
+// Font字体-开始
+// 字体大小
+@fontSize12: 12px;
+@fontSize14: 14px;
+@fontSize16: 16px;
+@fontSize18: 18px;
+@fontSize20: 20px;
+@fontSize25: 25px;
+@fontSizePercent80: 80%;
+// 字体粗细
+@fontBold: 500;
+@fontNormal: 400;
+@fontLight: 300;
+// Font字体-结束
+
+// Custom惯用radius、padding、margin-开始
+@customRadius: 4px; // 惯用radius
+@customPadding: 8px; // 惯用padding
+@customMargin: 8px; // 惯用margin
+// Custom惯用radius、padding、margin-结束
+
+// 其他高度和宽度-开始
+@headerHeight: 60px; // 头部高度
+@leftWidth: 200px; // 左边宽度
+@footerContentHeight: 32px; // 底部footer高度:目前页面底部page组件和按钮高度均为32px
+@footerMargin: 15px; // 底部footer上下margin
+@footerHeight: @footerContentHeight+2*@footerMargin; // 底部高度
+@componentHeight: 32px; // 组件按钮、input等高度
+@transferWidth: 668px; // 穿梭框宽度
+
+
+// @函数-开始
+// 圆角样式函数，默认为惯用radius
+.border-radius(@borderRadius: @customRadius) {
+  border-radius: @borderRadius;
+}
+
+// 阴影样式函数，@hShadow水平，@vShadow垂直，@blur 模糊距离，@spread阴影的尺寸， @color阴影的颜色
+.box-shadow (@hShadow: 0px, @vShadow: 2px, @blur: 4px, @spread: 0px, @color: @colorShadom) {
+  box-shadow: @hShadow @vShadow @blur @spread @color;
+}
+
+// 内阴影
+.box-shadow-inset (@hShadow: 0px, @vShadow: 2px, @blur: 4px, @spread: 0px, @color: @colorShadom) {
+  box-shadow: @hShadow @vShadow @blur @spread @color inset;
+}
+
+// 字体大小颜色函数
+.sc(@fontSize, @Color) {
+  font-size: @fontSize;
+  color: @Color;
+}
+
+//宽高
+.wh(@width, @height) {
+  width: @width;
+  height: @height;
+}
+
+//flex 布局和 子元素 对其方式
+.flex(@atype: center, @jtype: center) {
+  display: flex;
+  align-items: @atype;
+  justify-content: @jtype;
+}
+
+// 单行文字 显示省略号
+.ellipsis {
+  white-space: nowrap;
+  word-break: break-all;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// @函数-结束

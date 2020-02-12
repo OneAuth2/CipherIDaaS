@@ -1,0 +1,86 @@
+@import "~@/assets/styles/common.less";
+
+// 头部为搜索，中部为表格，最后为page组合页面
+// 头部分为search框400px，左边部分，右边部分三块
+// 中部为table部分
+// 底部为page部分
+/**
+    例子：
+    <div class="tabled-wrap">
+        <div class="tabled-header">
+            <div class="tabled-header-search">搜索框</div>
+            <div class="tabled-header-left">左边部分</div>
+            <div class="tabled-header-right">右边部分</div>
+        </div>
+        <div class="tabled-table">table部分</div>
+        <div class="tabled-page">页码</div>
+    </div>
+*/
+
+// 变量
+@searchWidth: 400px; // 左边搜索框的宽度
+@fontDisabled: @colorFontGrey;
+
+.tabled-wrap {
+    .wrap;
+}
+
+.tabled-header:extend(.clearfix all) {
+    .head;
+    text-align: left;
+    margin-bottom: 1px;
+
+    .tabled-header-search {
+        display: inline-block;
+        width: @searchWidth;
+    }
+
+    .tabled-header-left {
+        display: inline-block;
+        padding-left: @customPadding;
+    }
+
+    .tabled-header-right,
+    .tabled-header-btn {
+        float: right;
+        text-align: right;
+
+        .btn {
+            margin-left: @customMargin;
+        }
+    }
+}
+
+.tabled-table {
+    height: calc(~"100% - @{headerHeight} - @{footerHeight} - 1px");
+    overflow-y: auto;
+
+    /deep/ a {
+        color: @colorTableBlue;
+        margin-left: @customMargin;
+        font-weight: @fontBold;
+        cursor: pointer;
+
+        &:first-child {
+            margin-left: 0;
+        }
+
+        &:hover {
+            color: @colorHover;
+        }
+    }
+
+    /deep/ .normal {
+        cursor: default;
+        color: #515a6e !important; // iview table里面的字体颜色
+    }
+
+    /deep/ .disabled {
+        cursor: default;
+        color: @fontDisabled  !important;
+    }
+}
+
+.tabled-page {
+    .page;
+}

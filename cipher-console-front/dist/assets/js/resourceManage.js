@@ -1,0 +1,1 @@
+(window["webpackJsonp"]=window["webpackJsonp"]||[]).push([["resourceManage"],{"4e72":function(e,n,t){"use strict";t.r(n);var r=function(){var e=this,n=e.$createElement,t=e._self._c||n;return t("div",{staticClass:"container"},[t("transition",[t("router-view")],1)],1)},a=[],s={},i=s,c=t("2877"),o=Object(c["a"])(i,r,a,!1,null,"6d2bfd7d",null);n["default"]=o.exports}}]);

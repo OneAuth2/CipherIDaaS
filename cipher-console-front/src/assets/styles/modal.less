@@ -1,0 +1,146 @@
+// 创建弹窗样式
+.create-modal {
+  /deep/ .ivu-modal-header {
+    height: 54px;
+    line-height: 54px;
+    padding: 0;
+    text-align: center;
+  }
+
+  /deep/ .ivu-modal-body {
+    padding: 30px 34px;
+  }
+
+  .ivu-form-item-content,
+  .create-modal-content {
+    width: 100%;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    span {
+      padding-right: 16px;
+    }
+
+    .input {
+      flex: 1;
+    }
+  }
+
+  /deep/ .ivu-modal-footer {
+    border: none;
+    padding: 0 34px 30px 34px;
+  }
+
+  .sub-title {
+    margin-left: 20px;
+    font-weight: 400;
+  }
+
+  .cancel__btn {
+    vertical-align: top;
+    margin-left: 10px;
+  }
+}
+
+// 带穿梭框的modal样式
+.tree-transfer {
+
+  /deep/ .ivu-modal-header {
+    padding: 24px 56px;
+  }
+
+  /deep/ .tabs-bar-nav {
+    padding: 8px 0 16px;
+  }
+
+  /deep/ .ivu-modal-footer {
+    text-align: center;
+    padding: 8px 0 42px;
+  }
+}
+
+// 提示类弹窗
+.tip-modal {
+  /deep/ .ivu-modal-header {
+    padding: 24px 32px;
+    border: none;
+    font-size: 16px;
+
+    i {
+      font-size: 40px;
+      margin-right: 16px;
+      position: relative;
+      top: -1px;
+    }
+
+    span {
+      font-size: 20px;
+      font-weight: 500;
+    }
+
+    .header-confirm {
+      i {
+        color: #f7b500;
+      }
+
+      span {
+        color: #fa6400;
+      }
+    }
+
+    .header-success {
+
+      i,
+      span {
+        color: #81cfe6;
+      }
+    }
+
+    .header-error {
+
+      i,
+      span {
+        color: #fa6400;
+      }
+    }
+  }
+
+  /deep/ .ivu-modal-header p,
+  .ivu-modal-header-inner.ivu-modal-header-inner {
+    height: auto;
+    ;
+  }
+
+  /deep/ .ivu-modal-body {
+    width: 100%;
+    font-size: 14px;
+    line-height: 20px;
+    color: #08142c;
+    padding: 0 56px 0;
+    min-height: 44px;
+    box-sizing: border-box;
+  }
+
+  .ivu-form-item-content,
+  .tip-modal-content {
+    width: 100%;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  /deep/ .ivu-modal-footer {
+    border: none;
+    padding-top: 20px;
+    padding-bottom: 24px;
+    ;
+  }
+
+  .cancel__btn {
+    vertical-align: top;
+    margin-left: 10px;
+  }
+}

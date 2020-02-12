@@ -1,0 +1,277 @@
+@import "~@/assets/styles/common.less";
+
+// form样式
+/**
+  最外围formed-wrap：
+    一、formed-header
+    二、formed-container :
+      （1）formed-form 表单 ：分块：formed-form-part ,formed-form-item
+      （2）formed-footer
+    例子：
+    <div class="formed-wrap">
+      <div class="formed-header">
+        <div class="formed-header-title">头部标题</div>
+        <div class="formed-header-btn">头部靠右按钮</div>
+      </div>
+      <div class="formed-container">
+        <div class="formed-form">
+          <div class="formed-form-part">
+            <div class="formed-form-part-title">分块标题</div>
+            <div class="foremd-form-item">
+              <span>小标题</span>
+              <span>内容</span>
+            </div>
+          </div>
+        </div>
+        <div class="formed-footer">底部</div>
+      </div>
+    </div> */
+.formed-wrap {
+  .wrap;
+  overflow-y: auto;
+}
+
+.formed-header {
+  .head;
+  text-align: center;
+  position: relative;
+  margin-bottom: 1px;
+
+  .formed-header-title {
+    .sc(@fontSize18, @colorFontDark);
+    font-weight: 500;
+  }
+
+  .formed-header-btn {
+    .ct; // 上下居中
+    right: @customMargin;
+  }
+}
+
+.formed-container {
+  background-color: @colorWhite;
+  height: calc(~"100% - @{headerHeight} - 1px");
+  .border-radius;
+  position: relative;
+  overflow-y: auto;
+}
+
+// 分块part
+.formed-form-part {
+  .clearfix;
+  margin-bottom: 42px;
+
+  // &:last-of-type {
+  //   margin-bottom: 0;
+  // }
+
+  .formed-form-item,
+  /deep/ .ivu-form-item {
+    margin-left: 120px;
+  }
+}
+
+.formed-form-part-title {
+  width: 120px;
+  float: left;
+  .sc(@fontSize16, @colorFontDark);
+  font-weight: @fontBold;
+  line-height: 32px;
+}
+
+
+.formed-form-item-part {
+  .clearfix;
+  margin-bottom: 24px;
+  padding-left: 16px;
+
+  &:first-of-type {
+    padding-left: 0;
+  }
+
+  &:last-of-type {
+    margin-bottom: 0;
+  }
+}
+
+.formed-form {
+  min-height: calc(~"100% - @{footerHeight}");
+  padding: 48px 56px 0;
+  // overflow-y: auto;
+  text-align: left;
+
+  /deep/ .ivu-form-item-content {
+    max-width: 500px;
+  }
+
+  // 每个选项之间间距16px，包括label距离
+  /deep/ .ivu-form .ivu-form-item-label,
+  /deep/ .ivu-input-number {
+    padding-right: @customMargin * 2;
+    margin-right: 0;
+  }
+
+  // 除label外的其他选项最后一个间距为0
+  /deep/ .ivu-form,
+  /deep/ .ivu-input-number {
+    &:last-of-type {
+      padding-right: 0;
+    }
+  }
+
+  .formed-form-item {
+    margin-bottom: 16px;
+    text-align: left;
+
+    // &:last-of-type {
+    //   margin-bottom: 0;
+    // }
+
+    >span {
+      display: inline-block;
+      display: table-cell;
+      vertical-align: middle;
+      vertical-align: top;
+      line-height: 32px;
+      // font-size: @fontSize14;
+
+      >div {
+        margin-bottom: 16px;
+      }
+    }
+
+    >span:nth-child(1) {
+      text-align: right;
+      width: 130px;
+      padding-right: @customPadding * 2;
+      color: @colorFormDark;
+      font-weight: @fontBold;
+    }
+
+    >span:nth-child(2) {
+      text-align: left;
+      color: @colorFontMain;
+    }
+  }
+
+  /deep/ .ivu-input-wrapper,
+  /deep/ .ivu-select,
+  /deep/ .ivu-textarea-wrapper {
+    width: 326px;
+    max-width: 100%;
+  }
+
+  /deep/ .ivu-date-picker {
+    width: 326px;
+    max-width: 100%;
+
+    /deep/ .ivu-input-wrapper {
+      width: 100%;
+    }
+  }
+}
+
+.formed-footer {
+  width: 100%;
+  text-align: center;
+  margin: @footerMargin 0;
+
+  .btn {
+    margin-left: @customMargin;
+    vertical-align: top;
+  }
+}
+
+.open {
+  font-size: 24px;
+  color: @colorPrimary;
+  margin-left: @customMargin;
+}
+
+.close {
+  font-size: 24px;
+  color: rgb(255, 0, 0);
+  margin-left: @customMargin;
+}
+
+
+//@editcolor:white;
+@titleh: 50px;
+@titlecolor: #fafafa;
+@size15: 14px;
+@bodyw: 500px;
+@bodyh: 650px;
+@bodydel: 400px;
+//@wraph:700px;
+@delheight: 50px;
+
+.wrap {
+  height: 100%;
+  // height: @wraph;
+  position: relative;
+}
+
+.edit_box {
+  height: calc(~"100% - @{delheight}");
+  overflow-y: auto;
+  //background:@editcolor
+}
+
+.edit_title_box {
+  height: @titleh;
+  background: @titlecolor;
+}
+
+.edit_title {
+  float: left;
+  text-align: center;
+  line-height: @titleh;
+  margin-left: 20px;
+  font-weight: bold;
+  font-size: @size15;
+}
+
+.edit_btn {
+  float: right;
+  margin-right: 20px;
+  text-align: center;
+  line-height: @titleh;
+}
+
+.edit_body_box {
+  width: @bodyw;
+  margin-top: 20px;
+}
+
+.footer {
+  height: 50px;
+  background: #fafafa;
+  width: 100%;
+  position: absolute;
+  bottom: 0px;
+  text-align: center;
+}
+
+.cancel {
+  text-align: center;
+  line-height: 50px;
+  float: left;
+  margin-left: 20px;
+}
+
+.submit {
+  margin-left: 43%;
+  text-align: center;
+  line-height: 50px;
+  float: left;
+}
+
+.clearfix:after {
+  content: '';
+  display: block;
+  clear: both;
+}
+
+.clearfix {
+  zoom: 1;
+}

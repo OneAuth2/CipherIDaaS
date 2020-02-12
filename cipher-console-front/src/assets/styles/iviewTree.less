@@ -1,0 +1,23 @@
+// tree组件样式
+// 去除上下间距
+/deep/ .ivu-tree ul li {
+  position: relative;
+  margin: 0;
+}
+
+// 展开的箭头图标移到右边，方向向下
+/deep/ .ivu-tree-arrow {
+  position: absolute;
+  right: 10px;
+  top: 12px;
+  transform: rotate(90deg);
+}
+
+// 展开的箭头 在展开后 方向向上
+/deep/ .ivu-tree-arrow-open i {
+  transform: rotate(180deg);
+}
+
+/deep/ .ivu-tree ul li {
+  padding: 0;
+}

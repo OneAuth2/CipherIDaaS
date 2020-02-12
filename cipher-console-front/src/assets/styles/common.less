@@ -1,0 +1,109 @@
+@import "~@/assets/styles/custom.less";
+
+// 浮动
+.left {
+  float: left;
+}
+
+.right {
+  float: right;
+}
+
+// 清除浮动样式
+.clearfix::after {
+  content: "";
+  display: block;
+  clear: both;
+}
+
+
+// 定位
+.relative {
+  position: relative;
+}
+
+//定位上下左右居中
+.center-all {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+//定位上下居中
+.ct {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+//定位左右居中
+.cl {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+// 可点击样式
+.link {
+  color: @colorPrimary;
+  cursor: pointer;
+
+  &:hover {
+    color: @colorHover;
+  }
+}
+
+// 惯用模块样式
+// 最外围
+.wrap {
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+// header、top模块等
+.head {
+  height: @headerHeight;
+  line-height: @headerHeight;
+  background: @colorWhite;
+  .box-shadow;
+  .border-radius;
+  padding: 0 @customPadding;
+}
+
+// 副标题
+.sub-title {
+  font-weight: @fontNormal;
+  color: @colorFontSub;
+  margin-left: @customMargin;
+}
+
+// 正文小标题
+.text-small-title {
+  .sc(@fontSize14, @colorFontDark);
+}
+
+// 圆点
+.point {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 4px;
+}
+
+// 小字体
+.samll-font {
+  font-size: 80%;
+}
+
+
+.page,
+.btn-footer {
+  margin: @footerMargin 0;
+
+  .btn {
+    margin-right: @customMargin;
+  }
+}

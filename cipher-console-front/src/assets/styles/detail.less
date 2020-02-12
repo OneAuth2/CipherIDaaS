@@ -1,0 +1,27 @@
+
+// 详情页面
+@detailTitle: rgb(250, 250, 250);
+@detailBdoy: rgb(255, 255, 255);
+@fontSizeLeft: @fontSize16; // 左侧字体
+@fontSizeRight: @fontSize14; // 右侧字体
+
+.detailTitle {
+    font-size: @fontSize16;
+    background-color: @detailTitle;
+    font-weight: @fontBold;
+
+    .left {
+        text-align: left;
+        padding: 5px 15px 5px 15px;
+    }
+
+    .right {
+        text-align: right;
+        padding: 5px 15px 5px 15px;
+    }
+}
+
+.detailBdoy {
+    font-size: @fontSize12;
+    background-color: @detailBdoy;
+}

@@ -1,0 +1,386 @@
+@import "~@/assets/styles/custom.less";
+@tableHeight: 48px; // table每行高度
+
+// 一、tasble组件样式  
+// 去除table上边和左边的线
+.ivu-table-wrapper {
+  border: none;
+}
+
+// 去除table下边的线
+.ivu-table-default::before {
+  height: 0;
+}
+
+// 去除table右边的下
+.ivu-table-default::after {
+  width: 0;
+}
+
+// table头部设置圆角
+.ivu-table-header {
+  .border-radius;
+}
+
+// table头部背景颜色并去除border
+.ivu-table th {
+  background: @colorFontLightGrey;
+  border: none;
+}
+
+// table body行间距设置为1，并将第一行向上移动
+.ivu-table-body table {
+  border-spacing: 0px 1px;
+
+  tr:first-child td {
+    margin-top: -1px;
+  }
+}
+
+// tbale样式调整
+.ivu-table-wrapper table {
+  border-collapse: separate; // 设置为可分开
+
+  tr {
+    height: @tableHeight; // 每行高度设置为48px
+  }
+
+  tbody {
+
+    // 每行边框设置
+    tr {
+
+      // 每个单元格上下加border
+      td {
+        border: solid #cecece;
+        border-width: 1px 0;
+      }
+
+      // 每行第一个单元格左边加边框
+      td:first-child {
+        border-left-width: 1px;
+      }
+
+      // 每行单元格右边加边框
+      td:last-child {
+        border-right-width: 1px;
+      }
+    }
+  }
+
+  // 每行第一个单元格左边加圆角
+  td:first-child {
+    border-top-left-radius: @customRadius;
+    border-bottom-left-radius: @customRadius;
+  }
+
+  //每行最后一个单元格右边加圆角
+  td:last-child {
+    border-top-right-radius: @customRadius;
+    border-bottom-right-radius: @customRadius;
+  }
+}
+
+
+
+// 二、下拉框样式 select，dropDown
+// dropdown去除上下留白样式
+.ivu-select-dropdown {
+  padding: 0;
+}
+
+.ivu-dropdown-item,
+.ivu-select-item {
+  text-align: center;
+  color: @colorFontLightBlack;
+}
+
+// dropDown组件,select组件hover样式
+.ivu-dropdown-item:hover,
+.ivu-select-item:hover {
+  background: @colorLightPrimary;
+  color: @colorPrimary;
+}
+
+.ivu-select-selection-focused,
+.ivu-select-selection:hover {
+  border-color: @colorPrimary ;
+}
+
+// select组件选中样式
+.ivu-select-item-selected {
+  background: #fff;
+  color: #08142c;
+}
+
+
+// 三、page组件样式
+.ivu-page-next,
+.ivu-page-prev,
+.ivu-page-item {
+  border: 1px solid rgba(206, 206, 206, 1);
+  border-radius: 50%;
+  color: rgba(167, 167, 167, 1);
+
+  a {
+    color: rgba(167, 167, 167, 1);
+  }
+}
+
+.ivu-page-prev i {
+  position: relative;
+  top: -1px;
+}
+
+.ivu-page-next i {
+  position: relative;
+  top: -1px;
+}
+
+.ivu-select-selected-value,
+.ivu-page-options-elevator {
+  border-color: rgba(206, 206, 206, 1);
+  color: rgba(167, 167, 167, 1);
+
+  input {
+    color: rgba(167, 167, 167, 1);
+  }
+}
+
+.ivu-page-item:hover,
+.ivu-page-next:hover,
+.ivu-page-prev:hover,
+.ivu-select-selected-value:hover,
+.ivu-page-options-elevator:hover {
+  border-color: @colorPrimary;
+  color: @colorPrimary;
+
+  a {
+    color: @colorPrimary;
+  }
+
+  input {
+    color: @colorPrimary;
+  }
+}
+
+.ivu-page-item-active {
+  border: none;
+  background: @colorLightPrimary;
+  color: @colorPrimary;
+}
+
+// 四 弹窗底部按钮改变及内容超出部分设置为隐藏
+
+.ivu-modal {
+  .ivu-btn {
+    display: inline-block;
+    padding: 1px 15px;
+    height: @componentHeight;
+    text-align: center;
+    background: #fff;
+    outline: none;
+    box-sizing: border-box;
+    transition: color .2s linear;
+
+    span {
+      vertical-align: baseline;
+    }
+  }
+
+  .ivu-btn-primary,
+  .ivu-btn-info {
+    border: none;
+    background-color: rgba(129, 207, 230, 1);
+
+    &:hover {
+      background: rgba(129, 207, 230, 0.5);
+    }
+
+    &:active {
+      background: rgba(58, 151, 179, 1);
+    }
+  }
+
+  .ivu-btn-text,
+  .ivu-btn-default {
+    border: 1px solid @colorPrimary;
+    color: @colorPrimary;
+
+    &:hover {
+      padding: 0 14px;
+      border: 2px solid #0091ff !important;
+    }
+
+    &:active {
+      padding: 1 15px;
+      border: 1px solid @colorPrimary;
+    }
+  }
+
+  .ivu-modal-footer {
+    border-top: 0;
+  }
+}
+
+// 五 input样式
+.ivu-input {
+  border-color: @colorFontLightBlack;
+  color: @colorFontDark;
+}
+
+.ivu-input::placeholder {
+  color: @colorFontLightBlack;
+  font-weight: @fontNormal;
+}
+
+.ivu-input:hover,
+.ivu-input:focus {
+  border-color: @colorPrimary ;
+  box-shadow: none;
+}
+
+// 六、checkbox和radio样式调整
+.ivu-radio-wrapper,
+.ivu-checkbox-wrapper {
+  margin-right: @customMargin*2;
+}
+
+.ivu-checkbox-inner,
+.ivu-radio-inner {
+  width: 16px;
+  height: 16px;
+  .box-shadow-inset(0px, 1px, 3px, 0px, rgba(0, 0, 0, 0.5));
+  .border-radius;
+  border: none;
+}
+
+.ivu-checkbox-inner {
+  .border-radius;
+}
+
+.ivu-radio-inner {
+  .border-radius(50%);
+}
+
+.ivu-checkbox-wrapper:hover,
+.ivu-radio-wrapper:hover {
+
+  .ivu-checkbox-inner,
+  .ivu-radio-inner {
+    box-shadow: none;
+    border: 2px solid @colorPrimary ;
+  }
+
+  .ivu-checkbox-checked,
+  .ivu-checkbox-indeterminate,
+  .ivu-radio-checked {
+
+    .ivu-checkbox-inner,
+    .ivu-radio-inner {
+      opacity: 0.5;
+      border: none;
+    }
+
+  }
+
+  .ivu-checkbox-disabled,
+  .ivu-radio-disabled {
+
+    .ivu-checkbox-inner,
+    .ivu-radio-inner {
+      opacity: 1;
+      border: none;
+      .box-shadow-inset(0px, 1px, 3px, 0px, rgba(0, 0, 0, 0.5));
+    }
+  }
+
+}
+
+.ivu-checkbox-checked,
+.ivu-checkbox-indeterminate {
+
+  .ivu-checkbox-inner {
+    background-color: @colorPrimary;
+    box-shadow: none;
+  }
+}
+
+.ivu-checkbox-checked .ivu-checkbox-inner::after {
+  top: 4px;
+  left: 6px;
+  width: 4px;
+  height: 8px;
+}
+
+.ivu-checkbox-indeterminate .ivu-checkbox-inner::after {
+  top: 7px;
+  left: 4px;
+}
+
+
+.ivu-radio-checked {
+
+  .ivu-radio-inner {
+    background-color: @colorPrimary;
+    box-shadow: none;
+
+    &::after {
+      top: 5px;
+      left: 5px;
+      width: 6px;
+      height: 6px;
+      background-color: #fff;
+    }
+  }
+}
+
+.ivu-checkbox-disabled,
+.ivu-radio-disabled {
+
+  .ivu-checkbox-inner,
+  .ivu-radio-inner {
+    background-color: @colorFontGrey;
+  }
+}
+
+// 七.ivu-modal
+.ivu-modal-wrap {
+  min-width: 800px;
+}
+
+// 八、ivu-form
+.ivu-form {
+
+  // .ivu-form-item-label,
+  // .ivu-form-item-content {
+  //   font-size: @fontSize14;
+  // }
+  .ivu-form-item-label {
+    color: @colorFormDark;
+    font-weight: @fontBold;
+  }
+
+  .ivu-form-item-content {
+    color: @colorFontMain;
+  }
+}
+
+// 八、进度条
+.ivu-steps-item.ivu-steps-status-process .ivu-steps-head-inner {
+  border-color: @colorPrimary;
+  background-color: @colorPrimary;
+}
+
+.ivu-steps-item.ivu-steps-status-finish .ivu-steps-head-inner {
+  border-color: @colorPrimary;
+}
+
+.ivu-steps-item.ivu-steps-status-finish .ivu-steps-head-inner span,
+.ivu-steps-item.ivu-steps-status-finish .ivu-steps-head-inner>.ivu-steps-icon {
+  color: @colorPrimary;
+}
+
+.ivu-steps-item.ivu-steps-status-finish .ivu-steps-tail>i:after {
+  background: @colorPrimary;
+}
