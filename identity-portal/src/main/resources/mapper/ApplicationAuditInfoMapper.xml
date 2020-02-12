@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.portal.daoAuthoriza.ApplicationAuditInfoDAO">
+    <resultMap id="BaseResultMap" type="com.portal.domain.ApplicationAuditInfo">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="application_id" property="applicationId"/>
+        <result column="sub_count_id" property="subCountId"/>
+        <result column="ip" property="ip" jdbcType="VARCHAR"/>
+        <result column="type" property="type" jdbcType="INTEGER"/>
+        <result column="msg" property="msg" jdbcType="VARCHAR"/>
+        <result column="operation" property="operation" jdbcType="VARCHAR"/>
+        <result column="remark" property="remark" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+    id, application_id, sub_count_id，ip, type, msg, remark, create_time,operation
+  </sql>
+
+    <insert id="insertSelective" parameterType="com.portal.domain.ApplicationAuditInfo">
+        insert into cipher_application_audit_log
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="subCountId != null">
+                sub_count_id,
+            </if>
+            <if test="applicationId != null">
+                application_id,
+            </if>
+            <if test="ip != null">
+                ip,
+            </if>
+            <if test="type != null">
+                type,
+            </if>
+            <if test="msg != null">
+                msg,
+            </if>
+            <if test="operation != null">
+                operation,
+            </if>
+            <if test="remark != null">
+                remark,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+            <if test="companyId != null">
+                company_id,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=INTEGER},
+            </if>
+            <if test="subCountId != null">
+                #{subCountId},
+            </if>
+            <if test="applicationId != null">
+                #{applicationId,jdbcType=INTEGER},
+            </if>
+            <if test="ip != null">
+                #{ip,jdbcType=VARCHAR},
+            </if>
+            <if test="type != null">
+                #{type,jdbcType=INTEGER},
+            </if>
+            <if test="msg != null">
+                #{msg,jdbcType=VARCHAR},
+            </if>
+            <if test="operation != null">
+               #{operation,jdbcType=VARCHAR},
+            </if>
+            <if test="remark != null">
+                #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="companyId != null">
+                #{companyId},
+            </if>
+        </trim>
+    </insert>
+
+    <insert id="insertAppAuditInfo">
+        insert into cipher_application_audit_log
+            (application_id,user_name,type,msg,company_id,create_time)
+            values
+            (#{applicationId},#{userName},#{type},#{msg},#{companyId},NOW())
+    </insert>
+
+
+</mapper>

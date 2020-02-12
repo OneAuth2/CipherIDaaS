@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.portal.daoAuthoriza.ApplicationDAO">
+    <resultMap id="appMap" type="com.portal.domain.ApplicationInfoDomain">
+        <result property="id" column="id"/>
+        <result property="applicationName" column="application_name"/>
+        <result property="applicationStatus" column="application_status"/>
+        <result property="applicationId" column="application_id"/>
+        <result property="applicationSecrect" column="application_secrect"/>
+        <result property="applicationRedirctUrl" column="application_redirct_url"/>
+        <result property="configInfo" column="config_info"/>
+        <result property="applicationType" column="application_type"/>
+        <result property="accountType" column="account_type"/>
+        <result property="xDsgUrl" column="x_dsg_url"/>
+        <result property="relayState" column="relay_state"/>
+        <result property="assertionConsumerServiceUrl" column="assertion_consumer_service_url"/>
+        <result property="entityId" column="entity_id"/>
+        <result property="publicKey" column="public_key"/>
+        <result property="privateKey" column="private_key"/>
+        <result property="exitTime" column="exit_time"/>
+    </resultMap>
+
+    <select id="queryApplication" resultMap="appMap">
+        select *
+        from cipher_application_info
+        where application_id = #{applicationId}
+    </select>
+
+
+    <select id="queryApplicationById" resultMap="appMap">
+        select *
+        from cipher_application_info
+        where id = #{id}
+    </select>
+
+    <select id="findApplicationId" resultType="java.lang.String">
+        select
+        application_id
+        from
+        cipher_application_info
+        where 1=1
+        <if test="service!=null and service!=''">
+            and application_url like CONCAT(#{service},'%')
+        </if>
+    </select>
+    <select id="getIdFromUserAndApplication" resultType="java.lang.String">
+        SELECT user_id AS uuid
+        FROM cipher_user_application_map
+        WHERE user_id = #{uuid}
+          AND application_id = #{appId}
+    </select>
+    <select id="getIdFromTeamAndApplicationId" resultType="java.lang.String">
+        SELECT team_user_map.id
+        FROM cipher_team_user_map team_user_map
+                 LEFT JOIN cipher_team_application_map team_app_map ON team_user_map.team_id = team_app_map.team_id
+        WHERE team_user_map.user_id = #{uuid}
+          AND team_app_map.application_id = #{appId}
+    </select>
+    <select id="getIdFromGroupIdAndApplicationId" resultType="java.lang.String">
+        SELECT group_app_map.id
+        FROM cipher_group_user_map group_user_map
+                 LEFT JOIN cipher_group_authorization_map group_app_map
+                           ON group_user_map.group_id = group_app_map.group_id
+        WHERE group_user_map.user_id = #{uuid}
+          AND group_app_map.application_id = #{appId}
+
+    </select>
+    <select id="getIdFromApplicationByServiceUrl" resultType="java.lang.String">
+        select
+        id
+        from
+        cipher_application_info
+        where 1=1
+        <if test="service!=null and service!=''">
+            and application_url like CONCAT(#{service},'%')
+        </if>
+        limit 1
+    </select>
+    <select id="getAppIdByAppHost" resultType="java.lang.String">
+        select
+        id
+        from
+        cipher_application_info
+        where 1=1
+        <if test="appHost!=null and appHost!=''">
+            and application_url like CONCAT('%',(CONCAT(#{appHost},'%')))
+        </if>
+        limit 1
+    </select>
+    <select id="findApplicationIdByAppHost" resultType="java.lang.String">
+        select
+        application_id
+        from
+        cipher_application_info
+        where 1=1
+        <if test="appHost!=null and appHost!=''">
+            and application_url like CONCAT('%',(CONCAT(#{appHost},'%')))
+        </if>
+        limit 1
+    </select>
+    <select id="getApplicationInfoByAssertionConsumerServiceURL" resultMap="appMap">
+        select *
+        from cipher_application_info
+        where 1 = 1
+          and assertion_consumer_service_url = #{acs}
+    </select>
+</mapper>

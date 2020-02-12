@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.portal.daoAuthoriza.RoleGroupMapDAO" >
+
+
+
+  <select id="selectGroupApplicationList" resultType="com.portal.model.GroupApplicationModel">
+       select
+       dd.id as i,dd.application_id as applicationId,dd.application_name as applicationName,nn.account_number as accountNumber from cipher_application_info dd
+       LEFT JOIN cipher_role_application_map mm on mm.application_id=dd.id
+       Left JOIN cipher_role_group_map ss on ss.role_id=mm.role_id
+       LEFT JOIN cipher_group_user_map nn on nn.group_id=ss.group_id
+       where nn.group_id = #{groupId} and dd.application_id is not null and application_status=1
+  </select>
+</mapper>

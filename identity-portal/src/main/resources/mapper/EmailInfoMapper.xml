@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.portal.daoAuthoriza.EmailInfoDAO">
+
+
+    <select id="getEmailInfo" resultType="com.portal.domain.EmailInfoDomain" parameterType="com.portal.domain.EmailInfoDomain">
+       select id,
+              smtp,port,title,account,pwd,describes,isSSL,
+              send_time as sendTime,
+              interval_time as intervalTime,
+              effective_time as effectiveTime,
+              extend_time as extendTime
+              from  cipher_email_config
+    </select>
+
+    <select id="getEmailConfig" resultType="com.portal.domain.EmailInfoDomain" parameterType="com.portal.domain.EmailInfoDomain">
+                SELECT
+                    id,
+                    smtp,
+                    PORT,
+                    title,
+                    account,
+                    pwd,
+                    describes,
+                    isSSL,
+                    send_time AS sendTime,
+                    interval_time AS intervalTime,
+                    effective_time AS effectiveTime,
+                    extend_time AS extendTime
+                FROM
+                    cipher_email_config
+                WHERE
+                    company_uuid = #{companyUuid}
+    </select>
+
+</mapper>

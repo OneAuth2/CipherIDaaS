@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.portal.daoAuthoriza.UserPathDAO">
+
+
+    <select id="getUserPathInfo" resultType="com.portal.domain.UserPathInfo">
+      select *  from  cipher_user_app_map where user_id=#{userId} and app_id=#{appId}
+    </select>
+
+
+
+    <insert id="insertUserPahtInfo">
+        insert into cipher_user_app_map
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null">
+                user_id,
+            </if>
+            <if test="appId != null">
+                app_id,
+            </if>
+            <if test="path != null">
+                path,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userId != null">
+                #{userId},
+            </if>
+            <if test="appId != null">
+                #{appId},
+            </if>
+            <if test="path != null">
+                #{path},
+            </if>
+
+        </trim>
+    </insert>
+
+    <update id="updateUserPathInfo">
+      update  cipher_user_app_map set  path=#{path} where user_id=#{userId} and app_id=#{appId}
+    </update>
+
+</mapper>

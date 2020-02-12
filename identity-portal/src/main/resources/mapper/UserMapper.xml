@@ -1,0 +1,931 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.portal.daoAuthoriza.UserDAO">
+    <resultMap id="userMap" type="com.portal.model.User">
+        <result property="username" column="account_number"/>
+        <result property="password" column="password"/>
+        <result property="secret" column="totp_key"/>
+        <result property="totpCount" column="totp_secret_count"/>
+    </resultMap>
+    <resultMap id="userPasswordMap" type="com.portal.domain.UserInfoDomain">
+        <result column="uuid" property="uuid"/>
+        <result column="account_number" property="accountNumber"/>
+        <result column="phone_number" property="phoneNumber"/>
+        <result column="mail" property="mail"/>
+        <result column="password" property="password"/>
+        <result column="company_id" property="companyId"/>
+        <result column="account_status" property="accountStatus"/>
+        <result column="account_authorized_date" property="accountAuthorizedDate"/>
+        <result column="account_authorized_valid_date" property="accountAuthorizedValidDate"/>
+        <result column="is_delete" property="isDelete"/>
+        <result column="plat_id" property="platId"/>
+    </resultMap>
+
+    <resultMap id="userBindingInfoMap" type="com.portal.domain.UserInfoDomain">
+        <result column="uuid" property="uuid"/>
+        <result column="account_number" property="accountNumber"/>
+        <result column="phone_number" property="phoneNumber"/>
+        <result column="mail" property="mail"/>
+        <result column="password" property="password"/>
+        <result column="company_id" property="companyId"/>
+        <result column="account_status" property="accountStatus"/>
+        <result column="account_authorized_date" property="accountAuthorizedDate"/>
+        <result column="account_authorized_valid_date" property="accountAuthorizedValidDate"/>
+        <result column="is_delete" property="isDelete"/>
+        <result column="plat_id" property="platId"/>
+        <result column="ding_union_id" property="dingUnionId"/>
+        <result column="ding_user_id" property="dingUserId"/>
+        <result column="id_num" property="idNum"/>
+    </resultMap>
+
+    <resultMap id="BaseResultMap" type="com.portal.domain.UserInfoDomain">
+        <result column="account_number" property="accountNumber"></result>
+        <result column="user_name" property="userName"></result>
+        <result column="user_account_control" property="userAccountControl"></result>
+        <result column="nickname" property="nickname"></result>
+        <result column="mail" property="mail"></result>
+        <result column="phone_number" property="phoneNumber"></result>
+        <result column="account_status" property="accountStatus"></result>
+        <result column="account_authorized_valid_date" property="accountAuthorizedValidDate"></result>
+        <result column="is_admin" property="isAdmin"></result>
+        <result column="job" property="job"></result>
+        <result column="is_delete" property="isDelete"></result>
+        <result column="objectGUID" property="source"></result>
+        <result column="password" property="password"></result>
+        <result column="plat_id" property="platId"></result>
+        <result column="uuid"  property="uuid"></result>
+        <result column="user_id" property="userId"></result>
+        <result column="company_id" property="companyId"></result>
+        <result column="ad_ip" property="adIp"></result>
+        <result column="ad_port" property="adPort"></result>
+        <result column="ad_user_name" property="adUserName"></result>
+        <result column="upn" property="upn"></result>
+    </resultMap>
+
+    <sql id="baseColumns">
+        uuid, company_id, account_number, user_name, user_account_control, nickname, mail, id_num, phone_number,
+        account_authorized_date, account_authorized_valid_date, create_time, modify_time, job, post, posts, job_no,
+        objectGUID, lastname, firstname, Tel, sssaa, userType, work_unit, num, police_no, birthday
+    </sql>
+
+    <sql id="userAdColumns">
+    uuid,
+    account_status,
+    account_number,
+    cipher_user_info.user_name,
+    user_account_control,
+    nickname,
+    mail,
+    phone_number,
+    account_authorized_date,
+    account_authorized_valid_date,
+    cipher_user_info.create_time,
+    cipher_user_info.modify_time,
+    gender,
+    job,
+    post,
+    posts,
+    job_no,
+    objectGUID,lastname, firstname, Tel, userType, work_unit, num,
+    police_no, birthday,cipher_ad_info.ip as ad_ip,cipher_ad_info.port as ad_port,
+    cipher_ad_info.user_name as ad_user_name,upn
+  </sql>
+
+    <sql id="userPasswordColumn">
+        uuid,cipher_user_info.account_number,phone_number,mail,password,
+        company_id,account_status,account_authorized_date,account_authorized_valid_date,is_delete
+    </sql>
+
+    <sql id="userPlatColumn">
+        cipher_user_info.account_number,phone_number,mail,account_status,is_delete,plat_id
+    </sql>
+
+    <sql id="dingTalkBindingColumn">
+        uuid,account_number,phone_number,mail,cipher_account_ding_bind_mapping.company_id,account_status,
+        account_authorized_date,account_authorized_valid_date,is_delete,ding_union_id,ding_user_id
+    </sql>
+
+    <sql id="bayMaxUserInfoColumn">
+        uuid,account_number,phone_number,mail,company_id,id_num
+    </sql>
+
+    <sql id="userInfoContactWay">
+         uuid, account_number, mail, phone_number,
+        company_id,account_status,account_authorized_date,account_authorized_valid_date,is_delete
+    </sql>
+
+    <select id="selectAllUser" resultMap="userMap">
+        SELECT cipher_user_info.account_number,password,totp_key,totp_secret_count
+        from cipher_user_info,cipher_password_authorization_mag,cipher_totp_authorization_mag
+        WHERE cipher_user_info.account_number = cipher_password_authorization_mag.account_number
+        and cipher_user_info.account_number = cipher_totp_authorization_mag.account_number
+    </select>
+
+    <select id="selectUserByUsername" resultMap="userMap" parameterType="String">
+        SELECT cipher_user_info.account_number,password,totp_key,totp_secret_count
+        from cipher_user_info,cipher_password_authorization_mag,cipher_totp_authorization_mag
+        WHERE cipher_user_info.account_number = cipher_password_authorization_mag.account_number
+        and cipher_user_info.account_number = cipher_totp_authorization_mag.account_number
+        AND cipher_user_info.account_number = #{accountNumber} and cipher_user_info.account_status=1
+        limit 1
+    </select>
+
+
+    <update id="updateUserPwd" parameterType="com.portal.domain.UserInfoDomain">
+        update cipher_password_authorization_mag
+        <set>
+            <if test="password != null">
+                password = #{password}
+            </if>
+        </set>
+        where user_id = #{userId}
+    </update>
+
+    <update id="updateUserPwdByUuid" parameterType="com.portal.domain.UserInfoDomain">
+        replace cipher_password_authorization_mag(user_id,account_anthorized_code, password, password_binding_date, create_time, modify_time)
+        values
+        (#{uuid},2,#{password},NOW(),NOW(),NOW());
+    </update>
+
+
+    <resultMap id="userInfoMap" type="com.portal.domain.UserInfoDomain">
+        <result property="accountNumber" column="account_number"/>
+        <result property="mail" column="mail"/>
+        <result property="phoneNumber" column="phone_number"/>
+        <result property="nickname" column="nickname"/>
+        <result property="groupName" column="group_name"/>
+        <result property="groupId" column="group_id"/>
+    </resultMap>
+
+
+    <select id="selectUserInfo" resultMap="userInfoMap" parameterType="com.portal.domain.UserInfoDomain">
+        select  tt.uuid as uuid,tt.account_number,user_name AS userName,
+        mail,nickname,phone_number
+        FROM cipher_user_info tt
+        where tt.uuid=#{uuid}
+    </select>
+
+
+    <update id="updateUserInfo" parameterType="com.portal.domain.UserInfoDomain">
+        update cipher_user_info
+        <set>
+            <if test="mail != null and mail != ''">
+                mail = #{mail},
+            </if>
+            <if test="phoneNumber != null and phoneNumber != ''">
+                phone_number = #{phoneNumber},
+            </if>
+            <if test="nickname != null and nickname != ''">
+                nickname = #{nickname},
+            </if>
+            <if test="userName != null and userName!= ''">
+                user_name = #{userName}
+            </if>
+            <if test="issueStatus != null and issueStatus!= ''">
+                issue_status = #{issueStatus}
+            </if>
+        </set>
+        where uuid=#{uuid}
+    </update>
+
+
+    <select id="queryGroupSelect" resultType="com.portal.domain.GroupInfoDomain">
+       SELECT group_id as groupId,group_name as groupName from cipher_group_info
+       where group_id not in(#{groupId})
+    </select>
+
+
+    <select id="getFirstPwd" resultType="String">
+        select init from cipher_password_setting_info
+    </select>
+
+    <select id="getPwd" resultType="java.lang.String" parameterType="String">
+        select password from cipher_password_authorization_mag where user_id=#{userId}
+    </select>
+
+
+    <update id="updateGroupId" parameterType="com.portal.domain.UserInfoDomain">
+        update cipher_group_user_map
+        <set>
+            <if test="groupId != null">
+                group_id = #{groupId}
+            </if>
+        </set>
+        where account_number=#{accountNumber}
+    </update>
+
+    <select id="getLength" resultType="java.lang.String">
+       select length from cipher_password_setting_info
+    </select>
+
+
+    <select id="getGuize" resultType="java.lang.Integer">
+       select password_code from cipher_password_type_info where status=0
+    </select>
+
+
+    <select id="getSubNameInfo" resultType="com.portal.domain.SubClientInfoDomain">
+        select tt.*,ss.account_number as accountNumber,tt.id as clientId,tt.application_id as applyId,mm.sub_pwd as password,
+        mm.sub_account as subAccount from cipher_application_info tt
+        LEFT JOIN cipher_sub_account mm on tt.application_id= mm.app_client_id
+        LEFT JOIN cipher_sub_account_map ur on mm.id=ur.sub_id
+        LEFT JOIN cipher_user_info ss on  ss.uuid=ur.user_id
+        where  tt.application_status=1 and ss.uuid=#{uuid} and tt.application_id=#{clientId}
+    </select>
+
+    <insert id="insertSubName" parameterType="com.portal.domain.SubClientInfoDomain" useGeneratedKeys="true"
+            keyProperty="subId">
+        insert into cipher_sub_account
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="subAccount != null">
+                sub_account,
+            </if>
+            <if test="password != null">
+                sub_pwd,
+            </if>
+            <if test="clientId != null">
+                app_client_id,
+            </if>
+            create_time,
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="subAccount != null">
+                #{subAccount},
+            </if>
+            <if test="password != null">
+                #{password},
+            </if>
+            <if test="clientId != null">
+                #{clientId},
+            </if>
+            NOW(),
+        </trim>
+    </insert>
+
+    <insert id="insertSubNameMap" parameterType="com.portal.domain.SubClientInfoDomain" useGeneratedKeys="true"
+            keyProperty="id">
+        insert into cipher_sub_account_map
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="accountNumber != null">
+                account_number,
+            </if>
+            <if test="userId != null">
+                user_id,
+            </if>
+            <if test="subId != null">
+                sub_id,
+            </if>
+            create_time,
+            modify_time,
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="accountNumber != null">
+                #{accountNumber},
+            </if>
+            <if test="userId != null">
+                #{userId},
+            </if>
+            <if test="subId != null">
+                #{subId},
+            </if>
+            NOW(),
+            NOW(),
+        </trim>
+    </insert>
+
+
+    <select id="getSubName" resultType="com.portal.domain.SubClientInfoDomain">
+       select sub_account as subAccount,id as subId,
+       app_client_id as clientId,
+       sub_pwd as password
+       from cipher_sub_account
+       where sub_account= #{subAccount}
+       and app_client_id=#{clientId}
+    </select>
+
+
+    <update id="updateSubName" parameterType="com.portal.domain.SubClientInfoDomain">
+        update cipher_sub_account  set modify_time=NOW(),
+        sub_pwd = #{password}
+        where sub_account = #{subAccount} and app_client_id = #{clientId}
+    </update>
+
+
+    <select id="getUserInfo" resultType="com.portal.domain.UserInfoDomain">
+        select   uuid ,account_number as accountNumber,
+               nickname as nickname,
+               mail as mail,
+               phone_number as phoneNumber,
+               is_admin as isAdmin,
+               user_name as userName,
+               account_status as accountStatus,
+               source,
+               company_id
+               from
+                cipher_user_info
+              where
+                cipher_user_info.account_number =#{uuid}
+                or
+                phone_number = #{uuid}
+                or
+                mail = #{uuid}
+              limit 1
+    </select>
+
+
+    <select id="getUserInfoByUUid" resultType="com.portal.domain.UserInfoDomain">
+        select   uuid ,account_number as accountNumber,
+        nickname as nickname,
+        mail as mail,
+        phone_number as phoneNumber,
+        is_admin as isAdmin,
+        user_name as userName,
+        company_id as companyId,
+        account_status as accountStatus,
+        job,
+        job_no as jobNo
+        from
+        cipher_user_info
+        where
+        uuid = #{uuid}
+    </select>
+
+
+    <select id="getSubAccountMap" resultType="com.portal.domain.SubAccountMapDomain">
+             select * from cipher_sub_account_map where user_id=#{userId} and sub_id=#{subId}
+    </select>
+
+
+    <select id="selectUser" resultType="com.portal.domain.UserInfoDomain">
+        SELECT cipher_user_info.account_number,password
+        from cipher_user_info,cipher_password_authorization_mag
+        WHERE cipher_user_info.uuid = cipher_password_authorization_mag.user_id
+        AND cipher_user_info.uuid = #{uuid} and cipher_user_info.account_status=1 and cipher_user_info.company_id=#{companyUuid}
+        limit 1
+    </select>
+
+    <select id="insertUserInfo" parameterType="com.portal.model.DabbyUserInfoModel">
+        insert into cipher_user_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id_num != null">
+                account_number,
+            </if>
+            <if test="full_name != null">
+                user_name,
+            </if>
+            modify_time,
+            create_time,
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id_num != null">
+                #{id_num},
+            </if>
+            <if test="full_name != null">
+                #{full_name},
+            </if>
+            NOW(),
+            NOW(),
+        </trim>
+    </select>
+
+    <select id="getUserInfoByconditon" resultMap="userInfoMap">
+       select * from cipher_password_authorization_mag mag
+       LEFT JOIN cipher_user_info  info on mag.account_number=info.account_number
+       where info.account_number=#{accountNumber} and mag.password=#{password}
+    </select>
+
+
+    <select id="getTeamList" resultType="com.portal.domain.TeamInfo">
+      select  dsg_team_id as dsgTeamId from cipher_team_info nn
+      LEFT JOIN cipher_team_user_map dd on nn.id=dd.team_id where user_id=#{userId}
+      group by nn.id
+    </select>
+
+    <insert id="insertUserAgentInfo" parameterType="com.portal.model.UserAgentModel">
+        INSERT INTO cipher_user_agent_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="accountNumber != null">
+                account_number,
+            </if>
+            <if test="osName != null">
+                os_name,
+            </if>
+
+            <if test="manufacturer != null">
+                manufacturer,
+            </if>
+            <if test="browserName != null">
+                browser_name,
+            </if>
+            <if test="browserVersion != null">
+                browser_version,
+            </if>
+            <if test="browserEngine != null">
+                browser_engine,
+            </if>
+            <if test="ip != null">
+                ip,
+            </if>
+            <if test="browserType != null">
+                browser_type,
+            </if>
+            create_time,
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="accountNumber != null">
+                #{accountNumber},
+            </if>
+            <if test="osName != null">
+                #{osName},
+            </if>
+
+            <if test="manufacturer != null">
+                #{manufacturer},
+            </if>
+            <if test="browserName != null">
+                #{browserName},
+            </if>
+            <if test="browserVersion != null">
+                #{browserVersion},
+            </if>
+            <if test="browserEngine != null">
+                #{browserEngine},
+            </if>
+            <if test="ip != null">
+                #{ip},
+            </if>
+            <if test="browserType != null">
+                #{browserType},
+            </if>
+            NOW(),
+        </trim>
+    </insert>
+
+
+    <insert id="insertPwd" parameterType="com.portal.domain.SubClientInfoDomain" useGeneratedKeys="true"
+            keyProperty="subId">
+        insert into cipher_password_authorization_mag
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="accountNumber != null">
+                account_number,
+            </if>
+            <if test="password != null">
+                password,
+            </if>
+            <if test="userId != null">
+                user_id,
+            </if>
+            create_time,
+            modify_time,
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="accountNumber != null">
+                #{accountNumber},
+            </if>
+            <if test="password != null">
+                #{password},
+            </if>
+            <if test="userId != null">
+                #{userId},
+            </if>
+            NOW(),
+            NOW(),
+        </trim>
+    </insert>
+
+    <select id="getPwdType" resultType="java.lang.Integer">
+     select password_type from cipher_password_setting_info limit 1
+
+    </select>
+    <select id="getUserInfoByMail" resultType="com.portal.domain.UserInfoDomain">
+                SELECT
+                    uuid ,account_number AS accountNumber
+                FROM
+                    cipher_user_info
+                WHERE
+                    1 = 1
+                AND mail = #{mail}
+                limit 1
+    </select>
+    <select id="getUserInfoByPhone" resultType="com.portal.domain.UserInfoDomain">
+                SELECT
+                     uuid, account_number AS  accountNumber , account_status AS accountStatus ,uuid, nickname, mail, phone_number AS phoneNumber ,user_name AS userName
+                FROM
+                    cipher_user_info
+                WHERE
+                    1 = 1
+                AND phone_number = #{phoneNumber}
+                limit 1
+    </select>
+    <select id="getUserBySaifu" resultType="com.portal.domain.UserInfoDomain">
+                SELECT
+                    account_number AS  accountNumber , account_status AS accountStatus ,uuid, nickname, mail, phone_number AS phoneNumber ,user_name AS userName
+                FROM
+                    cipher_user_info
+                WHERE
+                    uuid = (
+                        SELECT
+                            user_id
+                        FROM
+                            cipher_account_plat_mapping
+                        WHERE
+                            plat_id = #{userName}
+                        AND company_id = #{companyId}
+                    )
+    </select>
+    <select id="getUserByDabai" resultType="com.portal.domain.UserInfoDomain">
+                SELECT
+                  account_number AS  accountNumber , account_status AS accountStatus ,uuid, nickname, mail, phone_number AS phoneNumber ,user_name AS userName
+                FROM
+                    cipher_user_info
+                WHERE
+                    uuid = (
+                        SELECT
+                            user_id
+                        FROM
+                            cipher_account_link_map
+                        WHERE
+                            link_account = #{userName}
+                            AND company_id=#{companyId}
+                    )
+    </select>
+    <select id="getUserByDingding" resultType="com.portal.domain.UserInfoDomain">
+                SELECT
+                      account_number AS  accountNumber , account_status AS accountStatus ,uuid, nickname, mail, phone_number AS phoneNumber ,user_name AS userName
+                FROM
+                    cipher_user_info
+                WHERE
+                    uuid = (
+                        SELECT
+                            user_id
+                        FROM
+                            cipher_account_ding_bind_mapping
+                        WHERE
+                            union_id = #{userName}
+                    )
+
+    </select>
+    <select id="getPwdTypeByCompanyUuid" resultType="java.lang.Integer">
+               select password_type from cipher_password_setting_info  where company_id = #{companyUUid} limit 1
+    </select>
+
+    <select id="getRegistUser" resultType="com.portal.domain.RegisterApprovalDomain"
+            parameterType="com.portal.domain.RegisterApprovalDomain">
+        SELECT
+        *
+        FROM
+        cipher_regist_user
+        WHERE
+        1 = 1
+        AND user_name = #{userName}
+        <if test="userEmail != null">
+            AND user_email = #{userEmail}
+        </if>
+        <if test="phoneNumber != null">
+            AND phone_number= #{phoneNumber}
+        </if>
+        limit 1
+    </select>
+    <insert id="registUser" parameterType="com.portal.domain.RegisterApprovalDomain">
+        insert into cipher_regist_user
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="uuid != null">
+                uuid,
+            </if>
+            <if test="companyUuid != null">
+                company_uuid,
+            </if>
+            <if test="userName != null">
+                user_name,
+            </if>
+            <if test="userEmail != null">
+                user_email,
+            </if>
+            <if test="phoneNumber != null">
+                phone_number,
+            </if>
+            <if test="status != null">
+                status,
+            </if>
+            <if test="idNum != null">
+                id_num,
+            </if>
+            <if test="platId != null">
+                plat_id,
+            </if>
+            <if test="dingUserId != null">
+                ding_user_id,
+            </if>
+            <if test="unionId != null">
+                union_id,
+            </if>
+            <if test="wxUserId != null">
+                wx_user_id,
+            </if>
+            create_time,
+            modify_time,
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="uuid != null">
+                #{uuid},
+            </if>
+            <if test="companyUuid != null">
+                #{companyUuid},
+            </if>
+            <if test="userName != null">
+                #{userName},
+            </if>
+            <if test="userEmail != null">
+                #{userEmail},
+            </if>
+            <if test="phoneNumber != null">
+                #{phoneNumber},
+            </if>
+            <if test="status != null">
+                #{status},
+            </if>
+            <if test="idNum != null">
+                #{idNum},
+            </if>
+            <if test="platId != null">
+                #{platId},
+            </if>
+            <if test="dingUserId != null">
+               #{dingUserId},
+            </if>
+            <if test="unionId != null">
+                #{unionId},
+            </if>
+            <if test="wxUserId != null">
+               #{wxUserId}
+            </if>
+            NOW(),
+            NOW(),
+        </trim>
+    </insert>
+    <select id="getUser" resultType="com.portal.domain.UserInfoDomain">
+                SELECT
+                    account_number AS  accountNumber , account_status AS accountStatus ,uuid, nickname, mail, phone_number AS phoneNumber ,user_name AS userName
+                FROM
+                    cipher_user_info
+                WHERE
+                    uuid = (
+                        SELECT
+                            user_id
+                        FROM
+                            cipher_account_plat_mapping
+                        WHERE
+                            plat_id =#{userPlantId}
+                        AND company_id =#{companyUUid}
+                    )
+    </select>
+    <select id="getUserByMailAndPhone" resultType="com.portal.domain.UserInfoDomain">
+          SELECT
+                     uuid, account_number AS  accountNumber , account_status AS accountStatus ,uuid, nickname, mail, phone_number AS phoneNumber ,user_name AS userName
+                FROM
+                    cipher_user_info
+                WHERE
+                    1 = 1
+                AND phone_number = #{phoneNumber} and mail=#{mail}
+                limit 1
+    </select>
+    <select id="getUserByMailOrPhone" resultType="com.portal.domain.UserInfoDomain">
+             SELECT
+                     uuid, account_number AS  accountNumber , account_status AS accountStatus ,uuid, nickname, mail, phone_number AS phoneNumber ,user_name AS userName
+                FROM
+                    cipher_user_info
+                WHERE
+                    1 = 1
+                AND phone_number = #{phoneNumber} or mail=#{mail}
+                limit 1
+    </select>
+    <select id="selectUserInfoWithPassword" parameterType="String" resultMap="userPasswordMap">
+        select
+        <include refid="userPasswordColumn"/>
+        from
+        cipher_user_info
+        left join
+        cipher_password_authorization_mag
+        on
+        cipher_user_info.uuid = cipher_password_authorization_mag.user_id
+        where
+        cipher_user_info.account_number = #{userName}
+        or
+        phone_number = #{userName}
+        or
+        mail = #{userName}
+        limit 1
+    </select>
+
+    <select id="selectUserInfoWithPlatId" parameterType="String" resultMap="userPasswordMap">
+        select
+        <include refid="userPlatColumn"/>
+        from
+        cipher_user_info
+        left join
+        cipher_account_plat_mapping
+        on
+        cipher_user_info.uuid = cipher_account_plat_mapping.user_id
+        where
+        cipher_user_info.uuid =#{userId}
+        limit 1
+    </select>
+
+    <update id="updateUserPhone" parameterType="com.portal.domain.UserInfoDomain">
+        UPDATE cipher_user_info
+        set phone_number = #{phoneNumber}
+        WHERE uuid = #{uuid}
+    </update>
+
+    <select id="selectUserInfoByDingTalkInfo" resultMap="userBindingInfoMap">
+        select
+        <include refid="dingTalkBindingColumn"/>
+
+        from
+        cipher_user_info
+
+        left join
+        cipher_account_ding_bind_mapping
+        on
+        uuid = user_id
+
+        where
+        cipher_account_ding_bind_mapping.company_id = #{companyId}
+
+        and
+        ding_union_id = #{dingUnionId}
+        limit 1
+    </select>
+
+    <select id="selectUserInfoByIdNum" parameterType="String" resultMap="userBindingInfoMap">
+        select
+        <include refid="bayMaxUserInfoColumn"/>
+
+        FROM
+        cipher_user_info
+        WHERE
+        id_num = #{idNum}
+        limit 1
+    </select>
+
+    <select id="getCompanyUserInfoByPhoneNumber" resultMap="userPasswordMap">
+        SELECT
+        <include refid="userInfoContactWay"/>
+        FROM
+        cipher_user_info
+        WHERE
+        phone_number = #{phoneNumber}
+        AND
+        company_id = #{companyId}
+        limit 1
+    </select>
+
+    <select id="getCompanyUserInfoByMail" resultMap="userPasswordMap">
+        SELECT
+        <include refid="userInfoContactWay"/>
+        FROM
+        cipher_user_info
+        WHERE
+        mail = #{mail}
+        AND
+        company_id = #{companyId}
+        limit 1
+    </select>
+
+    <select id="selectUserInfoWithPasswordByUserId" parameterType="String" resultMap="userPasswordMap">
+        select
+        <include refid="userPasswordColumn"/>
+        from
+        cipher_user_info
+        left join
+        cipher_password_authorization_mag
+        on
+        cipher_user_info.uuid = cipher_password_authorization_mag.user_id
+        where
+        cipher_user_info.uuid = #{userId}
+        limit 1
+    </select>
+
+    <select id="getPasswordTypeByCompanyId" parameterType="String" resultType="java.lang.Integer">
+        select
+          password_type
+        from
+          cipher_password_setting_info
+        where
+          company_id = #{companyId}
+        limit 1
+    </select>
+
+
+    <select id="getUserByDingTalkByUnionIdAndCompanyId" parameterType="String" resultMap="userBindingInfoMap">
+        SELECT
+        <include refid="dingTalkBindingColumn"/>
+        FROM
+        cipher_user_info
+        left JOIN
+        cipher_account_ding_bind_mapping
+        ON
+        cipher_user_info.uuid=cipher_account_ding_bind_mapping.user_id
+        WHERE
+        ding_union_id = #{unionId}
+        AND
+        cipher_account_ding_bind_mapping.company_id = #{companyId}
+        limit 1
+    </select>
+
+
+    <select id="getUserCompanyByMailAndPhone" resultMap="userPasswordMap">
+        SELECT
+        <include refid="userInfoContactWay"/>
+        FROM
+        cipher_user_info
+        WHERE
+        phone_number = #{phoneNumber}
+        and
+        mail=#{mail}
+        and
+        company_id = #{companyId}
+        limit 1
+    </select>
+
+    <select id="getUserCompanyByMailOrPhone" resultMap="userPasswordMap">
+        SELECT
+        <include refid="userInfoContactWay"/>
+        FROM
+        cipher_user_info
+        WHERE
+        phone_number = #{phoneNumber}
+        or
+        mail=#{mail}
+        and
+        company_id = #{companyId}
+        limit 1
+    </select>
+
+    <select id="selectUserInfoWithAdInfo" resultMap="BaseResultMap">
+        SELECT
+        <include refid="userAdColumns"/>
+        FROM cipher_user_info
+        LEFT JOIN cipher_account_ad_binding on uuid = cipher_account_ad_binding.user_id
+        LEFT JOIN cipher_ad_info on cipher_account_ad_binding.ip = cipher_ad_info.ip
+        AND cipher_account_ad_binding.company_id = cipher_ad_info.company_id
+        WHERE
+        cipher_user_info.company_id = #{companyId}
+        and
+        cipher_user_info.account_number = #{userName}
+        or
+        cipher_user_info.phone_number = #{userName}
+        or
+        cipher_user_info.mail = #{userName}
+        limit 1
+    </select>
+    <select id="getUserGroupIdListByUuid" resultType="java.lang.String">
+                SELECT
+                    user_group.group_id
+                FROM
+                    cipher_group_user_map user_group,
+                    cipher_group_info group_info
+                WHERE
+                    user_group.user_id = #{uuid}
+                AND user_group.group_id = group_info.group_id
+                AND group_info.company_id = #{companyId}
+    </select>
+    <select id="getTeamListByUuidAndCompanyId" resultType="java.lang.String">
+                SELECT
+                    user_team.team_id
+                FROM
+                    cipher_team_user_map user_team,
+                    cipher_team_info team_info
+                WHERE
+                    user_team.user_id = #{uuid}
+                AND user_team.team_id = team_info.id
+                AND team_info.company_id = #{companyId}
+    </select>
+
+
+    <update id="updateUserMail">
+        UPDATE cipher_user_info
+        set mail = #{mail}
+        WHERE uuid = #{uuid}
+    </update>
+
+
+    <select id="selectUserInfoByWeixinInfo" resultType="com.portal.domain.UserInfoDomain">
+       SELECT
+                    account_number AS  accountNumber , account_status AS accountStatus ,uuid, nickname, mail, phone_number AS phoneNumber ,user_name AS userName
+                FROM
+                    cipher_user_info
+                WHERE
+                    uuid = (
+                        SELECT
+                            user_id
+                        FROM
+                            cipher_account_wx_bind_mapping
+                        WHERE
+                            wx_user_id =#{wxUserId}
+                        AND company_id =#{companyId}
+                    )
+    </select>
+
+</mapper>

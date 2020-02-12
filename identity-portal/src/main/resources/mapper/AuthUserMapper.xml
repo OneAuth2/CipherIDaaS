@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.portal.daoAuthoriza.AuthUserDAO">
+
+    <resultMap id="userMap" type="com.portal.domain.UserInfoDomain">
+        <result property="accountNumber" column="account_number"/>
+        <result property="accountStatus" column="account_status"/>
+        <result property="accountAuthorizedDate" column="account_authorized_date"/>
+        <result property="accountAuthorizedValidDate" column="account_authorized_valid_date"/>
+        <result property="isDelete" column="is_delete"/>
+    </resultMap>
+
+
+    <select id="queryUserAuthInfo" resultMap="userMap" parameterType="java.lang.String">
+        SELECT
+            account_number,
+            account_status,
+            account_authorized_date,
+            account_authorized_valid_date,
+            is_delete
+        FROM cipher_user_info
+        WHERE  lower(account_number) = #{userName};
+    </select>
+
+
+</mapper>

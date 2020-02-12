@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.portal.daoAuthoriza.PlatCipherUserMapDAO">
+
+
+    <select id="queryCipherUserByPlatUserId" resultType="java.lang.String">
+        select account_number
+        from plat_cipher_user_map
+        where plat_user_id = #{platUserId};
+    </select>
+
+    <select id="queryPlatUserIdByCipherUser" resultType="java.lang.Integer">
+        select plat_user_id
+        from plat_cipher_user_map
+        where account_number = #{accountNumber};
+    </select>
+
+
+</mapper>

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.portal.daoAuthoriza.UserLoginRecDAO">
+
+    <resultMap id="baseMap" type="com.portal.domain.UserLoginRecInfo">
+        <result column="id" property="id"></result>
+        <result column="user_id" property="userId"></result>
+        <result column="first_face_login_time" property="firstFaceLoginTime"></result>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"></result>
+        <result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP"></result>
+    </resultMap>
+
+
+    <sql id="base_columns">
+        id, user_id, account_number, first_face_login_time, create_time, modify_time
+    </sql>
+
+    <select id="selectUserLoginRecInfoByUUid" resultMap="baseMap" parameterType="String">
+        select
+          <include refid="base_columns"/>
+        from
+          cipher_user_login_rec
+        where
+          cipher_user_login_rec.user_id = #{uuid}
+        limit 1
+    </select>
+
+
+    <select id="selectUserLoginRecInfo" resultType="com.portal.domain.UserLoginRecInfo">
+       select id as id, first_face_login_time as firstFaceLoginTime,account_number as accountNumber,
+       create_time as createTime,modify_time as modifyTime from cipher_user_login_rec where 1=1
+        <if test="userId != null and userId!=''">
+            and  user_id = #{userId}
+        </if>
+
+    </select>
+
+
+    <insert id="insertUserLoginRecInfo" parameterType="com.portal.domain.UserLoginRecInfo">
+        insert into cipher_user_login_rec
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="accountNumber != null">
+                account_number,
+            </if>
+            <if test="userId != null">
+                user_id,
+            </if>
+                first_face_login_time,
+                create_time,
+                modify_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="accountNumber != null">
+                #{accountNumber},
+            </if>
+            <if test="userId != null">
+                #{userId},
+            </if>
+              NOW(),
+              NOW(),
+              NOW()
+        </trim>
+    </insert>
+    <update id="updateUserLoginRecInfo">
+        UPDATE cipher_user_login_rec
+        SET first_face_login_time = NOW()
+        WHERE account_number = #{accountNumber}
+    </update>
+
+
+    <insert id="insertUserLoginRecInfoWithUUid" parameterType="com.portal.domain.UserLoginRecInfo">
+        insert into cipher_user_login_rec
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="uuid != null">
+                user_id,
+            </if>
+            first_face_login_time,
+            create_time,
+            modify_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="uuid != null">
+                #{uuid},
+            </if>
+            NOW(),
+            NOW(),
+            NOW()
+        </trim>
+    </insert>
+
+    <update id="updateUserLoginRecInfoUUid" parameterType="String">
+        UPDATE cipher_user_login_rec
+        SET first_face_login_time = NOW()
+        WHERE user_id = #{userId}
+    </update>
+
+
+</mapper>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.portal.daoAuthoriza.OtpDynamicInfoDAO">
+
+
+
+
+    <delete id="deleteOtpDynamicInfo">
+      delete from cipher_dynamic_password where user_id=#{userId}
+    </delete>
+
+
+    <insert id="insertOtpDynamicInfo">
+        INSERT INTO cipher_dynamic_password
+            (uuid,user_id,company_id,dynamic_password,create_time,modify_time)
+        VALUES
+            (#{uuid},#{userId},#{companyId},#{dynamicPassword},NOW(),NOW())
+    </insert>
+
+    <select id="getOtpDynamicInfo" resultType="java.lang.String">
+     select dynamic_password  as dynamicPassword from cipher_dynamic_password where user_id=#{userId}
+    </select>
+
+
+</mapper>

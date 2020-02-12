@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.portal.daoAuthoriza.EquipBehaviorInfoDAO">
+    <select id="selectUserInfoByUserId" parameterType="string" resultType="string">
+        SELECT GROUP_CONCAT(ifnull(user_name,""),"(",ifnull(account_number,""),")") user_info FROM cipher_user_info
+        WHERE uuid=#{UserId}
+    </select>
+    <insert id="insertEquipBehavior" parameterType="com.portal.domain.EquipBehaviorInfo">
+        insert into cipher_equip_behavior_log
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="userId != null">
+                user_id,
+            </if>
+            <if test="companyId!=null">
+                company_id,
+            </if>
+            <if test="vpnId != null">
+                vpn_id,
+            </if>
+            <if test="userInfo != null">
+                user_info,
+            </if>
+            <if test="type != null">
+                type,
+            </if>
+            <if test="intro != null">
+                intro,
+            </if>
+            <if test="msg != null">
+                msg,
+            </if>
+            create_time,
+            modify_time,
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=INTEGER},
+            </if>
+            <if test="userId != null">
+                #{userId,jdbcType=VARCHAR},
+            </if>
+            <if test="companyId!=null">
+                #{companyId,jdbcType=VARCHAR},
+            </if>
+            <if test="vpnId != null">
+                #{vpnId,jdbcType=VARCHAR},
+            </if>
+            <if test="userInfo != null">
+                #{userInfo,jdbcType=VARCHAR},
+            </if>
+            <if test="type != null">
+                #{type,jdbcType=VARCHAR},
+            </if>
+            <if test="intro != null">
+                #{intro,jdbcType=VARCHAR},
+            </if>
+            <if test="msg != null">
+                #{msg,jdbcType=VARCHAR},
+            </if>
+            NOW(),
+            NOW(),
+        </trim>
+    </insert>
+
+</mapper>

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.portal.daoAuthoriza.SubInfoDAO">
+
+
+    <select id="selectSubAccountInfo" resultType="com.portal.domain.SubAccountDomain">
+     select * from cipher_sub_account where sub_account=#{subAccount} and app_client_id=#{appClientId}
+    </select>
+
+
+    <select id="selectSubAccountMapInfo" resultType="com.portal.domain.SubAccountMapDomain">
+      select * from cipher_sub_account_map where account_number=#{accountNumber} and sub_id=#{subId}
+    </select>
+
+
+    <insert id="insertSubAccountInfo" useGeneratedKeys="true" keyProperty="id"
+            parameterType="com.portal.domain.SubAccountDomain">
+            INSERT INTO cipher_sub_account (sub_account, sub_pwd, app_client_id, create_time, modify_time) VALUES (
+            #{subAccount},
+            #{subPwd},
+            #{appClientId},
+            NOW(),
+            NOW()
+        )
+    </insert>
+
+
+    <insert id="insertSubAccountMapInfo" parameterType="com.portal.domain.SubAccountMapDomain">
+            INSERT INTO cipher_sub_account_map (account_number, sub_id, create_time, modify_time) VALUES (
+            #{accountNumber},
+            #{subId},
+            NOW(),
+            NOW()
+        )
+    </insert>
+
+
+
+    <update id="updateSubInfo" parameterType="com.portal.domain.SubAccountDomain">
+       UPDATE cipher_sub_account
+        SET
+            sub_pwd                = #{subPwd},
+            modify_time            = NOW()
+        WHERE sub_account = #{subAccount} and app_client_id= #{appClientId}
+    </update>
+
+    <select id="getSubAccountInfo" resultType="java.lang.String">
+        select
+        sub_account
+        from
+        cipher_sub_account a
+        left join
+        cipher_sub_account_map m
+        on
+        a.id=m.sub_id
+        where 1=1
+        <if test="applicationId!=null and applicationId!=''">
+            and a.app_client_id=#{applicationId}
+        </if>
+        <if test="uuid!=null and uuid!=''">
+            and m.user_id=#{uuid}
+        </if>
+    </select>
+    <select id="getSubAccountInfoByHost" resultType="com.portal.domain.SubAccountDomain">
+        select
+        sub_account,
+        sub_pwd
+        from
+        cipher_sub_account a
+        left join
+        cipher_sub_account_map m
+        on
+        a.id=m.sub_id
+        where 1=1
+        <if test="applicationId!=null and applicationId!=''">
+            and a.app_client_id=#{applicationId}
+        </if>
+        <if test="uuid!=null and uuid!=''">
+            and m.user_id=#{uuid}
+        </if>
+    </select>
+
+
+</mapper>

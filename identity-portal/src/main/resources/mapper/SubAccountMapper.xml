@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.portal.daoAuthoriza.SubAccountDAO">
+
+    <select id="getTheSubAccount" resultType="com.portal.domain.SubAccountDomain">
+        SELECT id as id,
+        sub_account as subAccount,
+        sub_pwd as subPwd,
+        app_client_id as appClientId
+        FROM
+        cipher_sub_account
+        WHERE 1=1
+        <if test="subAccount!=null and subAccount!=''">
+            and sub_account = #{subAccount}
+        </if>
+        <if test="appClientId!=null and appClientId!=''">
+            and app_client_id=#{appClientId}
+        </if>
+
+    </select>
+
+
+    <select id="insertSubAccountMap" parameterType="com.portal.domain.SubAccountMapDomain">
+        INSERT INTO cipher_sub_account_map (account_number, sub_id, create_time, modify_time,user_id)
+        VALUES (
+            #{accountNumber},
+            #{subId},
+            NOW(),
+            NOW(),
+            #{userId}
+        )
+    </select>
+    <select id="deleteSubAccountMap" parameterType="com.portal.domain.SubAccountMapDomain">
+        DELETE FROM cipher_sub_account_map
+        WHERE user_id = #{userId} AND sub_id = #{subId};
+    </select>
+
+
+    <select id="querySubAccountInfo" resultType="com.portal.domain.SubAccountDomain">
+        SELECT tt.id as id,
+        tt.sub_account as subAccount,
+        tt.sub_pwd as subPwd,
+        tt.app_client_id as appClientId
+        FROM cipher_sub_account tt
+            LEFT JOIN cipher_sub_account_map mm ON tt.id = mm.sub_id
+            LEFT JOIN cipher_application_info rr ON rr.application_id = tt.app_client_id
+            LEFT JOIN cipher_user_info dd ON dd.uuid = mm.user_id
+        WHERE dd.uuid = #{userId} AND tt.app_client_id = #{appClientId}
+    </select>
+
+
+    <insert id="insertSubAccountInfo" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO cipher_sub_account (sub_account, sub_pwd, app_client_id, create_time, modify_time) VALUES (
+            #{subAccount},
+            #{password},
+            #{appClientId},
+            NOW(),
+            NOW()
+        )
+    </insert>
+
+
+    <select id="querySubMap" resultType="com.portal.domain.SubAccountMapDomain">
+        SELECT
+            id             AS id,
+            sub_id         AS subId,
+            account_number AS accountNumber,
+            user_id        AS userId
+        FROM cipher_sub_account_map
+        WHERE user_id = #{userId} AND sub_id = #{subId}
+    </select>
+
+
+    <select id="queryPrimaryId" resultType="java.lang.Integer">
+        SELECT id
+        FROM cipher_sub_account
+        WHERE
+            sub_account = #{subAccount}
+            AND app_client_id = #{appClientId}
+        LIMIT 1
+
+    </select>
+
+
+
+    <update id="updateSubAccountInfo" parameterType="com.portal.domain.SubAccountDomain">
+        update cipher_sub_account
+        <set>
+            <if test="subAccount != null">
+                sub_account = #{subAccount},
+            </if>
+            <if test="subPwd != null">
+                sub_pwd = #{subPwd},
+            </if>
+            <if test="appClientId != null">
+                app_client_id = #{appClientId},
+            </if>
+            modify_time=NOW()
+        </set>
+        where id = #{id}
+    </update>
+
+</mapper>

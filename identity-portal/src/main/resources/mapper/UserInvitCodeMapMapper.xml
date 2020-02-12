@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.portal.daoAuthoriza.PlatUserCompanyMapDAO">
+
+
+    <select id="queryCompayIdByPlatUserID" resultType="java.lang.Integer">
+        select company_id
+        from cipher_user_company_map
+        where platform_user_id = #{platUserId};
+    </select>
+
+
+</mapper>

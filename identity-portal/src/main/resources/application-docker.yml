@@ -1,0 +1,95 @@
+server:
+  port: 8443
+  context-path: /
+  session:
+    cookie:
+      max-age: 72000
+      name: IDENTITY-PORTAL
+    timeout: 43200
+
+
+spring:
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/cipher_authorization_v1.5.4?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowMultiQueries=true
+    username: root
+    password: Cipher171!
+    driverClassName: com.mysql.jdbc.Driver
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    password: 123456
+    timeout: 0
+    #    database: 1
+    pool:
+      max-active: 600
+      max-wait: -1
+      max-idle: 300
+    jpa:
+      database: MYSQL
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+      naming-strategy: org.hibernate.cfg.ImprovedNamingStrategy
+    properties:
+      hibernate:
+        dialect : org.hibernate.dialect.MySQL5Dialect
+  activemq:
+    broker-url: tcp://127.0.0.1:61616
+    user: admin
+    password: admin
+    pool:
+      enabled: true
+      max-connections: 50
+
+
+    freemarker:
+      allowRequestOverride: false
+      allowSessionOverride: false
+      cache: true
+      checkTemplateLocation: true
+      contentType: text/html
+      exposeRequestAttributes: false
+      exposeSessionAttributes: false
+      exposeSpringMacroHelpers: false。
+      suffix: .ftl
+      templateEncoding: UTF-8
+      templateLoaderPath: classpath:/templates/  #表示所有的模板文件都放在该目录下
+      spring.freemarker.settings:
+        locale: zh_CN
+        date_format: yyyy-MM-dd
+        time_format: HH:mm:ss
+        datetime_format: yyyy-MM-dd HH:mm:ss
+
+
+
+mybatis:
+  type-aliases-package: com.portal.model,com.portal.domain.*
+  mapper-locations: classpath:mapper/*.xml
+  #mybatis驼峰命名规则开启
+  configuration:
+    map-underscore-to-camel-case: true
+
+
+serverurl:
+  secret: OOBB7OFDSSQTE72K  #这个参数目前已被淘汰，用于区分多个公司扫码
+  appId: cipher01
+
+
+
+cipher:
+  account:
+    safer:
+      ip: 0.0.0.0
+      port: 6200
+
+
+
+async:
+  executor:
+    thread:
+      coreSize: 100
+      maxSize: 100
+      namePrefix: async
+      queueCapacity: 100000
+
+

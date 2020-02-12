@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.portal.daoAuthoriza.GlobalServiceInfoDAO">
+
+
+    <resultMap id="serviceInfo" type="com.portal.domain.ServiceInfo">
+        <id column="id" property="id"/>
+        <result column="index_id" property="indexId"/>
+        <result column="name" property="name"/>
+        <result column="default_status" property="defaultStatus"/>
+        <result column="total_contro_status" property="totalControStatus"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <select id="queryServiceInfoByIndexId" resultMap="serviceInfo">
+        select *
+        from cipher_service_info
+        where index_id = #{indexId} limit 1;
+    </select>
+
+
+    <select id="queryServiceSwitchInfo" resultType="com.portal.domain.ServiceSwitchInfo">
+      select id as id, service_name as serviceName, status as status from cipher_gateway_config where service_name=#{serviceName}
+    </select>
+
+
+</mapper>

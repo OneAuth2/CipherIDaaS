@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.portal.daoAuthoriza.CipherUserInfoDAO">
+
+
+    <resultMap id="userMap" type="com.portal.domain.UserInfoDomain">
+        <result property="accountNumber" column="account_number"/>
+        <result property="userAccountControl" column="user_account_control"/>
+        <result property="source" column="source"/>
+    </resultMap>
+
+
+    <select id="queryUserByName" resultMap="userMap">
+            select user_account_control,
+            source,
+            account_number
+             from cipher_user_info where uuid=#{uuid}
+             limit 1;
+    </select>
+
+
+    <update id="modifyUserAccountControl">
+            update cipher_user_info
+            set user_account_control=#{control}
+            where uuid=#{uuid} and company_id =#{companyId}
+    </update>
+
+
+
+    <insert id="insertUserInfo">
+     INSERT INTO cipher_user_info (account_number,
+                                      nickname,
+                                      user_name,
+                                      phone_number,
+                                      gender,
+                                      account_status,
+                                      mail,
+                                      job,
+                                      account_authorized_date,
+                                      account_authorized_valid_date,
+                                      source,
+                                      create_time,
+                                      modify_time,
+                                      job_no,
+                                      user_account_control
+                                  )
+        VALUES (#{accountNumber},
+            #{nickname},
+            #{userName},
+            #{phoneNumber},
+            #{gender},
+            '启用',
+            #{mail},
+            #{job},
+            #{startTime},
+            #{endTime},
+            #{source},
+            NOW(),
+            NOW(),
+            #{jobNo},
+             #{userAccountControl}
+            );
+    </insert>
+
+
+</mapper>

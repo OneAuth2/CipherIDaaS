@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.portal.daoAuthoriza.IdentityModesDAO">
+
+    <resultMap type="com.portal.domain.IdentitySettingInfoDomain" id="identitySettingInfoDomainMap">
+        <result column="auth_mode" property="authMode"/>
+        <result column="binding_flow" property="bindingFlow"/>
+        <result column="regist_flow" property="registFlow"/>
+        <result column="forget_flow" property="forgetFlow"/>
+    </resultMap>
+
+    <resultMap type="com.portal.domain.PortalConfigDomain" id="portalConfigDomainMap">
+        <result column="title" property="title"/>
+        <result column="iconfont_img_url" property="iconfont"/>
+        <result column="logo_img_url" property="logo"/>
+    </resultMap>
+
+    <resultMap id="BaseResultMap" type="com.portal.domain.IconSettingsDomain">
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="company_uuid" property="companyUuid" jdbcType="VARCHAR" />
+        <result column="type" property="type" jdbcType="INTEGER" />
+        <result column="title" property="title" jdbcType="VARCHAR" />
+        <result column="left_title" property="leftTitle" jdbcType="VARCHAR" />
+        <result column="right_title" property="rightTitle" jdbcType="VARCHAR" />
+        <result column="iconfont_img_url" property="iconfont" jdbcType="VARCHAR" />
+        <result column="logo_img_url" property="logo" jdbcType="VARCHAR" />
+    </resultMap>
+
+
+    <select id="getIdentityModesByCompanyUUid" resultMap="identitySettingInfoDomainMap">
+                SELECT
+                    auth_mode,
+                    binding_flow,
+                    regist_flow,
+                    forget_flow
+                FROM
+                    cipher_identity_setting_info
+                WHERE
+                    company_uuid = #{companyUuid}
+                AND type = "2"
+    </select>
+
+    <select id="getPortalConfig" resultType="com.portal.domain.PortalConfigDomain">
+                SELECT
+                    title,
+                    left_title AS  leftTitle,
+                    right_title AS rightTitle,
+                    iconfont_img_url AS iconfont,
+                    logo_img_url AS logo
+                FROM
+                    cipher_interface_config
+                WHERE
+                    company_uuid = #{companyUuid}
+                AND type = "2"
+    </select>
+
+    <select id="selectCopyright" resultType="string">
+        SELECT copyright FROM cipher_company_copyRight where id=1
+    </select>
+
+    <select id="selectIconSettingsByCompanyUuid" resultMap="BaseResultMap">
+        SELECT id,company_uuid,type,title,left_title,right_title,iconfont_img_url,logo_img_url
+        FROM cipher_interface_config
+        WHERE company_uuid=#{companyUuid} AND type=#{type};
+    </select>
+</mapper>

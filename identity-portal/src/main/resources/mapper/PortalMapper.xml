@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.portal.daoAuthoriza.PortalDAO">
+
+    <resultMap id="portalMap" type="com.portal.domain.PortalApplyInfo">
+        <result property="id" column="id"/>
+        <result property="applyName" column="application_name"/>
+        <result property="applyUrl" column="application_url"/>
+        <result property="state" column="application_status"/>
+        <result property="clientId" column="application_id"/>
+        <result property="clientSecret" column="application_secrect"/>
+        <result property="redirectUrl" column="application_redirct_url"/>
+        <result property="imgUrl" column="application_icon_url"/>
+        <result property="jsMethod" column="js_method"/>
+        <result property="mail" column="mail"/>
+        <result property="reqUrl" column="req_url"/>
+        <result property="configInfo" column="config_info"/>
+        <result property="applicationType" column="application_type"/>
+        <result property="dsgApiUrl" column="dsg_api_url"/>
+        <result property="xdsgUrl" column="x_dsg_url"/>
+        <result property="applicationAuthUrl" column="application_authorized_url"/>
+        <result property="isSameAccount" column="is_same_account"/>
+        <result property="associatedAccount" column="associated_account"/>
+        <result property="server" column="server"/>
+        <result property="data" column="data"/>
+        <result property="pos" column="pos"/>
+        <result property="groupCode" column="group_code"/>
+        <result property="langCode" column="lang_code"/>
+    </resultMap>
+
+    <select id="queryPortalApplyList" resultMap="portalMap"  parameterType="com.portal.domain.PortalApplyInfo">
+        select tt.*,ss.account_number as userName,ss.mail,
+        mm.sub_account as subAccount from cipher_application_info tt
+        LEFT JOIN cipher_sub_account mm on tt.application_id= mm.app_client_id
+        LEFT JOIN cipher_sub_account_map ur on mm.id=ur.sub_id
+        LEFT JOIN cipher_user_info ss on  ss.account_number=ur.account_number
+         where  tt.application_status=1 and ss.account_number=#{userName}
+    </select>
+
+
+    <select id="selectPortalInfo" resultMap="portalMap" resultType="com.portal.domain.PortalApplyInfo">
+        SELECT * FROM cipher_application_info  app
+      /*  LEFT JOIN cipher_application_system_info  sys on app.app_sys_id=sys.id*/
+        where 1=1
+        <if test="id!=null and id!=''">
+            and  app.id=#{id}
+        </if>
+        <if test="clientId!=null and clientId!=''">
+            and app.application_id=#{clientId}
+        </if>
+
+    </select>
+
+
+
+    <select id="queryPortalList" resultMap="portalMap" resultType="com.portal.domain.PortalApplyInfo">
+           SELECT * FROM cipher_application_info where application_status=1;
+    </select>
+
+
+    <select id="queryPortalByGroup" resultMap="portalMap" resultType="com.portal.domain.PortalApplyInfo">
+      select tt.*,mm.group_id from cipher_application_info tt
+      LEFT JOIN cipher_group_authorization_map mm on tt.id=mm.application_id
+      LEFT JOIN cipher_group_user_map  ss on mm.group_id=ss.group_id
+      where ss.account_number=#{userName} and tt.application_status=1
+      order by create_time desc
+    </select>
+
+
+    <select id="queryOidcInfo" resultMap="portalMap" resultType="com.portal.domain.PortalApplyInfo">
+       SELECT * FROM cipher_application_info where application_status=1 and id=1;
+    </select>
+
+    <select id="getReqUrl" resultType="java.lang.String">
+            SELECT req_url  FROM cipher_application_info  where 1=1 and application_id=#{applyId}
+    </select>
+
+
+    <select id="getRediretLoginUrl" resultType="java.lang.String">
+        SELECT application_redirct_url  FROM cipher_application_info  where 1=1 and application_id=#{applyId}
+    </select>
+
+    <select id="getApplicationUrl" resultType="java.lang.String">
+      SELECT application_url  FROM cipher_application_info  where 1=1 and application_id=#{applyId}
+    </select>
+
+
+    <select id="getIconSettiingInfo" resultType="com.portal.domain.IconSettingsDomain">
+        SELECT id,company_uuid,type,title,left_title as leftTitle,
+        right_title as rightTitle,iconfont_img_url as iconfont,logo_img_url as logo
+        FROM cipher_interface_config
+        WHERE company_uuid=#{companyId} AND type=3  limit 1;
+    </select>
+
+
+
+    <resultMap id="csAppMap" type="com.portal.domain.CsApplicationInfo">
+        <result property="type" column="id"/>
+        <result property="path" column="application_url"/>
+        <result property="server" column="server"/>
+        <result property="data" column="data"/>
+        <result property="pos" column="pos"/>
+
+    </resultMap>
+
+    <select id="getCsApplicationInfo" resultMap="csAppMap" resultType="com.portal.domain.CsApplicationInfo">
+       SELECT  id, application_url,server,data,pos,associated_account
+       from cipher_application_info
+       where 1=1
+       and application_id=#{applyId}
+    </select>
+
+
+    <select id="getSystemType" resultType="java.lang.String">
+      SELECT  type  from cipher_application_system_info where id=#{id}
+    </select>
+
+
+    <resultMap id="authAppMap" type="com.portal.auth2.model.SsoClientDetails">
+        <result property="id" column="id"/>
+        <result property="redirectUrl" column="application_url"/>
+        <result property="clientId" column="application_id"/>
+        <result property="clientName" column="application_name"/>
+    </resultMap>
+
+    <select id="getAuthApplicationInfo" resultMap="authAppMap">
+         select  id,application_url,application_id,application_name from cipher_application_info where  1=1
+
+         <if test="clientId!=null and clientId!=''">
+            and  application_id=#{clientId}
+         </if>
+        <if test="redirectUrl!=null and redirectUrl!=''">
+            and  application_url=#{redirectUrl}
+        </if>
+
+    </select>
+
+</mapper>

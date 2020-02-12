@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.portal.daoAuthoriza.VpnConfigDAO">
+
+
+    <sql id="all_fild">
+    id, uuid,auth_type, company_id, devicename, equip_addr, describee,
+    status, auth_origin, towAuthWay, radius_server, auth_port,
+     share_key, create_time, modify_time
+    </sql>
+
+
+    <select id="getConfigByIp" resultType="com.portal.domain.VpnConfigDomain">
+        SELECT
+        <include refid="all_fild"></include>
+        from cipher_vpn_configuration where equip_addr=#{ip}
+    </select>
+
+
+</mapper>

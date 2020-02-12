@@ -1,0 +1,26 @@
+package com.portal.publistener;
+
+import com.portal.domain.AppAuditInfo;
+import com.portal.event.AppBehaviorEvent;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Component;
+
+/**
+ * 插入应用日志消息发布者
+ * @author cozi
+ * @date 2019-07-09
+ */
+@Component
+public class AppBehaviorPublistener {
+    private final ApplicationContext applicationContext;
+
+    @Autowired
+    public AppBehaviorPublistener(ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
+    }
+
+    public void publish(AppAuditInfo appAuditInfo){
+        applicationContext.publishEvent(new AppBehaviorEvent(this,appAuditInfo));
+    }
+}

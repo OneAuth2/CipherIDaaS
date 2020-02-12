@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.portal.daoAuthoriza.AdInfoDAO">
+
+    <resultMap id="ldapMap" type="com.portal.domain.AdInfoDomain">
+        <id column="id" property="id"/>
+        <result column="type" property="type"/>
+        <result column="ip" property="ip"/>
+        <result column="port" property="port"/>
+        <result column="user_name" property="userName"/>
+        <result column="password" property="password"/>
+        <result column="company_id" property="companyId"/>
+    </resultMap>
+
+    <sql id="BaseResultColumn">
+        id, type, ip, port, user_name, password, ou_dc, object_class, search_scope,
+        sync_ou, kvConfig, create_time, modify_time, company_id
+    </sql>
+
+
+    <sql id="JoinResultColumn">
+        id, type, ip, port, cipher_ad_info.user_name, password, ou_dc, object_class, search_scope,
+        sync_ou, kvConfig, cipher_ad_info.create_time, cipher_ad_info.modify_time, cipher_ad_info.company_id
+    </sql>
+
+
+    <select id="selectAdInfoByUserInfo" parameterType="com.portal.domain.UserInfoDomain" resultMap="ldapMap">
+        select <include refid="JoinResultColumn"/> from
+        cipher_ad_info left join cipher_user_info on
+        ip = source
+        where account_number = #{accountNumber}
+        and cipher_ad_info.company_id = #{companyId}
+        limit 1
+    </select>
+
+    <select id="queryAdInfo" resultMap="ldapMap">
+        SELECT *
+        FROM cipher_ad_info
+        where ip = #{ip}
+        limit 1;
+    </select>
+
+</mapper>

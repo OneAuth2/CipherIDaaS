@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.portal.daoAuthoriza.CasAndRdsgConfigDAO">
+
+    <resultMap id="userMap" type="com.portal.domain.CasAndRdsgConfigInfoDomain">
+        <result property="casServerAuthUrl" column="cas_server_auth_url"/>
+        <result property="rdsgServerAuthUrl" column="rdsg_server_auth_url"/>
+        <result property="rdsgServerUrl" column="rdsg_server_url"/>
+        <result property="bindingAccountUrl" column="binding_account_url"/>
+    </resultMap>
+    <select id="getCasAndRdsgConfigInfoDomain" resultMap="userMap">
+                SELECT
+                    cas_server_auth_url,
+                    rdsg_server_auth_url,
+                    rdsg_server_url,
+                    rdsg_server_url,
+                    binding_account_url
+                FROM
+                    cipher_system_config_info
+                WHERE
+                    1 = 1
+                LIMIT 1
+    </select>
+
+
+</mapper>

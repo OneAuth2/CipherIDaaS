@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.portal.daoAuthoriza.CompanyServiceMapDAO">
+
+
+    <select id="queryServiceStatus" resultType="java.lang.Integer">
+        select status
+        from cipher_company_service_map
+        where company_id = #{companyId}
+          and service_id = #{serviceId} limit 1;
+    </select>
+
+
+
+
+
+</mapper>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.portal.daoAuthoriza.SmsInfoDAO">
+
+    <select id="getSmsInfo" resultType="com.portal.domain.SmsInfoDomain" parameterType="com.portal.domain.SmsInfoDomain">
+        select id,name,address,describes,
+               one_time_valid as oneTimeValid,
+              send_timeout as sendTimeout,
+              request_params as requestParams,
+              response_params as responseParams,
+              send_time as sendTime,
+              interval_time as intervalTime,
+              effective_time as effectiveTime,
+              extend_time as extendTime
+        from cipher_sms_config
+    </select>
+    <select id="getSmsConfig" resultType="com.portal.domain.SmsInfoDomain">
+                SELECT
+                    id,
+                    NAME,
+                    address,
+                    describes,
+                    one_time_valid AS oneTimeValid,
+                    send_timeout AS sendTimeout,
+                    request_params AS requestParams,
+                    response_params AS responseParams,
+                    send_time AS sendTime,
+                    interval_time AS intervalTime,
+                    effective_time AS effectiveTime,
+                    extend_time AS extendTime
+                FROM
+                    cipher_sms_config
+                WHERE
+                    company_uuid = #{companyUuid}
+    </select>
+
+
+</mapper>

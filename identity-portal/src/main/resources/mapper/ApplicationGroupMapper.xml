@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.portal.daoAuthoriza.ApplicationGroupDAO">
+    <resultMap id="portalMap" type="com.portal.model.GroupApplicationModel">
+        <result property="id" column="id"/>
+        <result property="applyName" column="application_name"/>
+        <result property="applyUrl" column="application_url"/>
+        <result property="state" column="application_status"/>
+        <result property="clientId" column="application_id"/>
+        <result property="clientSecret" column="application_secrect"/>
+        <result property="redirectUrl" column="application_redirct_url"/>
+        <result property="imgUrl" column="application_icon_url"/>
+        <result property="jsMethod" column="js_method"/>
+        <result property="mail" column="mail"/>
+        <result property="reqUrl" column="req_url"/>
+        <result property="configInfo" column="config_info"/>
+        <result property="applicationType" column="application_type"/>
+        <result property="dsgApiUrl" column="dsg_api_url"/>
+        <result property="xdsgUrl" column="x_dsg_url"/>
+        <result property="applicationAuthUrl" column="application_authorized_url"/>
+        <result property="isSameAccount" column="is_same_account"/>
+    </resultMap>
+
+
+    <select id="getApplicationsByGroupId" parameterType="int"
+            resultType="com.portal.domain.ApplicationInfoDomain">
+        SELECT *
+        FROM cipher_application_info,
+             cipher_group_authorization_map
+        WHERE group_id = #{groupId}
+          and cipher_application_info.id = cipher_group_authorization_map.application_id;
+    </select>
+
+    <select id="getApplicationByAccountNumberAndGroupId"
+            parameterType="com.portal.model.UserInfoModel"
+            resultType="com.portal.domain.ApplicationInfoDomain">
+        select a.id,a.app_client_id as application_id,a.application_name,b.sub_account
+        from (select cipher_application_info.id,
+                     cipher_group_info.group_id,
+                     cipher_group_info.group_name,
+                     cipher_group_info.parent_group_id,
+                     cipher_role_group_map.role_id,
+                     cipher_role_info.role_name,
+                     cipher_role_application_map.application_id,
+                     cipher_application_info.application_name,
+                     cipher_group_user_map.account_number,
+                     cipher_application_info.application_id as app_client_id
+              from cipher_group_info
+                       left join cipher_role_group_map on cipher_group_info.group_id = cipher_role_group_map.group_id
+                       left join cipher_role_info on cipher_role_group_map.role_id = cipher_role_info.id
+                       left join cipher_role_application_map
+                                 on cipher_role_application_map.role_id = cipher_role_info.id
+                       left join cipher_application_info
+                                 on cipher_role_application_map.application_id = cipher_application_info.id
+                       left join cipher_group_user_map on cipher_group_user_map.group_id = cipher_group_info.group_id
+              where cipher_group_info.group_id = #{groupId}) a
+                 left join (select sub_account,cipher_sub_account.app_client_id,cipher_sub_account_map.account_number
+                            from cipher_sub_account,
+                                 cipher_sub_account_map
+                            where cipher_sub_account_map.sub_id = cipher_sub_account.id) b
+                           on a.app_client_id = b.app_client_id
+                               and a.account_number = b.account_number
+        where a.account_number = #{accountNumber}
+        group by a.application_name;
+
+    </select>
+
+
+    <select id="selectApplication" resultType="com.portal.domain.ApplicationInfoDomain">
+        select dd.id               as id,
+               dd.application_id   as applicationId,
+               dd.application_name as applicationName,
+               nn.account_number   as accountNumber
+        from cipher_application_info dd
+                 LEFT JOIN cipher_group_authorization_map mm on mm.application_id = dd.id
+                 LEFT JOIN cipher_group_user_map nn on nn.group_id = mm.group_id
+        where nn.account_number = #{accountNumber}
+        group by dd.application_name
+    </select>
+
+    <select id="selectAllGroupApplication" resultType="com.portal.model.GroupApplicationModel">
+        select cipher_application_info.id,
+               cipher_group_info.group_id               as groupId,
+               cipher_group_info.group_name             as groupName,
+               cipher_group_info.parent_group_id        as parentGroupId,
+               cipher_role_info.role_name               as roleName,
+               cipher_application_info.application_name as applicationName,
+               cipher_application_info.application_id   as applicationId
+        from cipher_group_info
+                 left join cipher_role_group_map on cipher_group_info.group_id = cipher_role_group_map.group_id
+                 left join cipher_role_info on cipher_role_group_map.role_id = cipher_role_info.id
+                 left join cipher_role_application_map on cipher_role_application_map.role_id = cipher_role_info.id
+                 left join cipher_application_info
+                           on cipher_role_application_map.application_id = cipher_application_info.id
+        where cipher_application_info.application_status = 1
+    </select>
+
+    <select id="selectUserRoleApplication" resultType="com.portal.model.GroupApplicationModel" parameterType="String">
+        select a.id,a.app_client_id as applicationId,a.application_name as applicationName,b.sub_account
+        from (select cipher_user_info.account_number        as accountNumber,
+                     cipher_role_info.id                    as role_id,
+                     role_name,
+                     cipher_role_application_map.application_id,
+                     cipher_application_info.application_name,
+                     cipher_application_info.application_id as app_client_id,
+                     cipher_group_user_map.group_id,
+                     cipher_application_info.id
+              from cipher_group_user_map,
+                   cipher_user_info
+                       left join cipher_role_user_map on cipher_user_info.account_number = cipher_role_user_map.user_id
+                       left join cipher_role_info on cipher_role_info.id = cipher_role_user_map.role_id
+                       left join cipher_role_application_map
+                                 on cipher_role_application_map.role_id = cipher_role_info.id
+                       left join cipher_application_info
+                                 on cipher_application_info.id = cipher_role_application_map.application_id
+              where cipher_user_info.account_number = #{accountNumber}
+                and cipher_group_user_map.account_number = cipher_user_info.account_number
+                and cipher_application_info.application_status = 1
+              group by cipher_application_info.application_id) a
+                 left join (select sub_account,cipher_sub_account.app_client_id,cipher_sub_account_map.account_number
+                            from cipher_sub_account,
+                                 cipher_sub_account_map
+                            where cipher_sub_account_map.sub_id = cipher_sub_account.id) b
+                           on a.app_client_id = b.app_client_id
+        group by a.app_client_id;
+    </select>
+
+
+    <select id="selectNewApplicationList" resultMap="portalMap">
+        SELECT * FROM cipher_application_info app
+        JOIN
+        (
+        SELECT s.id, s.accountNumber, s.applicationType,s.applicationId, s.applicationName ,s.applicationUrl
+        ,s.applicationDescription FROM
+        (
+        select dd.id as id ,dd.application_type as applicationType,dd.application_id as
+        applicationId,dd.application_name as applicationName,nn.user_id as accountNumber,dd.application_url as
+        applicationUrl,dd.application_description as applicationDescription from cipher_application_info dd
+        LEFT JOIN cipher_group_authorization_map mm on mm.application_id=dd.id
+        LEFT JOIN cipher_group_user_map nn on nn.group_id=mm.group_id
+        where nn.user_id= #{uuid} and dd.application_status=1
+        UNION
+        select dd.id as id,dd.application_type as applicationType,dd.application_id as applicationId,dd.application_name
+        as applicationName,nn.user_id as accountNumber,dd.application_url as applicationUrl,dd.application_description
+        as applicationDescription from cipher_application_info dd
+        LEFT JOIN cipher_role_application_map mm on mm.application_id=dd.id
+        LEFT JOIN cipher_role_user_map nn on nn.role_id=mm.role_id
+        where nn.user_id= #{uuid} and dd.application_status=1
+        UNION
+        select dd.id as id,dd.application_type as applicationType,dd.application_id as applicationId,dd.application_name
+        as applicationName,nn.user_id as accountNumber ,dd.application_url as applicationUrl,dd.application_description
+        as applicationDescription from cipher_application_info dd
+        LEFT JOIN cipher_team_application_map mm on mm.application_id=dd.id
+        LEFT JOIN cipher_team_user_map nn on nn.team_id=mm.team_id
+        where nn.user_id= #{uuid} and dd.application_status=1
+        UNION
+        select dd.id as id,dd.application_type as applicationType,dd.application_id as applicationId,dd.application_name
+        as applicationName,mm.user_id as accountNumber ,dd.application_url as applicationUrl,dd.application_description
+        as applicationDescription from cipher_application_info dd
+        LEFT JOIN cipher_user_application_map mm on mm.application_id=dd.id
+        where mm.user_id= #{uuid} and dd.application_status=1
+        ) s GROUP BY s.applicationName
+        ) ss ON app.id = ss.id
+        where 1=1
+        <if test="queryName!=null and queryName!=''" >
+            and app.application_name LIKE CONCAT(CONCAT('%',#{queryName}),'%') or app.application_description LIKE CONCAT(CONCAT('%',#{queryName}),'%')
+        </if>
+
+        ORDER BY app.application_index
+
+    </select>
+
+
+</mapper>

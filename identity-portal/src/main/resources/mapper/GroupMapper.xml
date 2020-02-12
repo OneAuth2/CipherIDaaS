@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.portal.daoAuthoriza.GroupDAO">
+
+    <select id="selectGroupInfo" resultType="com.portal.domain.GroupInfoDomain" parameterType="com.portal.domain.GroupInfoDomain">
+        SELECT
+        group_id as groupId
+        from cipher_group_user_map tt
+        LEFT JOIN cipher_user_info nn on nn.uuid=tt.user_id
+        where nn.uuid=#{userId} and nn.company_id=#{companyId}
+         LIMIT 1
+    </select>
+
+
+    <select id="selectGroupInfoList" resultType="com.portal.domain.GroupInfoDomain" parameterType="com.portal.domain.GroupInfoDomain">
+        SELECT
+        mm.group_id as groupId,
+        mm.group_name as groupName
+        FROM cipher_group_info mm
+        Left join cipher_group_user_map tt on  mm.group_id=tt.group_id
+        LEFT JOIN cipher_user_info nn on nn.uuid=tt.user_id
+        where nn.uuid=#{userId} and nn.company_id=#{companyId}
+    </select>
+
+
+
+    <select id="getAllGroup" resultType="com.portal.domain.GroupInfoDomain">
+        SELECT group_id as groupId,
+        group_name as groupName,
+        parent_group_id as  parentGroupId
+        FROM cipher_group_info mm
+    </select>
+
+
+    <insert id="insertUserGroupMap" parameterType="com.portal.domain.UserGroupMap">
+        insert into cipher_group_user_map
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="groupId != null">
+                group_id,
+            </if>
+            <if test="accountNumber != null">
+                account_number,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="groupId != null">
+                #{groupId},
+            </if>
+            <if test="accountNumber != null">
+                #{accountNumber},
+            </if>
+        </trim>
+    </insert>
+
+
+    <select id="queryGroupByAccount" resultType="java.lang.Integer">
+   SELECT group_id from cipher_group_user_map where user_id=#{uuid}
+    </select>
+
+    <!--获取全局策略 -->
+    <select id="queryGlobalAuthType" resultType="com.portal.domain.IdentityAuthTypeDomain">
+      SELECT
+            id,
+            priority,
+            strategy_name,
+            auth_type,
+            scave_auth_state,
+            create_time,
+            modify_time
+        FROM cipher_identity_auth_strategy
+        LIMIT 1
+    </select>
+    <select id="queryAuthTypeByGroupIdList" resultType="com.portal.domain.IdentityAuthTypeDomain">
+        SELECT
+        id,
+        priority as priority,
+        strategy_name as strategyName,
+        auth_type as authType,
+        scave_auth_state as scaveAuthState,
+        create_time,
+        modify_time
+        FROM cipher_identity_auth_strategy
+        WHERE id IN (SELECT DISTINCT identity_id
+        FROM cipher_identity_group_mapping
+        WHERE group_id IN
+        <foreach collection="groupIdList" open="(" separator="," close=")" index="groupId" item="groupId">
+            #{groupId}
+        </foreach>
+        )
+        ORDER BY
+        priority DESC LIMIT 1;
+    </select>
+    <select id="queryDefaultAuthType" resultType="com.portal.domain.IdentityAuthTypeDomain">
+       SELECT
+            id,
+            priority as priority,
+            strategy_name as strategyName,
+            auth_type as authType,
+            scave_auth_state as scaveAuthState,
+            second_auth AS secondAuth,
+            second_auth_type AS secondAuthType,
+            create_time,
+            modify_time
+        FROM  cipher_identity_auth_strategy
+        where company_uuid=#{companyUUid}
+        ORDER BY priority ASC LIMIT 1;
+    </select>
+    <select id="queryGroupByCompanyIdAndAccount" resultType="java.lang.Integer">
+                SELECT
+                    gm.group_id
+                FROM
+                    cipher_group_user_map gm
+                LEFT JOIN cipher_group_info gg ON gm.group_id = gg.group_id
+                WHERE
+                    gm.user_id = #{accountNumber}
+                AND gg.company_id = #{companyUUid}
+    </select>
+    <select id="queryDefaultAuthTypeByCompanyId" resultType="com.portal.domain.IdentityAuthTypeDomain">
+            SELECT
+            id,
+            priority as priority,
+            strategy_name as strategyName,
+            auth_type as authType,
+            second_auth AS secondAuth,
+            second_auth_type AS secondAuthType,
+            scave_auth_state as scaveAuthState,
+            switches as switches,
+            create_time,
+            modify_time
+        FROM  cipher_identity_auth_strategy
+        where company_uuid=#{companyUUid}
+        ORDER BY priority ASC LIMIT 1;
+    </select>
+    <select id="queryAuthTypeByGroupIdListAndCompanyUUid" resultType="com.portal.domain.IdentityAuthTypeDomain">
+        SELECT
+        id,
+        priority as priority,
+        strategy_name as strategyName,
+        auth_type as authType,
+        second_auth,
+        second_auth_type AS secondAuthType,
+        scave_auth_state as scaveAuthState,
+        create_time,
+        modify_time
+        FROM cipher_identity_auth_strategy
+        WHERE id IN (SELECT DISTINCT identity_id
+        FROM cipher_identity_group_mapping
+        WHERE group_id IN
+        <foreach collection="groupIdList" open="(" separator="," close=")" index="groupId" item="groupId">
+            #{groupId}
+        </foreach>
+        )
+        AND company_uuid=#{companyUUid}
+        ORDER BY
+        priority DESC LIMIT 1;
+
+    </select>
+
+    <select id="queryAuthTypeByUserId" resultType="com.portal.domain.IdentityAuthTypeDomain">
+        select *
+        from
+          cipher_identity_auth_strategy
+        left join
+          cipher_identity_group_mapping
+        on
+          cipher_identity_auth_strategy.id = cipher_identity_group_mapping.identity_id
+        left join
+          cipher_group_user_map
+        on
+          cipher_identity_group_mapping.group_id = cipher_group_user_map.group_id
+        left join
+          cipher_group_info
+        on
+          cipher_group_info.group_id = cipher_group_user_map.group_id
+        where
+          cipher_group_user_map.user_id =#{userId} and company_id = #{companyId}
+    </select>
+
+
+
+    <select id="getGroupsByUuid" resultType="com.portal.domain.GroupInfoDomain">
+               SELECT
+                    gm.group_id,
+                    gg.group_name,
+                    gg.parent_group_id
+                FROM
+                    cipher_group_user_map gm
+                LEFT JOIN cipher_group_info gg ON gm.group_id = gg.group_id
+                WHERE
+                    gm.user_id = #{uuid}
+    </select>
+    <select id="getGroupsByGroupId" resultType="com.portal.domain.GroupInfoDomain">
+                SELECT
+                    gg.group_id,
+                    gg.group_name,
+                    gg.parent_group_id
+                FROM
+                    cipher_group_info gg
+                WHERE
+                    gg.group_id = #{groupId}
+    </select>
+
+</mapper>

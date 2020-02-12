@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.portal.daoAuthoriza.BindDingServiceInfoMapper">
+    <resultMap id="BaseResultMap" type="com.portal.domain.DingdingConfigInfo">
+        <id column="id" property="id" jdbcType="VARCHAR"/>
+        <result column="companyUUid" property="companyUUid"/>
+        <result column="scan_app_id" property="scanAppId"/>
+        <result column="scan_app_secret" property="scanAppSecret" jdbcType="VARCHAR"/>
+        <result column="corp_id" property="corpId" jdbcType="VARCHAR"/>
+        <result column="corp_secret" property="corpSecret" jdbcType="VARCHAR"/>
+        <result column="app_key" property="appKey" jdbcType="VARCHAR"/>
+        <result column="app_secret" property="appSecret" jdbcType="VARCHAR"/>
+        <result column="match_rule" property="matchRule" jdbcType="VARCHAR"/>
+    </resultMap>
+    
+    <resultMap id="baseDabaiBindingMap" type="com.portal.domain.DaBaiBindingInfoDomain">
+        <result column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="company_id" property="companyId"/>
+        <result column="accountNumber" property="accountNumber"/>
+        <result column="link_account" property="linkAccount"/>
+        <result column="state" property="state"/>
+    </resultMap>
+
+    <resultMap id="baseSaiFuBindingMap" type="com.portal.domain.SaiFuBindingInfoDomain">
+        <result column="id" property="id"/>
+        <result column="plat_id" property="platId"/>
+        <result column="user_id" property="userId"/>
+        <result column="account_number" property="accountNumber"/>
+        <result column="company_id" property="companyId"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+    
+    <resultMap id="baseDingTalkMap" type="com.portal.domain.BindingDingInfoDomain">
+        <result column="id" property="id"/>
+        <result column="ding_user_id" property="dingUserId"/>
+        <result column="ding_union_id" property="unionId"/>
+        <result column="company_id" property="companyId"/>
+        <result column="user_id" property="userId"/>
+        <result column="create_time" property="createTime"/>
+        <result column="modify_time" property="modifyTime"/>
+    </resultMap>
+
+    <sql id="baseDabaiColumns">
+        id, user_id, company_id, account_number, link_account, state
+    </sql>
+
+    <sql id="baseSaiFuColumns">
+        id, plat_id, user_id, account_number, company_id, create_time
+    </sql>
+
+    <sql id="baseDingTalkColumns">
+        id, ding_user_id, ding_union_id, user_id, company_id, create_time, modify_time
+    </sql>
+
+    <select id="getDingInfoByCompanyUUid" resultMap="BaseResultMap">
+                SELECT
+                    *
+                FROM
+                    cipher_ding_config_info
+                WHERE
+                    companyUUid = #{companyUUid}
+    </select>
+    <select id="getDingDingInfoDomain" resultType="com.portal.domain.BindingDingInfoDomain">
+                 SELECT
+                    *
+                FROM
+                    cipher_account_ding_bind_mapping
+                WHERE
+                    1 = 1
+                AND user_id = #{userId}
+    </select>
+    <insert id="insertBindDing" parameterType="com.portal.domain.BindingDingInfoDomain">
+            INSERT INTO cipher_account_ding_bind_mapping (company_id,ding_union_id,ding_user_id,user_id,create_time, modify_time) VALUES (
+            #{companyId},
+            #{unionId},
+            #{dingUserId},
+            #{userId},
+            NOW(),
+            NOW()
+           )
+    </insert>
+    <select id="getDabaiBindingInfo" resultType="com.portal.domain.DaBaiBindingInfoDomain">
+                SELECT
+                    *
+                FROM
+                    cipher_account_link_map
+                WHERE
+                    1 = 1
+                AND user_id = #{uuid}
+    </select>
+    <insert id="insertDaBaiBinding" >
+            INSERT INTO cipher_account_link_map (user_id, company_id,link_account,create_time) VALUES (
+            #{userId},
+            #{companyId},
+            #{linkAccount},
+            NOW()
+           )
+    </insert>
+    <select id="getSaiFuBindingInfo" resultType="com.portal.domain.SaiFuBindingInfoDomain">
+                SELECT
+                    *
+                FROM
+                    cipher_account_plat_mapping
+                WHERE
+                    1 = 1
+                AND user_id = #{uuid}
+    </select>
+    <insert id="insertBindDingSaiFu">
+            INSERT INTO cipher_account_plat_mapping (user_id, company_id,plat_id,create_time) VALUES (
+            #{userId},
+            #{companyId},
+            #{platId},
+            NOW()
+           )
+    </insert>
+
+    <select id="getDabaiBindingInfoByIdNum" resultMap="baseDabaiBindingMap">
+        SELECT <include refid="baseDabaiColumns"/>
+
+        FROM
+          cipher_account_link_map
+        WHERE
+          link_account = #{idNum}
+        AND
+          company_id = #{companyId}
+    </select>
+
+    <select id="getSaiFuBindingInfoBySaiFuId" resultMap="baseSaiFuBindingMap">
+        SELECT <include refid="baseSaiFuColumns"/>
+
+        FROM
+          cipher_account_plat_mapping
+        WHERE
+          plat_id = #{platId}
+        AND
+          company_id = #{companyId}
+    </select>
+    
+    <select id="getDingTalkInfoByUnionId" resultMap="baseDingTalkMap">
+        SELECT <include refid="baseDingTalkColumns"/>
+
+        FROM
+          cipher_account_ding_bind_mapping
+        WHERE
+          ding_union_id = #{unionId}
+        AND
+          company_id = #{companyId}
+    </select>
+
+
+
+
+    <select id="getWxInfoByUnionId" resultType="com.portal.domain.BindWxInfoDomain">
+               SELECT
+                    *
+                FROM
+                    cipher_account_wx_bind_mapping
+                WHERE
+                    1 = 1
+                AND wx_user_id = #{wxUserId}
+    </select>
+
+
+
+    <insert id="insertWeiXinInfo">
+           INSERT INTO cipher_account_wx_bind_mapping (user_id, company_id,wx_user_id,create_time) VALUES (
+            #{userId},
+            #{companyId},
+            #{wxUserId},
+            NOW()
+           )
+    </insert>
+
+
+</mapper>

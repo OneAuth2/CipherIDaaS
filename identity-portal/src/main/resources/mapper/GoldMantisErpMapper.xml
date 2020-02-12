@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.portal.daoAuthoriza.GoldMantisErpDAO">
+
+    <resultMap id="erpMap" type="com.portal.domain.ErpInfoDomain">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="src" property="src"/>
+        <result column="company_id" property="companyId"/>
+    </resultMap>
+
+    <sql id="BaseResultColumn">
+        id, name, src, company_id
+    </sql>
+
+
+
+    <select id="selectGoldMantisErpUrl" parameterType="String" resultMap="erpMap">
+        select <include refid="BaseResultColumn"/> from
+        cipher_mantis_erp
+        WHERE company_id = #{companyId}
+        limit 1
+    </select>
+
+</mapper>

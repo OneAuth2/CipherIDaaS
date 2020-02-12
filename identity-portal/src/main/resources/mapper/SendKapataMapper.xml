@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.portal.daoAuthoriza.SendKapataDAO">
+
+
+    <select id="selectSendKapataInfo" resultType="com.portal.domain.SendKapataDomain"  parameterType="com.portal.domain.SendKapataDomain">
+                 select id,username,type,
+                 send_time as sendTime,
+                 create_time as createTime from
+                 (select * from cipher_send_kapata_log where username =#{username}
+                 order by create_time desc limit #{count})as tt
+                 ORDER BY create_time ASC limit 1
+    </select>
+
+
+    <insert id="insertSendKapataInfo" parameterType="com.portal.domain.SendKapataDomain" >
+        insert into cipher_send_kapata_log
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="username != null">
+                username,
+            </if>
+            <if test="type != null">
+                type,
+            </if>
+            <if test="sendTime != null">
+                send_time,
+            </if>
+                create_time,
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="username != null">
+                #{username},
+            </if>
+            <if test="type != null">
+                #{type},
+            </if>
+            <if test="sendTime != null">
+                #{sendTime},
+            </if>
+                NOW(),
+        </trim>
+
+    </insert>
+
+</mapper>
